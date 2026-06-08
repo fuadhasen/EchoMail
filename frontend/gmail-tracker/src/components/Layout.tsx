@@ -8,15 +8,15 @@ const Layout = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const { status, isPending, error } = useAuth();
+  // const { status, error } = useAuth();
 
-  useEffect(() => {
-    if (status == "unauthenticated") {
-      navigate("/login");
-    }
-  }, [status, navigate]);
+  // useEffect(() => {
+  //   if (status == "unauthenticated") {
+  //     navigate("/login");
+  //   }
+  // }, [status, navigate]);
 
-  if (error) return <p className="m-10 p-4 bg-red-100">{error.message}</p>;
+  // if (error) return <p className="m-10 p-4 bg-red-100">{error.message}</p>;
 
   const LinkMaps = [
     {
@@ -31,7 +31,7 @@ const Layout = () => {
 
   return (
     <>
-      {status == "authenticated" && (
+      {"authenticated" == "authenticated" && (
         <div className="flex bg-gray-300 p-2 h-screen">
           <aside className="bg-white rounded-md shadow-md w-64 h-full space-y-10 ">
             <h1 className="text-xl mt-4 mx-4 p-3 text-center text-gray-800  font-bold mb-4">

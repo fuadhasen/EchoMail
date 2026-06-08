@@ -2,7 +2,7 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { BrowserRouter, Route, Routes } from "react-router";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+// import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import Reminders from "./components/Reminders.tsx";
 import Response from "./components/Response.tsx";
 import SentEmail from "./components/SentEmail.tsx";
@@ -38,5 +38,5 @@ createRoot(document.getElementById("root")!).render(
         </BrowserRouter>
       </Theme>
     </QueryClientProvider>
-  </StrictMode>
+  </StrictMode>,
 );
