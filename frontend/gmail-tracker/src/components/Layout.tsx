@@ -40,7 +40,7 @@ const Layout = () => {
       label: "search sent emails",
       icon: <Search size={18} />,
     },
-    { path: "/reminder", label: "Reminder", icon: <Bell size={18} /> },
+    { path: "/reminders", label: "Reminder", icon: <Bell size={18} /> },
     {
       path: "/responses",
       label: "Responses",
@@ -62,7 +62,7 @@ const Layout = () => {
   return (
     <>
       {"authenticated" == "authenticated" && (
-        <div className="flex min-h-screen bg-slate-50">
+        <div className="flex h-screen bg-slate-50">
           <aside className="w-96 bg-slate-950 text-slate-200 border-r border-slate-800 flex flex-col">
             <div className="h-20 flex items-center px-6 border-b border-slate-800">
               <h1 className="text-xl font-bold text-white">EchoMail</h1>
@@ -98,8 +98,7 @@ const Layout = () => {
               </div>
             </div>
           </aside>
-          <main className="flex-1 overflow-y-auto p-4 space-y-2">
-            {/* <NavBar /> */}
+          <main className="flex-1 overflow-y-auto">
             <section>
               <Outlet />
             </section>
