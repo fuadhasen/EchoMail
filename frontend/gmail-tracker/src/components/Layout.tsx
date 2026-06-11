@@ -62,12 +62,19 @@ const Layout = () => {
   return (
     <>
       {"authenticated" == "authenticated" && (
-        <div className="flex h-screen bg-slate-50">
-          <aside className="w-96 bg-slate-950 text-slate-200 border-r border-slate-800 flex flex-col">
-            <div className="h-20 flex items-center px-6 border-b border-slate-800">
-              <h1 className="text-xl font-bold text-white">EchoMail</h1>
+        <div className="flex h-screen bg-zinc-50 text-zinc-900 font-sans">
+          {/* Modernized Sidebar */}
+          <aside className="w-64 bg-zinc-950 text-zinc-200 border-r border-zinc-900 flex flex-col">
+            {/* Clean Header (Removed harsh borders & oversized height) */}
+            <div className="h-16 flex items-center px-6">
+              <h1 className="text-lg font-semibold text-white tracking-tight flex items-center gap-2">
+                <span className="h-2 w-2 rounded-full bg-indigo-500"></span>
+                EchoMail
+              </h1>
             </div>
-            <nav className="flex-1 px-4 py-6">
+
+            {/* Elegant Navigation (Balanced margins & sleeker active states) */}
+            <nav className="flex-1 px-3 py-4">
               <ul className="space-y-1">
                 {LinkMaps.map((item) => {
                   const active = location.pathname === item.path;
@@ -75,9 +82,20 @@ const Layout = () => {
                     <li key={item.path}>
                       <Link
                         to={item.path}
-                        className={` flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 font-medium ${active ? "bg-slate-800 text-white shadow-sm" : "text-slate-400 hover:bg-slate-900 hover:text-white"} `}
+                        className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 ${
+                          active
+                            ? "bg-white/[0.06] text-white"
+                            : "text-zinc-400 hover:bg-zinc-900/50 hover:text-zinc-200"
+                        }`}
                       >
-                        {item.icon} <span>{item.label}</span>
+                        <span
+                          className={
+                            active ? "text-indigo-400" : "text-zinc-500"
+                          }
+                        >
+                          {item.icon}
+                        </span>
+                        <span>{item.label}</span>
                       </Link>
                     </li>
                   );
@@ -85,21 +103,27 @@ const Layout = () => {
               </ul>
             </nav>
 
-            {/* {profile section} */}
-            <div className="border-t border-slate-800 p-4">
-              <div className="flex items-center gap-3 rounded-xl bg-slate-900 p-3">
-                <div className="h-10 w-10 rounded-full bg-slate-700 flex items-center justify-center">
+            {/* Seamless Profile Footer (No bulky background boxes) */}
+            <div className="border-t border-zinc-900 p-3">
+              <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-zinc-900/50 transition-colors cursor-pointer">
+                <div className="h-8 w-8 rounded-full bg-indigo-600/20 text-indigo-400 border border-indigo-500/30 flex items-center justify-center text-xs font-semibold">
                   F
                 </div>
                 <div>
-                  <p className="text-sm font-medium"> Fuad </p>
-                  <p className="text-xs text-slate-400"> Software Engineer </p>
+                  <p className="text-xs font-medium text-zinc-200 leading-tight">
+                    Fuad
+                  </p>
+                  <p className="text-[10px] text-zinc-500 mt-0.5">
+                    Software Engineer
+                  </p>
                 </div>
               </div>
             </div>
           </aside>
-          <main className="flex-1 overflow-y-auto">
-            <section>
+
+          {/* Main Content Area */}
+          <main className="flex-1 overflow-y-auto bg-zinc-50/50">
+            <section className="p-8">
               <Outlet />
             </section>
           </main>
