@@ -44,7 +44,7 @@ const getStatusBadgeClass = (status) => {
 
 const NeedsAttention = () => {
   return (
-    <Card className="shadow-sm border border-slate-100 bg-white rounded-xl">
+    <Card className="ring-0 shadow-sm border border-slate-100 bg-white rounded-xl">
       <CardHeader className="pb-3 flex flex-row items-center justify-between space-y-0">
         <div className="flex items-center gap-2.5">
           <div className="p-1.5 bg-amber-50 text-amber-600 rounded-lg">
