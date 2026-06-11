@@ -2,6 +2,7 @@
 // // import useTrackedEmails from "../hooks/useTrackedEmails";d
 // import HomeSkeleton from "./HomeSkeleton";
 // import res from "../data/mockTrackedEmails";
+import AnalyticsPreview from "./AnalyticsPreview";
 import NeedsAttention from "./NeedsAttention";
 import SummaryCards from "./SummaryCards";
 import UpcomingDeadlines from "./UpcomingDeadlines";
@@ -43,7 +44,9 @@ const Home = () => {
       </section>
 
       {/* Analytics */}
-      <section>Analytics Preview</section>
+      <section>
+        <AnalyticsPreview />
+      </section>
 
       {/* Activity */}
       <section>Recent Activity</section>

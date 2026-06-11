@@ -33,7 +33,7 @@ const UpcomingDeadlines = () => {
           <div className="p-1.5 bg-blue-50 text-blue-600 rounded-lg">
             <CalendarClock className="h-4 w-4" />
           </div>
-          <CardTitle className="text-base font-semibold text-slate-950">
+          <CardTitle className="text-sm font-semibold text-slate-750">
             Upcoming Deadlines
           </CardTitle>
         </div>
