@@ -4,6 +4,7 @@
 // import res from "../data/mockTrackedEmails";
 import AnalyticsPreview from "./AnalyticsPreview";
 import NeedsAttention from "./NeedsAttention";
+import RecentActivity from "./RecentActivity";
 import SummaryCards from "./SummaryCards";
 import UpcomingDeadlines from "./UpcomingDeadlines";
 
@@ -49,7 +50,11 @@ const Home = () => {
       </section>
 
       {/* Activity */}
-      <section>Recent Activity</section>
+      <section>
+        <div>
+          <RecentActivity />
+        </div>
+      </section>
     </div>
   );
 };
