@@ -19,7 +19,7 @@ const upcomingDeadlines = [
   {
     id: 3,
     subject: "Project Approval",
-    deadline: "Jun 20, 2026",
+    deadline: "Jun 23, 2026",
     daysLeft: 6,
   },
 ];
