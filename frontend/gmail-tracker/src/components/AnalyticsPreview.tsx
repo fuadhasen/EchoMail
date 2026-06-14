@@ -26,7 +26,7 @@ const AnalyticsPreview = () => {
           <div className="p-1.5 bg-emerald-50 text-emerald-600 rounded-lg">
             <BarChart3 className="h-4 w-4" />
           </div>
-          <CardTitle className="text-base font-semibold text-slate-950">
+          <CardTitle className="text-xs font-semibold text-slate-950">
             Analytics Preview
           </CardTitle>
         </div>

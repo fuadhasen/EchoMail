@@ -14,7 +14,7 @@ const SentEmail = () => {
 
   const fetchEmails = async (term: string) => {
     const res = await axios.get(
-      `http://localhost:8000/search-sent-emails?search_term=${term || ""}`
+      `http://localhost:8000/search-sent-emails?search_term=${term || ""}`,
     );
 
     return res.data.emails;

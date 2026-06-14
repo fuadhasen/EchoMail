@@ -24,7 +24,7 @@ const MarkButton = ({ status }: Props) => {
 
   const mark = async () => {
     const res = await axios.post(
-      `http://localhost:8000/tracked-emails/${id}/mark-done`
+      `http://localhost:8000/tracked-emails/${id}/mark-done`,
     );
     return res.data;
   };
@@ -39,7 +39,7 @@ const MarkButton = ({ status }: Props) => {
 
   const unmark = async () => {
     const res = await axios.post(
-      `http://localhost:8000/tracked-emails/${id}/mark-undone`
+      `http://localhost:8000/tracked-emails/${id}/mark-undone`,
     );
     return res.data;
   };
