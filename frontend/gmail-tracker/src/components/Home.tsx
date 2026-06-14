@@ -44,7 +44,7 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Analytics */}
+      {/* Analytics Preview*/}
       <section>
         <AnalyticsPreview />
       </section>
