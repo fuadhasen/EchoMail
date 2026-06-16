@@ -53,7 +53,7 @@ const LoginWithHandler = () => {
                 </span>
               </button>
               <p className="p-4 text-xs">
-                By continuing, you agree to our Terms and Privacy Policy.
+                By continuing, you agree to our terms and conditions{" "}
               </p>
             </div>
           </div>
