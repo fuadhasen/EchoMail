@@ -16,10 +16,7 @@ const Home = () => {
       {/* {welcom section} */}
       <section className="pl-4 border-l-2 border-indigo-500 space-y-1">
         <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-slate-900">
-          Welcome back,{" "}
-          <span className="bg-linear-to-r from-indigo-600 to-violet-600 bg-clip-text text-transparent">
-            Fuad
-          </span>
+          Review Analysis
         </h1>
         <p className="text-sm sm:text-base text-slate-500">
           Here's what is happening with your tracked emails.
