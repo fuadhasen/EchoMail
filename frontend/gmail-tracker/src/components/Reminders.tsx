@@ -26,7 +26,7 @@ const Reminders = () => {
 
     const res = await axios.post(
       `http://localhost:8000/tracked-emails/${id}/send-reminders`,
-      data
+      data,
     );
     return res.data;
   };
@@ -65,7 +65,7 @@ const Reminders = () => {
         </div>
         <div className="flex flex-col space-y-3">
           <label className="font-semibold" htmlFor="message">
-            Message (Optional)
+            Messages
           </label>
           <textarea
             ref={ref}
