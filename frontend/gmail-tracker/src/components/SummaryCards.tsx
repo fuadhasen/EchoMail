@@ -1,6 +1,5 @@
 import React from "react";
 import { Card, CardContent } from "../components/ui/card";
-import { TrendingUp, TrendingDown } from "lucide-react";
 
 interface Props {
   title: string;
@@ -14,15 +13,9 @@ interface Props {
   description?: string;
 }
 
-const SummaryCards = ({
-  title,
-  value,
-  icon: Icon,
-  trend,
-  description,
-}: Props) => {
+const SummaryCards = ({ title, value, icon: Icon }: Props) => {
   return (
-    <Card className="group relative overflow-hidden rounded-2xl border border-slate-100/80 bg-white shadow-lg transition-all duration-300 hover:-translate-y-1 hover:shadow-md hover:border-slate-200/60 cursor-pointer">
+    <Card className="group relative overflow-hidden rounded-2xl border border-slate-100/60 bg-white  transition-all duration-300 hover:-translate-y-1 hover:shadow-md hover:border-slate-200/60 cursor-pointer">
       {/* Decorative gradient background glow on hover */}
       <div className="absolute inset-0 bg-gradient-to-br from-indigo-50/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
 
@@ -44,33 +37,6 @@ const SummaryCards = ({
             </div>
           )}
         </div>
-
-        {/* Dynamic footer details (Trend & Description) */}
-        {(trend || description) && (
-          <div className="mt-4 pt-4 border-t border-slate-50 flex items-center justify-between text-xs">
-            {trend && (
-              <span
-                className={`flex items-center gap-1 font-medium px-2 py-0.5 rounded-full ${
-                  trend.isPositive
-                    ? "text-emerald-700 bg-emerald-50/70 border border-emerald-100/50"
-                    : "text-rose-700 bg-rose-50/70 border border-rose-100/50"
-                }`}
-              >
-                {trend.isPositive ? (
-                  <TrendingUp className="h-3 w-3" />
-                ) : (
-                  <TrendingDown className="h-3 w-3" />
-                )}
-                {trend.value}
-              </span>
-            )}
-            {description && (
-              <span className="text-slate-400 font-medium ml-auto">
-                {description}
-              </span>
-            )}
-          </div>
-        )}
       </CardContent>
     </Card>
   );

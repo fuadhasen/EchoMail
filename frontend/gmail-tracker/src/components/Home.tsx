@@ -5,7 +5,9 @@
 // import AnalyticsPreview from "./AnalyticsPreview";
 // import NeedsAttention from "./NeedsAttention";
 // import RecentActivity from "./RecentActivity";
+import NeedsAttention from "./NeedsAttention";
 import SummaryCards from "./SummaryCards";
+// import UpcomingDeadlines from "./UpcomingDeadlines";
 // import UpcomingDeadlines from "./UpcomingDeadlines";
 
 const Home = () => {
@@ -14,10 +16,9 @@ const Home = () => {
   return (
     <div className="space-y-8 p-8">
       {/* {welcom section} */}
-      <section className="mb-8 mt-5">
+      <section className="">
         <h1 className="text-4xl font-semibold text-slate-950">Dashboared</h1>
       </section>
-
       {/* Summary Cards */}
       <section>
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
@@ -27,20 +28,17 @@ const Home = () => {
           <SummaryCards title="Reminders Sent" value={19} />
         </div>
       </section>
-
-      {/* Attention + Deadlines */}
-      {/* <section>
+      Attention + Deadlines
+      <section>
         <div className="grid gap-6 lg:grid-cols-2">
           <NeedsAttention />
-          <UpcomingDeadlines />
+          {/* <UpcomingDeadlines /> */}
         </div>
-      </section> */}
-
+      </section>
       {/* Analytics Preview*/}
       {/* <section>
         <AnalyticsPreview />
       </section> */}
-
       {/* Activity */}
       {/* <section>
         <div>
