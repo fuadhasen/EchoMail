@@ -18,7 +18,7 @@ const TrackedEmail = () => {
   const { res, error, isPending } = useTrackedEmails(url);
   const result = res?.sort(
     (a, b) =>
-      new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
   );
 
   if (error) return <p>{error.message}</p>;
@@ -51,8 +51,8 @@ const TrackedEmail = () => {
                   {email.is_done
                     ? "completed"
                     : parseInt(email.time_left) <= 0
-                    ? "deadline Passed"
-                    : email.time_left + " day(s) left"}
+                      ? "deadline Passed"
+                      : email.time_left + " day(s) left"}
                 </Table.Cell>
                 <Table.Cell>
                   {email.is_done == true ? "true" : "false"}

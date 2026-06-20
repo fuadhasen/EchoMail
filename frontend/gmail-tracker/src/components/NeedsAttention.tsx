@@ -1,9 +1,9 @@
 import React from "react";
 import {
   Card,
-  CardTitle,
-  CardHeader,
   CardContent,
+  CardHeader,
+  CardTitle,
 } from "../components/ui/card";
 import { AlertTriangle, Users } from "lucide-react";
 
@@ -13,23 +13,26 @@ const needsAttention = [
     subject: "Partnership Proposal",
     pendingRecipients: 3,
     status: "Overdue",
+    daysLeft: "2 days left",
   },
   {
     id: 2,
     subject: "Client Feedback Request",
     pendingRecipients: 1,
     status: "Due Tomorrow",
+    daysLeft: "4 days left",
   },
   {
     id: 3,
     subject: "Job Application Follow-up",
     pendingRecipients: 2,
     status: "Reminder Needed",
+    daysLeft: "3 days left",
   },
 ];
 
 // Helper to apply dynamic badge styles based on the status
-const getStatusBadgeClass = (status) => {
+const getStatusBadgeClass = (status: string) => {
   switch (status) {
     case "Overdue":
       return "bg-rose-50 text-rose-700 border border-rose-100";

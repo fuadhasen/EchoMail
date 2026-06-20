@@ -5,8 +5,12 @@
 // import AnalyticsPreview from "./AnalyticsPreview";
 // import NeedsAttention from "./NeedsAttention";
 // import RecentActivity from "./RecentActivity";
+import AnalyticsPreview from "./AnalyticsPreview";
 import NeedsAttention from "./NeedsAttention";
+import RecentActivity from "./RecentActivity";
+// import RecentActivity from "./RecentActivity";
 import SummaryCards from "./SummaryCards";
+import UpcomingDeadlines from "./UpcomingDeadlines";
 // import UpcomingDeadlines from "./UpcomingDeadlines";
 // import UpcomingDeadlines from "./UpcomingDeadlines";
 
@@ -28,23 +32,22 @@ const Home = () => {
           <SummaryCards title="Reminders Sent" value={19} />
         </div>
       </section>
-      Attention + Deadlines
+      {/*Attention + Deadlines*/}
       <section>
         <div className="grid gap-6 lg:grid-cols-2">
           <NeedsAttention />
-          {/* <UpcomingDeadlines /> */}
+          <UpcomingDeadlines />
         </div>
       </section>
-      {/* Analytics Preview*/}
-      {/* <section>
+
+      {/* {anaylytics preview} */}
+      <section>
         <AnalyticsPreview />
-      </section> */}
-      {/* Activity */}
-      {/* <section>
-        <div>
-          <RecentActivity />
-        </div>
-      </section> */}
+      </section>
+
+      <section>
+        <RecentActivity />
+      </section>
     </div>
   );
 };
