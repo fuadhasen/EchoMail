@@ -12,6 +12,7 @@ import { Link, Outlet, useLocation, useNavigate } from "react-router";
 // import NavBar from "./NavBar";
 import useAuth from "../hooks/useAuth";
 import { useEffect } from "react";
+import NavBar from "./NavBar";
 
 const Layout = () => {
   const location = useLocation();
@@ -124,6 +125,7 @@ const Layout = () => {
           {/* Main Content Area */}
           <main className="flex-1 overflow-y-auto bg-zinc-50/50">
             <section className="p-8">
+              <NavBar />
               <Outlet />
             </section>
           </main>

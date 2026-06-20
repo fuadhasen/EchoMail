@@ -2,11 +2,11 @@
 // // import useTrackedEmails from "../hooks/useTrackedEmails";d
 // import HomeSkeleton from "./HomeSkeleton";
 // import res from "../data/mockTrackedEmails";
-import AnalyticsPreview from "./AnalyticsPreview";
-import NeedsAttention from "./NeedsAttention";
-import RecentActivity from "./RecentActivity";
+// import AnalyticsPreview from "./AnalyticsPreview";
+// import NeedsAttention from "./NeedsAttention";
+// import RecentActivity from "./RecentActivity";
 import SummaryCards from "./SummaryCards";
-import UpcomingDeadlines from "./UpcomingDeadlines";
+// import UpcomingDeadlines from "./UpcomingDeadlines";
 
 const Home = () => {
   // const url = "http://localhost:8000/tracked-emails?show_done=true";
@@ -14,13 +14,8 @@ const Home = () => {
   return (
     <div className="space-y-8 p-8">
       {/* {welcom section} */}
-      <section className="pl-4 border-l-2 border-indigo-500 space-y-1">
-        <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-slate-900">
-          Review Analysis
-        </h1>
-        <p className="text-sm sm:text-base text-slate-500">
-          Here's what is happening with your tracked emails.
-        </p>
+      <section className="mb-8 mt-5">
+        <h1 className="text-4xl font-semibold text-slate-950">Dashboared</h1>
       </section>
 
       {/* Summary Cards */}
@@ -34,24 +29,24 @@ const Home = () => {
       </section>
 
       {/* Attention + Deadlines */}
-      <section>
+      {/* <section>
         <div className="grid gap-6 lg:grid-cols-2">
           <NeedsAttention />
           <UpcomingDeadlines />
         </div>
-      </section>
+      </section> */}
 
       {/* Analytics Preview*/}
-      <section>
+      {/* <section>
         <AnalyticsPreview />
-      </section>
+      </section> */}
 
       {/* Activity */}
-      <section>
+      {/* <section>
         <div>
           <RecentActivity />
         </div>
-      </section>
+      </section> */}
     </div>
   );
 };
