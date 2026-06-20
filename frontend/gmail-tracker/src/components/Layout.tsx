@@ -63,7 +63,7 @@ const Layout = () => {
   return (
     <>
       {"authenticated" == "authenticated" && (
-        <div className="flex h-screen bg-zinc-50 text-zinc-900 font-sans">
+        <div className="flex h-screen font-sans bg-[#f8f9ff]">
           {/* Modernized Sidebar */}
           <aside className="w-64 bg-zinc-950 text-zinc-200 border-r border-zinc-900 flex flex-col">
             {/* Clean Header (Removed harsh borders & oversized height) */}
@@ -123,7 +123,7 @@ const Layout = () => {
           </aside>
 
           {/* Main Content Area */}
-          <main className="flex-1 overflow-y-auto bg-zinc-50/50">
+          <main className="flex-1 overflow-y-auto bg-[#f8f9ff]">
             <section className="">
               <NavBar />
               <Outlet />

@@ -8,7 +8,7 @@ import { Avatar, AvatarFallback } from "./ui/avatar";
 
 const NavBar = () => {
   return (
-    <header className="h-15 border-b border-slate-300 bg-white py-10 px-6">
+    <header className="h-15 border-b border-slate-300 bg-[#f8f9ff] py-10 px-6">
       <div className="flex h-full items-center justify-between">
         {/* Search */}
         <div className="relative w-full max-w-lg border-slate-100">
