@@ -1,18 +1,4 @@
-// import { Heading } from "@radix-ui/themes";
-// // import useTrackedEmails from "../hooks/useTrackedEmails";d
-// import HomeSkeleton from "./HomeSkeleton";
-// import res from "../data/mockTrackedEmails";
-// import AnalyticsPreview from "./AnalyticsPreview";
-// import NeedsAttention from "./NeedsAttention";
-// import RecentActivity from "./RecentActivity";
-import AnalyticsPreview from "./AnalyticsPreview";
-import NeedsAttention from "./NeedsAttention";
-import RecentActivity from "./RecentActivity";
-// import RecentActivity from "./RecentActivity";
 import SummaryCards from "./SummaryCards";
-import UpcomingDeadlines from "./UpcomingDeadlines";
-// import UpcomingDeadlines from "./UpcomingDeadlines";
-// import UpcomingDeadlines from "./UpcomingDeadlines";
 
 const Home = () => {
   // const url = "http://localhost:8000/tracked-emails?show_done=true";
@@ -21,7 +7,12 @@ const Home = () => {
     <div className="space-y-8 p-8">
       {/* {welcom section} */}
       <section className="">
-        <h1 className="text-4xl font-semibold text-slate-950">Dashboared</h1>
+        <h1 className="text-4xl font-bold text-slate-950 tracking-tight font-sans">
+          System Overview
+        </h1>
+        <p className="font-sans text-base text-[#464555] mt-1">
+          Real-time performance of your communication loops.
+        </p>
       </section>
       {/* Summary Cards */}
       <section>
@@ -33,21 +24,21 @@ const Home = () => {
         </div>
       </section>
       {/*Attention + Deadlines*/}
-      <section>
+      {/* <section>
         <div className="grid gap-6 lg:grid-cols-2">
           <NeedsAttention />
           <UpcomingDeadlines />
         </div>
-      </section>
+      </section> */}
 
       {/* {anaylytics preview} */}
-      <section>
+      {/* <section>
         <AnalyticsPreview />
       </section>
 
       <section>
         <RecentActivity />
-      </section>
+      </section> */}
     </div>
   );
 };
