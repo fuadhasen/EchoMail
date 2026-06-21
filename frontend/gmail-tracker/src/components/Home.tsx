@@ -56,9 +56,9 @@ const Home = () => {
       </section>
 
       {/* {12 Column Responsive Layout Grid} */}
-      <div>
+      <div className="grid grid-cols-1 lg:grid-cols-2">
         {/* left column section */}
-        <div>
+        <div className="">
           <NeedsAttention items={initialAttentionItems} />
           <AnalyticsPreview />
         </div>
