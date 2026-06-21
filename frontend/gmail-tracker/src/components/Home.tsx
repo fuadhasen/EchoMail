@@ -1,4 +1,30 @@
+import AnalyticsPreview from "./AnalyticsPreview";
+import NeedsAttention from "./NeedsAttention";
 import SummaryCards from "./SummaryCards";
+
+const initialAttentionItems = [
+  {
+    id: 1,
+    subject: "Partnership Proposal",
+    pendingRecipients: 3,
+    status: "Overdue",
+    daysLeft: "2 days left",
+  },
+  {
+    id: 2,
+    subject: "Client Feedback Request",
+    pendingRecipients: 1,
+    status: "Due Tomorrow",
+    daysLeft: "4 days left",
+  },
+  {
+    id: 3,
+    subject: "Job Application Follow-up",
+    pendingRecipients: 2,
+    status: "Reminder Needed",
+    daysLeft: "3 days left",
+  },
+];
 
 // fetch the backend data (totaltracked, )
 const Home = () => {
@@ -29,22 +55,19 @@ const Home = () => {
         </div>
       </section>
 
-      {/*Attention + Deadlines*/}
-      {/* <section>
-        <div className="grid gap-6 lg:grid-cols-2">
-          <NeedsAttention />
-          <UpcomingDeadlines />
+      {/* {12 Column Responsive Layout Grid} */}
+      <div>
+        {/* left column section */}
+        <div>
+          <NeedsAttention items={initialAttentionItems} />
+          <AnalyticsPreview />
         </div>
-      </section> */}
 
-      {/* {anaylytics preview} */}
-      {/* <section>
-        <AnalyticsPreview />
-      </section>
+        {/* right column section */}
+        <div></div>
+      </div>
 
-      <section>
-        <RecentActivity />
-      </section> */}
+      {/* footer */}
     </div>
   );
 };
