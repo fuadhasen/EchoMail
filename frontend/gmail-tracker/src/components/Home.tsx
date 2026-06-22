@@ -56,15 +56,18 @@ const Home = () => {
       </section>
 
       {/* {12 Column Responsive Layout Grid} */}
-      <div className="grid grid-cols-1 lg:grid-cols-2">
+      <div className="grid grid-cols-12">
         {/* left column section */}
-        <div className="">
+        <div className="col-span-12 lg:col-span-8 space-y-8 flex flex-col justify-start">
           <NeedsAttention items={initialAttentionItems} />
           <AnalyticsPreview />
         </div>
 
         {/* right column section */}
-        <div></div>
+        <div className="col-span-12 lg:col-span-4 space-y-8 flex flex-col justify-start">
+          <div>deadline</div>
+          <div>RecentActivities</div>
+        </div>
       </div>
 
       {/* footer */}

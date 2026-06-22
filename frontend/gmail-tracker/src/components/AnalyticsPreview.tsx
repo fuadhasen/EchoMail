@@ -1,4 +1,4 @@
-import { Award, HelpCircle, TrendingUp } from "lucide-react";
+import { Award, HelpCircle, TrendingUp, Zap } from "lucide-react";
 import { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 
@@ -77,7 +77,7 @@ const AnalyticsPreview = () => {
   ];
 
   return (
-    <section className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-8">
+    <section className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-6">
       {/* Velocity Card */}
       <div className="bg-white border border-[#c7c4d8]/30 rounded-2xl p-6 flex flex-col justify-between shadow-sm relative">
         <div>
@@ -140,11 +140,59 @@ const AnalyticsPreview = () => {
       <motion.div
         whileHover={{ scale: 1.005 }}
         onClick={() => setShowScoreDetail(!showScoreDetail)}
-        className="bg-[#3525cd] p-6 rounded-2xl text-white flex flex-col justify-between relative overflow-hidden group shadow-lg cursor-pointer min-h-[250px]"
+        className="bg-[#3525cd] p-6 rounded-2xl text-white flex flex-col justify-between relative overflow-hidden group shadow-lg cursor-pointer"
       >
         {/* Ambient glow decoration backdrops */}
         <div className="absolute -right-12 -bottom-12 w-44 h-44 bg-white/5 rounded-full blur-2xl group-hover:bg-white/10 transitions-colors duration-500" />
         <div className="absolute -left-12 top-12  w-28 h-28 bg-[#4f46e5]/40 rounded blur-xl" />
+
+        <div className="relative z-10 flex justify-between items-start">
+          <div>
+            <div className="flex items-center gap-1.5">
+              <h3 className="font-sans text-base font-bold text-white tracking-tight">
+                Efficiency Score
+              </h3>
+              <HelpCircle size={14} className="opacity-60 cursor-help" />
+            </div>
+            <p className="font-sans text-xs text-[#dad7ff] opacity-85 mt-1">
+              You are responding 15% faster than last month.
+            </p>
+          </div>
+          <div className="p-2 bg-white/10 rounded-lg text-white">
+            <Award size={18} />
+          </div>
+        </div>
+
+        {/* footer */}
+        <div className="relative z-10 mt-6">
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.2 }}
+          >
+            <div className="text-5xl font-black tracking-tight flex items-baseline gap-1">
+              94
+              <span className="text-2xl font-normal text-[#dad7ff] opacity-70">
+                /100
+              </span>
+            </div>
+            <div className="mt-5">
+              <div className="h-1.5 w-full bg-white/20 rounded-full overflow-hidden">
+                <motion.div
+                  initial={{ width: 0 }}
+                  animate={{ width: "94%" }}
+                  transition={{ duration: 0.8, delay: 0.2 }}
+                  className="h-full bg-white rounded-full"
+                />
+              </div>
+            </div>
+            <p className="text-[10px] text-[#dad7ff]/80 uppercase tracking-widest mt-3.5 flex items-center gap-1">
+              <Zap size={10} className="fill-white" />
+              Top 2% of Global Workspaces
+            </p>
+          </motion.div>
+        </div>
       </motion.div>
     </section>
   );
