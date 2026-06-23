@@ -84,7 +84,7 @@ const RecentActivity = ({ initialItems }: RecentActivityProps) => {
     }, 800);
   };
 
-  return <section>am analysis component</section>;
+  return <section className="">The Analysis component</section>;
 };
 
 export default RecentActivity;
