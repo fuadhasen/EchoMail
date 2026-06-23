@@ -26,14 +26,14 @@ const upcomingDeadlines = [
 
 const UpcomingDeadlines = () => {
   return (
-    <Card className="shadow-sm border border-slate-100 bg-white lg:ml-10 rounded-xl">
+    <Card className="shadow-sm border border-slate-100 bg-white rounded-xl">
       <CardHeader className="pb-3 flex flex-row items-center justify-between space-y-0">
         <div className="flex items-center gap-2.5">
           {/* Blue-themed icon container to match the styling language */}
           <div className="p-1.5 bg-blue-50 text-blue-600 rounded-lg">
             <CalendarClock className="h-4 w-4" />
           </div>
-          <CardTitle className="text-sm font-semibold text-slate-750">
+          <CardTitle className="text-sm font-bold text-slate-750">
             Upcoming Deadlines
           </CardTitle>
         </div>

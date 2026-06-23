@@ -89,7 +89,7 @@ const Home = () => {
       </section>
 
       {/* {12 Column Responsive Layout Grid} */}
-      <div className="grid grid-cols-12">
+      <div className="grid grid-cols-12 gap-5">
         {/* left column section */}
         <div className="col-span-12 lg:col-span-8 space-y-8 flex flex-col justify-start">
           <NeedsAttention items={initialAttentionItems} />
