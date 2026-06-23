@@ -1,6 +1,8 @@
 import AnalyticsPreview from "./AnalyticsPreview";
 import NeedsAttention from "./NeedsAttention";
+import RecentActivity from "./RecentActivity";
 import SummaryCards from "./SummaryCards";
+import UpcomingDeadlines from "./UpcomingDeadlines";
 
 const initialAttentionItems = [
   {
@@ -23,6 +25,37 @@ const initialAttentionItems = [
     pendingRecipients: 2,
     status: "Reminder Needed",
     daysLeft: "3 days left",
+  },
+];
+
+const initialActivities = [
+  {
+    id: 1,
+    iconType: "reply",
+    user: "David Smith",
+    boldText: "David Smith",
+    regularText: ' replied to "Q4 Planning"',
+    timeLabel: "2 minutes ago",
+  },
+  {
+    id: 2,
+    iconType: "reminder",
+    regularText: "Automatic reminder sent to Team Alpha",
+    timeLabel: "45 minutes ago",
+  },
+  {
+    id: 3,
+    iconType: "view",
+    user: "Marcus Roe",
+    boldText: "Marcus Roe",
+    regularText: ' opened "Agreement v2"',
+    timeLabel: "2 hours ago",
+  },
+  {
+    id: 4,
+    iconType: "mail",
+    regularText: 'New tracked message: "Client Kickoff"',
+    timeLabel: "3 hours ago",
   },
 ];
 
@@ -65,8 +98,8 @@ const Home = () => {
 
         {/* right column section */}
         <div className="col-span-12 lg:col-span-4 space-y-8 flex flex-col justify-start">
-          <div>deadline</div>
-          <div>RecentActivities</div>
+          <UpcomingDeadlines />
+          <RecentActivity initialItems={initialActivities} />
         </div>
       </div>
 
