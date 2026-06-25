@@ -91,7 +91,7 @@ const RecentActivity = ({ initialItems }: RecentActivityProps) => {
       </h3>
 
       <div className=" p-3 space-y-6">
-        {items.map((item, index) => (
+        {items.map((item) => (
           <div className="flex gap-4 items-start group">
             {/* bulb */}
             <div
