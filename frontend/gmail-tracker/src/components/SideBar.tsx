@@ -8,6 +8,7 @@ import {
   Users,
 } from "lucide-react";
 import { useState } from "react";
+import { Link } from "react-router";
 
 interface SideBarProps {
   activeItem?: string;
@@ -25,12 +26,12 @@ const SideBar = ({ activeItem = "Dashboared", onNavigate }: SideBarProps) => {
   };
 
   const navItems = [
-    { name: "Dashboard", icon: Grid },
-    { name: "Tracked Emails", icon: Mail, badge: "4" },
-    { name: "Recipients", icon: Users },
-    { name: "Reminders", icon: Bell, badge: "2" },
-    { name: "Analytics", icon: BarChart3 },
-    { name: "Settings", icon: Settings },
+    { name: "Dashboard", icon: Grid, path: "/" },
+    { name: "Tracked Emails", icon: Mail, path: "/tracked" },
+    { name: "Recipients", icon: Users, path: "/recipients" },
+    { name: "Reminders", icon: Bell, path: "/reminders" },
+    { name: "Analytics", icon: BarChart3, path: "/analytics" },
+    { name: "Settings", icon: Settings, path: "/settings" },
   ];
 
   return (
@@ -71,24 +72,15 @@ const SideBar = ({ activeItem = "Dashboared", onNavigate }: SideBarProps) => {
               onClick={() => handlItemClick(item.name)}
               className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl font-sans text-xs font-bold tracking-wide transiton-all duration-150 cursor-pointer ${isActive ? "bg-[#eff4ff] text-[#3525cd]" : "text-[#777587] hover:bg-slate-50 hover:text-[#0b1c30]"} `}
             >
-              <div className="flex items-center gap-3">
-                <Icon
-                  size={16}
-                  className={`transition-colors ${isActive ? "text-[#3525cd] stroke-[2.2]" : "text-[#777587] group-hover:text-[#0b1c30]"}`}
-                />
-                <span>{item.name}</span>
-              </div>
-              {item.badge && (
-                <span
-                  className={`text-[10px] font-bold px-1.5 py-0.5 rounded-md ${
-                    isActive
-                      ? "bg-[#3525cd] text-white"
-                      : "bg-[#eff4ff] text-[#3525cd] border border-[#c7c4d8]/20"
-                  }`}
-                >
-                  {item.badge}
-                </span>
-              )}
+              <Link to={item.path}>
+                <div className="flex items-center gap-3">
+                  <Icon
+                    size={16}
+                    className={`transition-colors ${isActive ? "text-[#3525cd] stroke-[2.2]" : "text-[#777587] group-hover:text-[#0b1c30]"}`}
+                  />
+                  <span>{item.name}</span>
+                </div>
+              </Link>
             </button>
           );
         })}

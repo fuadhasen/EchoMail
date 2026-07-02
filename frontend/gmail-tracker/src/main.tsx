@@ -33,6 +33,18 @@ createRoot(document.getElementById("root")!).render(
               <Route path="response" element={<Response />} />
               <Route path="track_new" element={<TrackNew />} />
               <Route path="reminders" element={<Reminders />} />
+              <Route
+                path="settings"
+                element={"Hello settings will be displayed here"}
+              />
+              <Route
+                path="analytics"
+                element={"the graph analytics also here"}
+              />
+              <Route
+                path="recipients"
+                element={"list of recipients if its important"}
+              />
             </Route>
           </Routes>
         </BrowserRouter>
