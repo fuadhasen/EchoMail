@@ -1,22 +1,21 @@
-import { Button } from "@radix-ui/themes";
 import { useMutation } from "@tanstack/react-query";
 import axios from "axios";
+import { CheckCircle2 } from "lucide-react";
+import { useRef } from "react";
 import { useNavigate } from "react-router";
 import useUrlQuery from "../hooks/useUrlQuery";
-import Spinner from "./Spinner";
-import { useRef } from "react";
 
 const Reminders = () => {
   const query = useUrlQuery();
   const navigate = useNavigate();
-  const email = query.get("email");
+  // const email = query.get("email");
   const id = query.get("id");
   const ref = useRef<HTMLTextAreaElement>(null);
   const emailRef = useRef<HTMLInputElement>(null);
 
-  const handler = () => {
-    mutation.mutate();
-  };
+  // const handler = () => {
+  //   mutation.mutate();
+  // };
 
   const sendReminders = async () => {
     const data = {
@@ -48,42 +47,20 @@ const Reminders = () => {
     );
 
   return (
-    <>
-      <div className="flex flex-col m-10 p-4 space-y-10">
-        <div className="flex flex-col space-y-3">
-          <label className="font-semibold" htmlFor="email">
-            Email Address
-          </label>
-          <input
-            id="email"
-            ref={emailRef}
-            type="text"
-            placeholder="Enter email ..."
-            className="p-3 outline-none w-2/4 rounded-md focus:ring-blue-300"
-            defaultValue={email!}
-          />
-        </div>
-        <div className="flex flex-col space-y-3">
-          <label className="font-semibold" htmlFor="message">
-            Messages
-          </label>
-          <textarea
-            ref={ref}
-            name=""
-            id="message"
-            className="p-4 h-40 rounded-md outline-none w-2/4"
-            placeholder="Enter your message ..."
-          ></textarea>
-        </div>
+    <div className="flex flex-col items-center justify-center min-h-[60vh] text-center p-8 bg-white border border-[#c7c4d8]/30 rounded-2xl shadow-xs">
+      <div className="p-3 bg-[#eff4ff] text-[#3525cd] rounded-2xl mb-4">
+        <CheckCircle2 size={32} className="stroke-[1.5]" />
       </div>
-      <Button
-        disabled={mutation.isPending || !id}
-        onClick={handler}
-        className="mx-14  w-52  cursor-pointer  p-5"
-      >
-        Send {mutation.isPending && <Spinner />}
-      </Button>
-    </>
+      <h3 className="font-sans text-lg font-bold text-[#0b1c30] mb-2">
+        TrackedEmail Section
+      </h3>
+      <p className="font-sans text-xs text-[#777587] max-w-sm mb-6">
+        This panel is on Progress
+      </p>
+      <button className="bg-[#3525cd] text-white hover:bg-[#3525cd]/95 text-xs font-bold py-2.5 px-5 rounded-xl transition-all font-sans cursor-pointer">
+        Back to Tracked Emails
+      </button>
+    </div>
   );
 };
 

@@ -15,6 +15,9 @@ import "@radix-ui/themes/styles.css";
 import "./index.css";
 import { Theme } from "@radix-ui/themes";
 import EmailDetail from "./components/EmailDetail.tsx";
+import Recipients from "./components/Recipients.tsx";
+import Analytics from "./components/Analytics.tsx";
+import Settings from "./components/Settings.tsx";
 
 const queryClient = new QueryClient();
 
@@ -33,18 +36,9 @@ createRoot(document.getElementById("root")!).render(
               <Route path="response" element={<Response />} />
               <Route path="track_new" element={<TrackNew />} />
               <Route path="reminders" element={<Reminders />} />
-              <Route
-                path="settings"
-                element={"Hello settings will be displayed here"}
-              />
-              <Route
-                path="analytics"
-                element={"the graph analytics also here"}
-              />
-              <Route
-                path="recipients"
-                element={"list of recipients if its important"}
-              />
+              <Route path="settings" element={<Settings />} />
+              <Route path="analytics" element={<Analytics />} />
+              <Route path="recipients" element={<Recipients />} />
             </Route>
           </Routes>
         </BrowserRouter>

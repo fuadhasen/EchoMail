@@ -69,7 +69,6 @@ const Layout = () => {
           {/* Main Content Area */}
           <main className="flex-1 overflow-y-auto bg-[#f8f9ff]">
             <section className="">
-              {/* <NavBar /> */}
               <Outlet />
             </section>
           </main>
