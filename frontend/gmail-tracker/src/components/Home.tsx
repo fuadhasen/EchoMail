@@ -64,7 +64,7 @@ const Home = () => {
   // const { res, error, isPending } = useTrackedEmails(url);
 
   return (
-    <div className="space-y-8 p-8">
+    <div className="space-y-8">
       {/* {welcom section} */}
       <section className="">
         <h1 className="text-4xl font-bold text-slate-950 tracking-tight font-sans">

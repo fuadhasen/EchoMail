@@ -25,11 +25,9 @@ const Layout = () => {
         <div className="flex h-screen font-sans bg-[#f8f9ff]">
           <SideBar />
           {/* Main Content Area */}
-          <main className="flex-1 overflow-y-auto bg-[#f8f9ff]">
-            <section className="">
-              <Outlet />
-              <ToastContainer />
-            </section>
+          <main className="flex-1 overflow-y-auto bg-[#f8f9ff] p-8 relative">
+            <Outlet />
+            <ToastContainer />
           </main>
         </div>
       )}

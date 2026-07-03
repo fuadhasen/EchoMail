@@ -1,5 +1,5 @@
 import { useToast } from "@/context/ToastContext";
-import { CheckCircle2 } from "lucide-react";
+import { AlertTriangle, CheckCircle2, Clock, Plus } from "lucide-react";
 import React, { useMemo, useState } from "react";
 
 export interface EmailRow {
@@ -88,6 +88,7 @@ const initialTrackedEmails: EmailRow[] = [
 ];
 
 const TrackedEmail = () => {
+  const { triggerToast } = useToast();
   const [emails, setEmails] = useState<EmailRow[]>(initialTrackedEmails);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<
@@ -102,7 +103,6 @@ const TrackedEmail = () => {
   // Track Email model state
   const [isTrackModelOpen, setIsTrackeModelOpen] = useState(false);
   const [newSubject, setNewSubject] = useState("");
-  const [newSender, setNewSender] = useState("You (fuya241@gmail.com)");
   const [newRecipientsCount, setNewRecipientsCount] = useState(5);
   const [newDeadline, setNewDeadline] = useState("Due in 3 Days");
 
@@ -163,18 +163,81 @@ const TrackedEmail = () => {
       });
   }, [emails, searchTerm, statusFilter, deadlineFilter, sortField, sortOrder]);
 
-  const { triggerToast } = useToast();
+  const handleTrackedEmails = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newSubject.trim()) {
+      triggerToast("Please fill in all fields", "info");
+      return;
+    }
+
+    const newEmail: EmailRow = {
+      id: Date.now(),
+      subject: newSubject,
+      recipientsCount: Number(newRecipientsCount),
+      respondedCount: 0,
+      totalCount: Number(newRecipientsCount),
+      deadline: newDeadline,
+      status: "Pending",
+    };
+
+    setEmails([newEmail, ...emails]);
+    setIsTrackeModelOpen(false);
+
+    // Reset form
+    setNewSubject("");
+    setNewRecipientsCount(5);
+    setNewDeadline("Due in 3 days");
+
+    triggerToast(`Successfully tracking ${newSubject}`, "success");
+  };
+
+  const getStatusBadge = (status: EmailRow["status"]) => {
+    switch (status) {
+      case "Completed":
+        return (
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-[#e8f5e9] text-[#2e7d32] border border-[#c8e6c9]">
+            <CheckCircle2 size={12} className="stroke-[2.5]" />
+            Completed
+          </span>
+        );
+      case "Overdue":
+        return (
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-[#ffebee] text-[#c62828] border border-[#ffcdd2]">
+            <AlertTriangle size={12} className="stroke-[2.5]" />
+            Overdue
+          </span>
+        );
+      case "Pending":
+      default:
+        return (
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-[#eff4ff] text-[#3525cd] border border-[#c7c4d8]/30">
+            <Clock size={12} className="stroke-[2.5]" />
+            Pending
+          </span>
+        );
+    }
+  };
 
   return (
-    <div>
-      here is the tracked email pag
-      <br />
-      <button
-        className="bg-blue-600 p-5 cursor-pointer m-10 text-white"
-        onClick={() => triggerToast("Hello World", "success")}
-      >
-        Test Toast
-      </button>
+    <div className="flex-1 text-left">
+      {/* Page Header Area */}
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
+        <div>
+          <h2 className="font-sans text-3xl font-bold text-[#0b1c30] tracking-tight">
+            Tracked Emails
+          </h2>
+          <p className="font-sans text-sm text-[#777587] mt-1">
+            Monitor emails awaiting responses and track recipient progress.
+          </p>
+        </div>
+        <button
+          onClick={() => setIsTrackeModelOpen(true)}
+          className="bg-[#3525cd] text-white hover:bg-[#3525cd]/95 py-2.5 px-5 rounded-xl font-sans text-xs font-bold tracking-wide flex items-center justify-center gap-2 shadow-sm transition-all active:scale-98 cursor-pointer"
+        >
+          <Plus className="stroke-[2.5]" />
+          Track Email
+        </button>
+      </div>
     </div>
   );
 };
