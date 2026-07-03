@@ -1,22 +1,10 @@
-import {
-  LayoutDashboard,
-  Mail,
-  Search,
-  Bell,
-  BarChart3,
-  Star,
-  Reply,
-  Tag,
-} from "lucide-react";
-import { Link, Outlet, useLocation, useNavigate } from "react-router";
+import { Outlet } from "react-router";
 // import NavBar from "./NavBar";
-import useAuth from "../hooks/useAuth";
-import { useEffect } from "react";
-import NavBar from "./NavBar";
 import SideBar from "./SideBar";
+import ToastContainer from "./ToastContainer";
 
 const Layout = () => {
-  const location = useLocation();
+  // const location = useLocation();
   // const navigate = useNavigate();
 
   // const { status, error } = useAuth();
@@ -30,36 +18,6 @@ const Layout = () => {
   // if (error) return <p className="m-10 p-4 bg-red-100">{error.message}</p>;
 
   // Email
-  const LinkMaps = [
-    {
-      path: "/",
-      label: "Dashboard",
-      icon: <LayoutDashboard size={18} />,
-    },
-    { path: "/tracked", label: "Tracked", icon: <Mail size={18} /> },
-    {
-      path: "/sent_emails",
-      label: "search sent emails",
-      icon: <Search size={18} />,
-    },
-    { path: "/reminders", label: "Reminder", icon: <Bell size={18} /> },
-    {
-      path: "/responses",
-      label: "Responses",
-      icon: <Reply size={18} />,
-    },
-    { path: "/analytics", label: "Analytics", icon: <BarChart3 size={18} /> },
-    {
-      path: "/labels",
-      label: "Labels",
-      icon: <Tag size={18} />,
-    },
-    {
-      path: "/important",
-      label: "Important",
-      icon: <Star size={18} />,
-    },
-  ];
 
   return (
     <>
@@ -70,6 +28,7 @@ const Layout = () => {
           <main className="flex-1 overflow-y-auto bg-[#f8f9ff]">
             <section className="">
               <Outlet />
+              <ToastContainer />
             </section>
           </main>
         </div>

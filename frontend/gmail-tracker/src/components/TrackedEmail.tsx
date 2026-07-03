@@ -1,3 +1,4 @@
+import { useToast } from "@/context/ToastContext";
 import { CheckCircle2 } from "lucide-react";
 import React, { useMemo, useState } from "react";
 
@@ -98,7 +99,6 @@ const TrackedEmail = () => {
 
   const [sortField, setSortField] = useState<keyof EmailRow>("subject");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
-
   // Track Email model state
   const [isTrackModelOpen, setIsTrackeModelOpen] = useState(false);
   const [newSubject, setNewSubject] = useState("");
@@ -161,9 +161,22 @@ const TrackedEmail = () => {
 
         return 0;
       });
-  });
+  }, [emails, searchTerm, statusFilter, deadlineFilter, sortField, sortOrder]);
 
-  return <div>here the trackedEmail components will be putted here</div>;
+  const { triggerToast } = useToast();
+
+  return (
+    <div>
+      here is the tracked email pag
+      <br />
+      <button
+        className="bg-blue-600 p-5 cursor-pointer m-10 text-white"
+        onClick={() => triggerToast("Hello World", "success")}
+      >
+        Test Toast
+      </button>
+    </div>
+  );
 };
 
 export default TrackedEmail;

@@ -59,7 +59,6 @@ const initialActivities = [
   },
 ];
 
-// fetch the backend data (totaltracked, )
 const Home = () => {
   // const url = "http://localhost:8000/tracked-emails?show_done=true";
   // const { res, error, isPending } = useTrackedEmails(url);
