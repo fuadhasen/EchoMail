@@ -1,5 +1,12 @@
 import { useToast } from "@/context/ToastContext";
-import { AlertTriangle, CheckCircle2, Clock, Plus } from "lucide-react";
+import {
+  AlertTriangle,
+  CheckCircle2,
+  Clock,
+  Plus,
+  Search,
+  SlidersHorizontal,
+} from "lucide-react";
 import React, { useMemo, useState } from "react";
 
 export interface EmailRow {
@@ -237,6 +244,54 @@ const TrackedEmail = () => {
           <Plus className="stroke-[2.5]" />
           Track Email
         </button>
+      </div>
+
+      {/* Tool bar area */}
+      <div className="bg-white border border-[#c7c4d8]/30 rounded-2xl p-4 mb-6 shadow-xs flex flex-col md:flex-row gap-4 items-center justify-between">
+        {/* Search Input */}
+        <div className="relative w-full md:w-80">
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#777587] w-4 h-4" />
+          <input
+            type="text"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder="Search by Subject..."
+            className="w-full bg-[#f8f9ff] border border-[#c7c4d8]/30 rounded-xl py-2 pl-10 pr-4 text-xs text-[#0b1c30] placeholder-[#777587]/70 font-sans focus:outline-none focus:ring-1 focus:ring-[#3525cd] focus:border-[#3525cd] transition-all"
+          />
+        </div>
+
+        {/* filter panel */}
+        <div className="flex flex-wrap items-center gap-4 w-full md:w-auto">
+          {/* Status filter tab buttons */}
+          <div className="flex  bg-[#f8f9ff] border border-[#c7c4d8]/20  rounded-xl p-1">
+            {(["All", "Pending", "Overdue", "Completed"] as const).map(
+              (status) => (
+                <button
+                  key={status}
+                  onClick={() => setStatusFilter(status)}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold font-sans transition-all cursor-pointer ${statusFilter === status ? "bg-white text-[#3525cd] shadow-xs border border-[#c7c4d8]/10" : "text-[#777587] hover:text-[#0b1c30]"}`}
+                >
+                  {status}
+                </button>
+              ),
+            )}
+          </div>
+
+          {/* deadline filter dropdown */}
+          <div className="flex items-center gap-2">
+            <SlidersHorizontal size={14} className="text-[#777587]" />
+            <select
+              value={deadlineFilter}
+              onChange={(e) => setDeadlineFilter(e.target.value as any)}
+              className="bg-[#f8f9ff] border border-[#c7c4d8]/30 text-xs font-bold text-[#464555] rounded-xl px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-[#3525cd] font-sans cursor-pointer"
+            >
+              <option value="All">All Deadlines</option>
+              <option value="Overdue">Overdue</option>
+              <option value="Soon">Due Soon</option>
+              <option value="Completed">Completed</option>
+            </select>
+          </div>
+        </div>
       </div>
     </div>
   );
