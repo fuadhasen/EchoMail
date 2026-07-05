@@ -1,11 +1,18 @@
 import { useToast } from "@/context/ToastContext";
 import {
   AlertTriangle,
+  ArrowUpDown,
   CheckCircle2,
   Clock,
+  Divide,
+  Eye,
+  Mail,
   Plus,
   Search,
   SlidersHorizontal,
+  SpaceIcon,
+  UserCheck,
+  X,
 } from "lucide-react";
 import React, { useMemo, useState } from "react";
 
@@ -293,6 +300,287 @@ const TrackedEmail = () => {
           </div>
         </div>
       </div>
+
+      {/* main table card */}
+      <div className="bg-white border border-[#c7c4d8]/30 rounded-2xl shadow-sm overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full border-collapse">
+            <thead>
+              <tr className="border-b border-[#c7c4d8]/20 bg-[#f8f9ff]/50">
+                <th
+                  onClick={() => handleSort("subject")}
+                  className="px-6 py-4 text-left font-sans text-[11px] font-bold text-[#777587] uppercase tracking-wider cursor-pointer select-none hover:text-[#0b1c30]"
+                >
+                  <div className="flex items-center gap-1.5">
+                    Subjects
+                    <ArrowUpDown size={12} className="opacity-70" />
+                  </div>
+                </th>
+                <th className="px-6 py-4 text-left font-sans text-[11px] font-bold text-[#777587] uppercase tracking-wider">
+                  Recipients
+                </th>
+                <th
+                  onClick={() => handleSort("deadline")}
+                  className="px-6 py-4 text-left font-sans text-[11px] font-bold text-[#777587] uppercase tracking-wider cursor-pointer select-none hover:text-[#0b1c30]"
+                >
+                  <div className="flex items-center gap-1.5">
+                    Deadline
+                    <ArrowUpDown size={12} className="opacity-70" />
+                  </div>
+                </th>
+                <th className="px-6 py-4 text-left font-sans text-[11px] font-bold text-[#777587] uppercase tracking-wider">
+                  Status
+                </th>
+                <th className="px-6 py-4 text-right font-sans text-[11px] font-bold text-[#777587] uppercase tracking-wider">
+                  Actions
+                </th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-[#c7c4d8]/15">
+              {filteredEmails.length == 0 ? (
+                <tr>
+                  <td
+                    colSpan={5}
+                    className="px-6 py-12 text-center text-[#777587] font-sans"
+                  >
+                    <div className="flex flex-col items-center justify-center gap-2">
+                      <Mail className="w-8 h-8 text-[#c7c4d8]/80 stroke-[1.5]" />
+                      <p className="text-sm font-bold text-[#0b1c30]">
+                        No emails found
+                      </p>
+                      <p className="text-xs">
+                        Try adjusting your search filters.
+                      </p>
+                    </div>
+                  </td>
+                </tr>
+              ) : (
+                filteredEmails.map((email) => {
+                  return (
+                    <tr
+                      key={email.id}
+                      className="hover:bg-slate-50/40 transition-colors"
+                    >
+                      {/* Column 1: Subject */}
+                      <td className="px-6 py-4.5 max-w-xs md:max-w-md">
+                        <div className="font-sans text-xs font-bold text-[#0b1c30] line-clamp-1">
+                          {email.subject}
+                        </div>
+                      </td>
+
+                      {/* Column 2: Recipients */}
+                      <td className="px-6 py-4.5 whitespace-nowrap">
+                        <div className="font-sans text-xs text-[#777587] font-medium">
+                          {email.recipientsCount} recipients
+                        </div>
+                      </td>
+
+                      {/* Column 3: Deadlines */}
+                      <td className="px-6 py-4.5 whitespace-nowrap">
+                        <div className="font-sans text-xs text-[#464555] font-semibold">
+                          {email.deadline}
+                        </div>
+                      </td>
+
+                      {/* Column 4: Status Badge*/}
+                      <td className="px-6 py-4.5 whitespace-nowrap">
+                        {getStatusBadge(email.status)}
+                      </td>
+
+                      {/* Column 5: Actions */}
+                      <td className="px-6 py-4.5 whitespace-nowrap text-right">
+                        <button
+                          onClick={() => setActiveDetailEmail(email)}
+                          className="inline-flex items-center gap-1.5 font-sans text-xs font-bold text-[#3525cd] hover:text-[#3525cd]/80 bg-[#eff4ff] hover:bg-[#eff4ff]/80 px-3 py-1.5 rounded-lg border border-[#c7c4d8]/20 transition-all cursor-pointer"
+                        >
+                          <Eye size={12} />
+                          Details
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Footer area with row summary count */}
+        <div className="px-6 py-4 bg-[#f8f9ff]/30 border-t border-[#c7c4d8]/15 flex items-center justify-between text-xs font-sans text-[#777587]">
+          <div>
+            Showing{" "}
+            <span className="font-bold text-[#0b1c30]">
+              {filteredEmails.length}
+            </span>{" "}
+            of <span className="font-bold text-[#0b1c30]">{emails.length}</span>{" "}
+            tracked emails
+          </div>
+          <div className="flex gap-2">
+            <button className="px-2.5 py-1.5 bg-white border border-[#c7c4d8]/30 rounded-lg text-[11px] font-bold text-[#777587] opacity-70 cursor-not-allowed">
+              Prev
+            </button>
+            <button className="px-2.5 py-1.5 bg-white border border-[#c7c4d8]/30 rounded-lg text-[11px] font-bold text-[#777587] opacity-60 cursor-not-allowed">
+              Next
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* MODAL 1: EMAIL DETAILS AND AUDIT LOG */}
+      {activeDetailEmail && (
+        <div className="fixed inset-0 bg-[#0b1c30]/40 backdrop-blur-xs flex items-center justify-center z-50 p-4">
+          <div className="bg-white border border-[#c7c4d8]/40 rounded-2xl shadow-xl w-full max-w-lg overflow-hidden text-left animate-in fade-in zoom-in-95 duration-150">
+            {/* Header */}
+            <div className="px-6 py-4.5 border border-[#c7c4d8]/10 flex items-center justify-between ">
+              <div className="flex items-center gap-2">
+                <div className="p-1 bg-[#eff4ff] text-[#3525cd] rounded-lg">
+                  <Mail size={14} />
+                </div>
+                <h3 className="font-sans text-sm font-bold text-[#0b1c30]">
+                  Tracking Summary
+                </h3>
+              </div>
+              <button
+                onClick={() => setActiveDetailEmail(null)}
+                className="text-[#777587] hover:text-[#0b1c30] p-1 rounded-full hover:bg-slate-100 transition-all"
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            {/* Details Content */}
+            <div className="p-6 space-y-6">
+              <div>
+                <span className="text-[10px] font-extrabold text-[#777587] uppercase tracking-wider block mb-1">
+                  Subject Line
+                </span>{" "}
+                <p className="font-sans text-sm font-bold text-[#0b1c30]">
+                  {activeDetailEmail.subject}
+                </p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <span className="text-[10px] font-extrabold text-[#777587] uppercase tracking-wider block mb-1">
+                    Sender Info
+                  </span>
+                  <p className="font-sans text-xs text-[#464555] font-medium">
+                    You (fuya241@gmail.com)
+                  </p>
+                </div>
+                <div>
+                  <span className="text-[10px] font-extrabold text-[#777587] uppercase tracking-wider block mb-1">
+                    Current Deadline
+                  </span>
+                  <p className="font-sans text-xs text-[#0b1c30] font-bold">
+                    {activeDetailEmail.deadline}
+                  </p>
+                </div>
+              </div>
+
+              {/* Response Status Grid */}
+              <div className="bg-slate-50/70 border border-[#c7c4d8]/20 rounded-xl p-4 grid grid-cols-3 gap-2 text-center">
+                <div className="space-y-0.5">
+                  <span className="text-[10px] font-extrabold text-[#777587] uppercase tracking-wider block">
+                    Total Sent
+                  </span>
+                  <p className="text-lg font-black text-[#0b1c30] font-sans">
+                    {activeDetailEmail.totalCount}
+                  </p>
+                </div>
+                <div className="space-y-0.5 border-x border-[#c7c4d8]/15">
+                  <span className="text-[10px] font-extrabold text-emerald-700 uppercase tracking-wider block">
+                    Responded
+                  </span>
+                  <p className="text-lg font-black text-emerald-700 font-sans">
+                    {activeDetailEmail.recipientsCount}
+                  </p>
+                </div>
+                <div className="space-y-0.5">
+                  <span className="text-[10px] font-extrabold text-amber-700 uppercase tracking-wider block">
+                    Pending
+                  </span>
+                  <p className="text-lg font-black text-amber-700 font-sans">
+                    {activeDetailEmail.recipientsCount -
+                      activeDetailEmail.respondedCount}
+                  </p>
+                </div>
+              </div>
+
+              {/* Progress Detail */}
+              <div className="space-y-2">
+                <div className="flex justify-between text-xs font-sans">
+                  <span className="font-bold text-[#0b1c30]">
+                    Overall Response Rate
+                  </span>
+                  <span className="font-bold text-[#3525cd]">
+                    {Math.round(
+                      (activeDetailEmail.respondedCount /
+                        activeDetailEmail.totalCount) *
+                        100,
+                    )}
+                    %
+                  </span>
+                </div>
+                <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-[#3525cd] rounded-full"
+                    style={{
+                      width: `${
+                        (activeDetailEmail.respondedCount /
+                          activeDetailEmail.totalCount) *
+                        100
+                      }%`,
+                    }}
+                  />
+                </div>
+              </div>
+
+              {/* Recipients CheckLists */}
+              <div>
+                <span className="text-[10px] font-extrabold text-[#777587] uppercase tracking-wider block">
+                  Recipients Response Matrix
+                </span>
+                <div className="max-h-32 overflow-y-auto space-y-2 pr-1 scrollbar-none">
+                  {Array.from({ length: activeDetailEmail.totalCount }).map(
+                    (_, index) => {
+                      const isResponded =
+                        index < activeDetailEmail.respondedCount;
+                      return (
+                        <div className="flex items-center justify-between p-2 rounded-lg bg-[#f8f9ff] border border-[#c7c4d8]/10 text-xs font-sans">
+                          <span className="font-medium text-[#464555]">
+                            recipient-{index + 1}@organization.com
+                          </span>
+                          {isResponded ? (
+                            <span className="flex items-center gap-1 font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-100 text-[10px]">
+                              <UserCheck size={11} /> Responded
+                            </span>
+                          ) : (
+                            <span className="flex items-center gap-1 font-semibold text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-100 text-[10px]">
+                              <Clock size={11} />
+                              Awaiting
+                            </span>
+                          )}
+                        </div>
+                      );
+                    },
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Action/Close */}
+            <div className="px-6 py-4.5 bg-[#f8f9ff]/50 border-t border-[#c7c4d8]/10 flex justify-end">
+              <button
+                className="bg-[#3525cd] text-white hover:bg-[#3525cd]/95 px-5 py-2 rounded-xl text-xs font-bold font-sans cursor-pointer transition-all"
+                onClick={() => setActiveDetailEmail(null)}
+              >
+                Close Summary
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
