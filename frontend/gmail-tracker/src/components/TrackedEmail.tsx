@@ -569,6 +569,7 @@ const TrackedEmail = () => {
               </div>
             </div>
 
+            {/* {Close Summary} */}
             <div className="px-6 py-4.5 bg-[#f8f9ff]/50 border-t border-[#c7c4d8]/10 flex justify-end">
               <button
                 className="bg-[#3525cd] text-white hover:bg-[#3525cd]/95 px-5 py-2 rounded-xl text-xs font-bold font-sans cursor-pointer transition-all"
