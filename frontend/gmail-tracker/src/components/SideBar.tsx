@@ -1,12 +1,4 @@
-import {
-  BarChart3,
-  Bell,
-  Grid,
-  Mail,
-  Plus,
-  Settings,
-  Users,
-} from "lucide-react";
+import { BarChart3, Grid, Mail, Plus, Settings } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router";
 
@@ -28,8 +20,6 @@ const SideBar = ({ activeItem = "Dashboared", onNavigate }: SideBarProps) => {
   const navItems = [
     { name: "Dashboard", icon: Grid, path: "/" },
     { name: "Tracked Emails", icon: Mail, path: "/tracked" },
-    { name: "Recipients", icon: Users, path: "/recipients" },
-    { name: "Reminders", icon: Bell, path: "/reminders" },
     { name: "Analytics", icon: BarChart3, path: "/analytics" },
     { name: "Settings", icon: Settings, path: "/settings" },
   ];
