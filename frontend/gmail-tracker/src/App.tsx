@@ -18,14 +18,12 @@ const App = () => {
       <Route path="/login" element={<LoginWithHandler />} />
       <Route path="/" element={<Layout />}>
         <Route index element={<Home />} />
-        <Route path="tracked/detail" element={<EmailDetail />} />
+        <Route path="tracked/detail/:id" element={<EmailDetail />} />
         <Route path="tracked" element={<TrackedEmail />} />
         <Route path="sent_emails" element={<SentEmail />} />
         <Route path="track_new" element={<TrackNew />} />
-        <Route path="reminders" element={<Reminders />} />
         <Route path="settings" element={<Settings />} />
         <Route path="analytics" element={<Analytics />} />
-        <Route path="recipients" element={<Recipients />} />
       </Route>
     </Routes>
   );

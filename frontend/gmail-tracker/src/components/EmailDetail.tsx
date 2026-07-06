@@ -1,5 +1,6 @@
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
+import { useParams } from "react-router";
 dayjs.extend(relativeTime);
 
 const EmailDetail = () => {
@@ -13,7 +14,9 @@ const EmailDetail = () => {
   // if (error) return <p>{error.message}</p>;
   // if (isPending) return <EmailDetailSkeleton />;
 
-  return <div>the Email Details Page</div>;
+  const { id } = useParams();
+
+  return <div>The emails detail page for the Id: {id}</div>;
 };
 
 export default EmailDetail;

@@ -1,5 +1,10 @@
 import { useToast } from "@/context/ToastContext";
 import {
+  getTrackedEmails,
+  addTrackedEmail,
+  TrackedEmail,
+} from "..//data/mockTrackedEmails";
+import {
   AlertTriangle,
   ArrowUpDown,
   CheckCircle2,
@@ -13,6 +18,7 @@ import {
   X,
 } from "lucide-react";
 import React, { useMemo, useState } from "react";
+import { Link } from "react-router";
 
 export interface EmailRow {
   id: number;
@@ -79,29 +85,13 @@ const initialTrackedEmails: EmailRow[] = [
     deadline: "Completed Jun 20",
     status: "Completed",
   },
-  {
-    id: 7,
-    subject: "Partnership Agreement Final Draft",
-    recipientsCount: 4,
-    respondedCount: 1,
-    totalCount: 4,
-    deadline: "Overdue by 2 days",
-    status: "Overdue",
-  },
-  {
-    id: 8,
-    subject: "Board Meeting RSVP Request",
-    recipientsCount: 12,
-    respondedCount: 11,
-    totalCount: 12,
-    deadline: "Due Today, 5 PM",
-    status: "Pending",
-  },
 ];
 
 const TrackedEmail = () => {
   const { triggerToast } = useToast();
-  const [emails, setEmails] = useState<EmailRow[]>(initialTrackedEmails);
+  const [emails, setEmails] = useState<TrackedEmail[]>(() =>
+    getTrackedEmails(),
+  );
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<
     "All" | "Pending" | "Completed" | "Overdue"
@@ -110,7 +100,7 @@ const TrackedEmail = () => {
     "All" | "Overdue" | "Soon" | "Completed"
   >("All");
 
-  const [sortField, setSortField] = useState<keyof EmailRow>("subject");
+  const [sortField, setSortField] = useState<keyof TrackedEmail>("subject");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
   // Track Email model state
   const [isTrackModelOpen, setIsTrackeModelOpen] = useState(false);
@@ -119,9 +109,8 @@ const TrackedEmail = () => {
   const [newDeadline, setNewDeadline] = useState("Due in 3 Days");
 
   // Row Detail mode status
-  const [activeDetailEmail, setActiveDetailEmail] = useState<EmailRow | null>(
-    null,
-  );
+  const [activeDetailEmail, setActiveDetailEmail] =
+    useState<TrackedEmail | null>(null);
 
   const handleSort = (field: keyof EmailRow) => {
     if (sortField === field) {
@@ -361,9 +350,14 @@ const TrackedEmail = () => {
                     >
                       {/* Column 1: Subject */}
                       <td className="px-6 py-4.5 max-w-xs md:max-w-md">
-                        <div className="font-sans text-xs font-bold text-[#0b1c30] line-clamp-1">
-                          {email.subject}
-                        </div>
+                        <Link
+                          to={`/tracked/detail/${email.id}`}
+                          className="group inline-block"
+                        >
+                          <span className="font-sans text-xs font-bold text-[#0b1c30] text-clamp-1 transition-colors duration-200 group-hover:text-indigo-600 group-hover:underline cursor-pointer">
+                            {email.subject}
+                          </span>
+                        </Link>
                       </td>
 
                       {/* Column 2: Recipients */}
