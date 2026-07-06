@@ -1,7 +1,6 @@
 import { useToast } from "@/context/ToastContext";
-import {
+import type {
   getTrackedEmails,
-  addTrackedEmail,
   TrackedEmail,
 } from "..//data/mockTrackedEmails";
 import {
@@ -19,73 +18,6 @@ import {
 } from "lucide-react";
 import React, { useMemo, useState } from "react";
 import { Link } from "react-router";
-
-export interface EmailRow {
-  id: number;
-  subject: string;
-  recipientsCount: number;
-  respondedCount: number;
-  totalCount: number;
-  deadline: string;
-  status: "Pending" | "Completed" | "Overdue";
-}
-
-const initialTrackedEmails: EmailRow[] = [
-  {
-    id: 1,
-    subject: "Q4 Marketing Strategy Feedback",
-    recipientsCount: 5,
-    respondedCount: 3,
-    totalCount: 5,
-    deadline: "Due in 2 days",
-    status: "Pending",
-  },
-  {
-    id: 2,
-    subject: "Q2 Performance Report Approval",
-    recipientsCount: 5,
-    respondedCount: 3,
-    totalCount: 5,
-    deadline: "Overdue by 24h",
-    status: "Overdue",
-  },
-  {
-    id: 3,
-    subject: "Service Level Agreement Renewal",
-    recipientsCount: 7,
-    respondedCount: 7,
-    totalCount: 7,
-    deadline: "Completed Jun 21",
-    status: "Completed",
-  },
-  {
-    id: 4,
-    subject: "Strategic Marketing Proposal Review",
-    recipientsCount: 9,
-    respondedCount: 6,
-    totalCount: 9,
-    deadline: "Due in 5 days",
-    status: "Pending",
-  },
-  {
-    id: 5,
-    subject: "Vendor Workspace Security Compliance Audit",
-    recipientsCount: 8,
-    respondedCount: 4,
-    totalCount: 8,
-    deadline: "Due in 3 days",
-    status: "Pending",
-  },
-  {
-    id: 6,
-    subject: "Client Onboarding Checklist",
-    recipientsCount: 3,
-    respondedCount: 3,
-    totalCount: 3,
-    deadline: "Completed Jun 20",
-    status: "Completed",
-  },
-];
 
 const TrackedEmail = () => {
   const { triggerToast } = useToast();
@@ -108,11 +40,11 @@ const TrackedEmail = () => {
   const [newRecipientsCount, setNewRecipientsCount] = useState(5);
   const [newDeadline, setNewDeadline] = useState("Due in 3 Days");
 
-  // Row Detail mode status
-  const [activeDetailEmail, setActiveDetailEmail] =
-    useState<TrackedEmail | null>(null);
+  // Summary/Audit Log modal state
+  const [summaryEmail, setSummaryEmail] = useState<TrackedEmail | null>(null);
+  const [activeTab, setActiveTab] = useState<"overview" | "audit">("overview");
 
-  const handleSort = (field: keyof EmailRow) => {
+  const handleSort = (field: keyof TrackedEmail) => {
     if (sortField === field) {
       setSortOrder(sortOrder === "asc" ? "desc" : "asc");
     } else {
@@ -164,35 +96,7 @@ const TrackedEmail = () => {
       });
   }, [emails, searchTerm, statusFilter, deadlineFilter, sortField, sortOrder]);
 
-  const handleTrackedEmails = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newSubject.trim()) {
-      triggerToast("Please fill in all fields", "info");
-      return;
-    }
-
-    const newEmail: EmailRow = {
-      id: Date.now(),
-      subject: newSubject,
-      recipientsCount: Number(newRecipientsCount),
-      respondedCount: 0,
-      totalCount: Number(newRecipientsCount),
-      deadline: newDeadline,
-      status: "Pending",
-    };
-
-    setEmails([newEmail, ...emails]);
-    setIsTrackeModelOpen(false);
-
-    // Reset form
-    setNewSubject("");
-    setNewRecipientsCount(5);
-    setNewDeadline("Due in 3 days");
-
-    triggerToast(`Successfully tracking ${newSubject}`, "success");
-  };
-
-  const getStatusBadge = (status: EmailRow["status"]) => {
+  const getStatusBadge = (status: TrackedEmail["status"]) => {
     switch (status) {
       case "Completed":
         return (
@@ -343,6 +247,11 @@ const TrackedEmail = () => {
                 </tr>
               ) : (
                 filteredEmails.map((email) => {
+                  const total = email.recipients.length;
+                  const responded = email.recipients.filter(
+                    (r) => r.responded,
+                  ).length;
+
                   return (
                     <tr
                       key={email.id}
@@ -363,7 +272,7 @@ const TrackedEmail = () => {
                       {/* Column 2: Recipients */}
                       <td className="px-6 py-4.5 whitespace-nowrap">
                         <div className="font-sans text-xs text-[#777587] font-medium">
-                          {email.recipientsCount} recipients
+                          {responded}/{total} responded
                         </div>
                       </td>
 
@@ -382,11 +291,14 @@ const TrackedEmail = () => {
                       {/* Column 5: Actions */}
                       <td className="px-6 py-4.5 whitespace-nowrap text-right">
                         <button
-                          onClick={() => setActiveDetailEmail(email)}
+                          onClick={() => {
+                            setSummaryEmail(email);
+                            setActiveTab("overview");
+                          }}
                           className="inline-flex items-center gap-1.5 font-sans text-xs font-bold text-[#3525cd] hover:text-[#3525cd]/80 bg-[#eff4ff] hover:bg-[#eff4ff]/80 px-3 py-1.5 rounded-lg border border-[#c7c4d8]/20 transition-all cursor-pointer"
                         >
                           <Eye size={12} />
-                          Details
+                          View Details
                         </button>
                       </td>
                     </tr>
@@ -419,7 +331,7 @@ const TrackedEmail = () => {
       </div>
 
       {/* MODAL 1: EMAIL DETAILS AND AUDIT LOG */}
-      {activeDetailEmail && (
+      {summaryEmail && (
         <div className="fixed inset-0 bg-[#0b1c30]/40 backdrop-blur-xs flex items-center justify-center z-50 p-4">
           <div className="bg-white border border-[#c7c4d8]/40 rounded-2xl shadow-xl w-full max-w-lg overflow-hidden text-left animate-in fade-in zoom-in-95 duration-150">
             {/* Header */}
