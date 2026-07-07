@@ -1,23 +1,28 @@
 import { useToast } from "@/context/ToastContext";
-import type {
+import {
   getTrackedEmails,
-  TrackedEmail,
+  type TrackedEmail,
 } from "..//data/mockTrackedEmails";
 import {
   AlertTriangle,
   ArrowUpDown,
+  Calendar,
   CheckCircle2,
+  ClipboardList,
   Clock,
   Eye,
+  History,
   Mail,
   Plus,
   Search,
   SlidersHorizontal,
+  SpaceIcon,
+  User,
   UserCheck,
   X,
 } from "lucide-react";
 import React, { useMemo, useState } from "react";
-import { Link } from "react-router";
+import { Link, type DiscoverBehavior } from "react-router";
 
 const TrackedEmail = () => {
   const { triggerToast } = useToast();
@@ -143,7 +148,6 @@ const TrackedEmail = () => {
           Track Email
         </button>
       </div>
-
       {/* Tool bar area */}
       <div className="bg-white border border-[#c7c4d8]/30 rounded-2xl p-4 mb-6 shadow-xs flex flex-col md:flex-row gap-4 items-center justify-between">
         {/* Search Input */}
@@ -191,7 +195,6 @@ const TrackedEmail = () => {
           </div>
         </div>
       </div>
-
       {/* main table card */}
       <div className="bg-white border border-[#c7c4d8]/30 rounded-2xl shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
@@ -330,158 +333,187 @@ const TrackedEmail = () => {
         </div>
       </div>
 
-      {/* MODAL 1: EMAIL DETAILS AND AUDIT LOG */}
+      {/* Summary Log */}
       {summaryEmail && (
-        <div className="fixed inset-0 bg-[#0b1c30]/40 backdrop-blur-xs flex items-center justify-center z-50 p-4">
-          <div className="bg-white border border-[#c7c4d8]/40 rounded-2xl shadow-xl w-full max-w-lg overflow-hidden text-left animate-in fade-in zoom-in-95 duration-150">
+        <div className="fixed inset-0 bg-[#0b1c30]/40 backdrop-blur-xs flex  items-center justify-center z-50 p-4">
+          <div className="bg-white border border-[#c7c4d8]/40 rounded-2xl shadow-xl max-w-2xl w-full overflow-hidden text-left animat-in fade-in zoom-in-95 duration-150 flex flex-col max-h-[85vh]">
             {/* Header */}
-            <div className="px-6 py-4.5 border border-[#c7c4d8]/10 flex items-center justify-between ">
-              <div className="flex items-center gap-2">
-                <div className="p-1 bg-[#eff4ff] text-[#3525cd] rounded-lg">
-                  <Mail size={14} />
-                </div>
-                <h3 className="font-sans text-sm font-bold text-[#0b1c30]">
-                  Tracking Summary
+            <div className="px-6 py-4.5 border-b border-[#c7c4d8]/10 flex items-center justify-between bg-slate-50/50">
+              <div>
+                <span className="text-[9px] font-extrabold text-[#777587 uppercase tracking-wider font-mono">
+                  Email Tracking Summary
+                </span>
+                <h3 className="font-sans text-base font-black text-[#0b1c30] line-clamp-1 mt-0.5">
+                  {summaryEmail.subject}
                 </h3>
               </div>
               <button
-                onClick={() => setActiveDetailEmail(null)}
-                className="text-[#777587] hover:text-[#0b1c30] p-1 rounded-full hover:bg-slate-100 transition-all"
+                onClick={() => setSummaryEmail(null)}
+                className="text-[#777587] hover:text-[#0b1c30] p-1.5 rounded-full hover:bg-slate-100 transition-all cursor-pointer"
               >
-                <X size={16} />
+                <X />
               </button>
             </div>
 
-            {/* Details Content */}
-            <div className="p-6 space-y-6">
-              <div>
-                <span className="text-[10px] font-extrabold text-[#777587] uppercase tracking-wider block mb-1">
-                  Subject Line
-                </span>{" "}
-                <p className="font-sans text-sm font-bold text-[#0b1c30]">
-                  {activeDetailEmail.subject}
-                </p>
-              </div>
+            {/* Tabs */}
+            <div className="flex bg-[#f8f9ff] border-b border-[#c7c4d8]/20 px-6">
+              <button
+                onClick={() => setActiveTab("overview")}
+                className={`flex items-center gap-2 py-3 px-4 text-xs font-bold font-sans border-b-2 transition-all cursor-pointer ${activeTab === "overview" ? "border-[#3525cd] text-[#3525cd]" : "border-transparent text-[#777587] hover:text-[#0b1c30]"}`}
+              >
+                <ClipboardList size={14} />
+                Overview & Recipients
+              </button>
+              <button
+                onClick={() => setActiveTab("audit")}
+                className={`flex items-center gap-2 py-3 px-4 text-xs  font-bold font-sans border-b-2 transition-all cursor-pointer ${activeTab === "audit" ? "border-[#3525cd] text-[#3525cd]" : "border-transparent text-[#777587] hover:text-[#0b1c30]"}`}
+              >
+                <History size={14} />
+                Audit Logs
+              </button>
+            </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <span className="text-[10px] font-extrabold text-[#777587] uppercase tracking-wider block mb-1">
-                    Sender Info
-                  </span>
-                  <p className="font-sans text-xs text-[#464555] font-medium">
-                    You (fuya241@gmail.com)
-                  </p>
-                </div>
-                <div>
-                  <span className="text-[10px] font-extrabold text-[#777587] uppercase tracking-wider block mb-1">
-                    Current Deadline
-                  </span>
-                  <p className="font-sans text-xs text-[#0b1c30] font-bold">
-                    {activeDetailEmail.deadline}
-                  </p>
-                </div>
-              </div>
-
-              {/* Response Status Grid */}
-              <div className="bg-slate-50/70 border border-[#c7c4d8]/20 rounded-xl p-4 grid grid-cols-3 gap-2 text-center">
-                <div className="space-y-0.5">
-                  <span className="text-[10px] font-extrabold text-[#777587] uppercase tracking-wider block">
-                    Total Sent
-                  </span>
-                  <p className="text-lg font-black text-[#0b1c30] font-sans">
-                    {activeDetailEmail.totalCount}
-                  </p>
-                </div>
-                <div className="space-y-0.5 border-x border-[#c7c4d8]/15">
-                  <span className="text-[10px] font-extrabold text-emerald-700 uppercase tracking-wider block">
-                    Responded
-                  </span>
-                  <p className="text-lg font-black text-emerald-700 font-sans">
-                    {activeDetailEmail.recipientsCount}
-                  </p>
-                </div>
-                <div className="space-y-0.5">
-                  <span className="text-[10px] font-extrabold text-amber-700 uppercase tracking-wider block">
-                    Pending
-                  </span>
-                  <p className="text-lg font-black text-amber-700 font-sans">
-                    {activeDetailEmail.recipientsCount -
-                      activeDetailEmail.respondedCount}
-                  </p>
-                </div>
-              </div>
-
-              {/* Progress Detail */}
-              <div className="space-y-2">
-                <div className="flex justify-between text-xs font-sans">
-                  <span className="font-bold text-[#0b1c30]">
-                    Overall Response Rate
-                  </span>
-                  <span className="font-bold text-[#3525cd]">
-                    {Math.round(
-                      (activeDetailEmail.respondedCount /
-                        activeDetailEmail.totalCount) *
-                        100,
-                    )}
-                    %
-                  </span>
-                </div>
-                <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-[#3525cd] rounded-full"
-                    style={{
-                      width: `${
-                        (activeDetailEmail.respondedCount /
-                          activeDetailEmail.totalCount) *
-                        100
-                      }%`,
-                    }}
-                  />
-                </div>
-              </div>
-
-              {/* Recipients CheckLists */}
-              <div>
-                <span className="text-[10px] font-extrabold text-[#777587] uppercase tracking-wider block">
-                  Recipients Response Matrix
-                </span>
-                <div className="max-h-32 overflow-y-auto space-y-2 pr-1 scrollbar-none">
-                  {Array.from({ length: activeDetailEmail.totalCount }).map(
-                    (_, index) => {
-                      const isResponded =
-                        index < activeDetailEmail.respondedCount;
-                      return (
-                        <div className="flex items-center justify-between p-2 rounded-lg bg-[#f8f9ff] border border-[#c7c4d8]/10 text-xs font-sans">
-                          <span className="font-medium text-[#464555]">
-                            recipient-{index + 1}@organization.com
+            {/* Scrollbar content area */}
+            <div className="flex-1 overflow-y-auto p-6 space-y-6 custom-scrollbar">
+              {activeTab === "overview" ? (
+                <>
+                  {/* Summary Grid */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="bg-[#f8f9ff] border-[#c7c4d8]/20  rounded-xl p-4 space-y-3">
+                      <div>
+                        <span className="block text-[10px] font-bold text-[#777587] uppercase tracking-wider">
+                          Sender Info
+                        </span>
+                        <div className="flex items-center gap-2 mt-1">
+                          <div className="p-1.5 bg-[#eff4ff] text-[#3525cd] rounded-lg">
+                            <User size={13} />
+                          </div>
+                          <span className="text-xs font-bold text-[#0b1c30]">
+                            You (fuya241@gmail.com)
                           </span>
-                          {isResponded ? (
-                            <span className="flex items-center gap-1 font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-100 text-[10px]">
-                              <UserCheck size={11} /> Responded
+                        </div>
+                      </div>
+
+                      <div>
+                        <span className="block text-[10px] font-bold text-[#777587] uppercase tracking-wider">
+                          Tracking Initiated
+                        </span>
+                        <div className="flex items-center gap-2 mt-1">
+                          <div className="p-1.5 bg-[#eff4ff] text-[#3525cd] rounded-lg">
+                            <Calendar size={13} />
+                          </div>
+                          <span className="text-xs font-semibold text-[#464555]">
+                            {summaryEmail.sentDate}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="bg-[#f8f9ff] border border-[#c7c4d8]/20 rounded-xl p-4 space-y-3">
+                      <div>
+                        <span className="block text-[10px] font-bold text-[#777587] uppercase tracking-wider">
+                          Deadline
+                        </span>
+                        <div className="flex items-center gap-2 mt-1">
+                          <div className="p-1.5 bg-amber-50 text-amber-600  rounded-lg">
+                            <Clock size={13} />
+                          </div>
+                          <span className="text-xs font-extrabold text-amber-700">
+                            {summaryEmail.deadline}
+                          </span>
+                        </div>
+                      </div>
+                      <div>
+                        <span className="block text-[10px] font-bold text-[#777587] uppercase tracking-wider">
+                          Overall Status
+                        </span>
+                        <div className="mt-1">
+                          {summaryEmail.status === "Completed" ? (
+                            <span className="inlin-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-[#e8f5e9] text-[#2e7d32] border border-[#c8e6c9]">
+                              Completed
+                            </span>
+                          ) : summaryEmail.status === "Overdue" ? (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-[#ffebee] text-[#c62828] border border-[#ffcdd2]">
+                              Overdue
                             </span>
                           ) : (
-                            <span className="flex items-center gap-1 font-semibold text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-100 text-[10px]">
-                              <Clock size={11} />
-                              Awaiting
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-[#eff4ff] text-[#3525cd] border border-[#c7c4d8]/30">
+                              Pending
                             </span>
                           )}
                         </div>
-                      );
-                    },
-                  )}
-                </div>
-              </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Response Progress Grid */}
+                  <div className="border border-[#c7c4d8]/20 rounded-xl p-4 space-y-3 bg-white shadow-xs">
+                    <div className="flex justify-between items-center text-xs">
+                      <span className="font-bold text-[#464555]">
+                        Response Progress
+                      </span>
+                      <span className="font-mono font-black text-[#3525cd] text-sm">
+                        {summaryEmail.recipients.length > 0
+                          ? Math.round(
+                              (summaryEmail.recipients.filter(
+                                (r) => r.responded,
+                              ).length /
+                                summaryEmail.recipients.length) *
+                                100,
+                            )
+                          : 0}
+                        %
+                      </span>
+                    </div>
+                    <div className="w-full bg-[#f1f0f7] h-2.5 rounded-full overflow-hidden">
+                      <div
+                        className="bg-[#3525cd] h-full rounded-full transition-all duration-500"
+                        style={{
+                          width: `${
+                            summaryEmail.recipients.length > 0
+                              ? Math.round(
+                                  (summaryEmail.recipients.filter(
+                                    (r) => r.responded,
+                                  ).length /
+                                    summaryEmail.recipients.length) *
+                                    100,
+                                )
+                              : 0
+                          }%`,
+                        }}
+                      />
+                    </div>
+                    <div className="flex justify-between text-[11px] text-[#777587] font-semibold font-sans pt-1">
+                      <span className="">
+                        {
+                          summaryEmail.recipients.filter((r) => r.responded)
+                            .length
+                        }{" "}
+                        Responded
+                      </span>
+                      <span>
+                        {
+                          summaryEmail.recipients.filter((r) => !r.responded)
+                            .length
+                        }{" "}
+                        Awaiting
+                      </span>
+                      <span>
+                        {summaryEmail.recipients.length} Total Recipients
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Recipient Response Matrix */}
+                  <div></div>
+                </>
+              ) : (
+                <div>summary2</div>
+              )}
             </div>
 
-            {/* {Close Summary} */}
-            <div className="px-6 py-4.5 bg-[#f8f9ff]/50 border-t border-[#c7c4d8]/10 flex justify-end">
-              <button
-                className="bg-[#3525cd] text-white hover:bg-[#3525cd]/95 px-5 py-2 rounded-xl text-xs font-bold font-sans cursor-pointer transition-all"
-                onClick={() => setActiveDetailEmail(null)}
-              >
-                Close Summary
-              </button>
-            </div>
+            {/* Modal Footer */}
+            <div>Modal Footer</div>
           </div>
         </div>
       )}
