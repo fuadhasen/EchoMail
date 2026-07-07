@@ -552,11 +552,11 @@ const TrackedEmail = () => {
                     <h4 className="font-sans text-[11px] font-extrabold text-[#777587] uppercase tracking-wider">
                       System $ Action History Logs
                     </h4>
-                    <span>
+                    <span className="text-[10px] font-mono text-[#777587]">
                       {summaryEmail.activityLogs.length} events logged
                     </span>
                   </div>
-                  <div>
+                  <div className="relative border border-[#c7c4d8]/30 ml-3 pl-5 space-y-6">
                     {summaryEmail.activityLogs.map((log) => {
                       let actionTitle = "System Action";
                       let repName = "";
@@ -604,10 +604,10 @@ const TrackedEmail = () => {
                       }
 
                       return (
-                        <div key={log.id}>
+                        <div key={log.id} className="relative text-xs">
                           {/* circle timeline pin indicator */}
-                          <div>
-                            <span />
+                          <div className="absolute -left-6.5 top-1.5 w-3.5 h-3.5 rounded-full bg-white border-2 border-[#3525cd] z-10 flex items-center justify-center">
+                            <span className="w-1 h-1 bg-[#3525cd] rounded-full" />
                           </div>
                           <div>
                             <div></div>
