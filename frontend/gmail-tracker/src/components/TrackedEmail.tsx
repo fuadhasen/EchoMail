@@ -7,6 +7,7 @@ import {
   AlertTriangle,
   ArrowUpDown,
   Calendar,
+  CheckCircle,
   CheckCircle2,
   ClipboardList,
   Clock,
@@ -374,7 +375,7 @@ const TrackedEmail = () => {
             </div>
 
             {/* Scrollbar content area */}
-            <div className="flex-1 overflow-y-auto p-6 space-y-6 custom-scrollbar">
+            <div className="flex-1 overflow-y-auto p-6 space-y-6 custom-scrollbar scrollbar-none">
               {activeTab === "overview" ? (
                 <>
                   {/* Summary Grid */}
@@ -505,10 +506,120 @@ const TrackedEmail = () => {
                   </div>
 
                   {/* Recipient Response Matrix */}
-                  <div></div>
+                  <div className="space-y-3">
+                    <h4 className="font-sans text-[11px] font-extrabold text-[#777587] uppercase tracking-wider">
+                      Recipient Status Matrix
+                    </h4>
+                    <div className="border border-[#c7c4d8]/20 rounded-xl overflow-hidden divide-y divide-[#c7c4d8]/15 shadow-xs">
+                      {summaryEmail.recipients.map((recipient) => (
+                        <div className="p-3.5 flex items-center justify-between hover:bg-slate-50/20 transition-all text-shadow-xs">
+                          <div className="space-y-0.5">
+                            <p className="font-sans font-bold text-[#0b1c30]">
+                              {recipient.name}
+                            </p>
+                            <p className="font-mono text-[10px] text-[#777587]">
+                              {recipient.email}
+                            </p>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <span className="font-sans text-[10px] text-[#777587] font-medium bg-slate-100 px-2 py-0.5 rounded-md">
+                              Reminders: {recipient.remindersSent}
+                            </span>
+                            {recipient.responded ? (
+                              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold bg-[#e8f5e9] text-[#2e7d32] border border-[#c8e6c9]">
+                                <CheckCircle
+                                  size={11}
+                                  className="stroke-[2.5]"
+                                />
+                                Responded
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-150">
+                                <Clock size={11} className="stroke-[2.5]" />
+                                Awaiting Response
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 </>
               ) : (
-                <div>summary2</div>
+                // Audit log section
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between border-b border-[#c7c4d8]/15 pb-2">
+                    <h4 className="font-sans text-[11px] font-extrabold text-[#777587] uppercase tracking-wider">
+                      System $ Action History Logs
+                    </h4>
+                    <span>
+                      {summaryEmail.activityLogs.length} events logged
+                    </span>
+                  </div>
+                  <div>
+                    {summaryEmail.activityLogs.map((log) => {
+                      let actionTitle = "System Action";
+                      let repName = "";
+                      let badgeStyle =
+                        "bg-slate-50 text-slate-700 border-slate-200";
+
+                      if (log.type === "sent") {
+                        actionTitle = "Email Tracking Started";
+                        badgeStyle =
+                          "bg-[#eff4ff] text-[#3525cd] border-[#3525cd]/15";
+                      } else if (log.type === "reply") {
+                        actionTitle = "Recipient Response Logged";
+                        badgeStyle =
+                          "bg-[#e8f5e9] text-[#2e7d32] border-[#c8e6c9]";
+
+                        const matched = summaryEmail.recipients.find(
+                          (r) =>
+                            log.description.includes(r.name) ||
+                            log.description
+                              .toLowerCase()
+                              .includes(r.email.toLowerCase()),
+                        );
+                        if (matched) {
+                          repName = matched.name;
+                        } else {
+                          const match =
+                            log.description.match(/from\s+([^(\n\r]+)/i);
+                          if (match && match[1]) repName = match[1].trim();
+                        }
+                      } else if (log.type === "reminder") {
+                        actionTitle = "Reminder Notification Sent";
+                        badgeStyle =
+                          "bg-amber-50 text-amber-700 border-amber-200";
+
+                        const matched = summaryEmail.recipients.find((r) =>
+                          log.description.includes(r.name),
+                        );
+                        if (matched) {
+                          repName = matched.name;
+                        }
+                      } else if (log.type === "status_change") {
+                        actionTitle = "Overall Status Updated";
+                        badgeStyle =
+                          "bg-slate-100 text-slate-700 border-slate-300";
+                      }
+
+                      return (
+                        <div key={log.id}>
+                          {/* circle timeline pin indicator */}
+                          <div>
+                            <span />
+                          </div>
+                          <div>
+                            <div></div>
+                            <p>{log.description}</p>
+
+                            {repName && <div></div>}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
               )}
             </div>
 
