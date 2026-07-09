@@ -25,7 +25,7 @@ import {
 import React, { useMemo, useState } from "react";
 import { Link, type DiscoverBehavior } from "react-router";
 
-const TrackedEmail = () => {
+const TrackedEmails = () => {
   const { triggerToast } = useToast();
   const [emails, setEmails] = useState<TrackedEmail[]>(() =>
     getTrackedEmails(),
@@ -665,4 +665,4 @@ const TrackedEmail = () => {
   );
 };
 
-export default TrackedEmail;
+export default TrackedEmails;

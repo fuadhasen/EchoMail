@@ -20,6 +20,7 @@ const SideBar = ({ activeItem = "Dashboared", onNavigate }: SideBarProps) => {
   const navItems = [
     { name: "Dashboard", icon: Grid, path: "/" },
     { name: "Tracked Emails", icon: Mail, path: "/tracked" },
+    { name: "SentEmails", icon: Mail, path: "/sent_emails" },
     { name: "Analytics", icon: BarChart3, path: "/analytics" },
     { name: "Settings", icon: Settings, path: "/settings" },
   ];

@@ -1,16 +1,13 @@
-import React from "react";
 import { Route, Routes } from "react-router";
 import Analytics from "./components/Analytics";
 import EmailDetail from "./components/EmailDetail";
-import LoginWithHandler from "./components/login";
-import Recipients from "./components/Recipients";
-import Reminders from "./components/Reminders";
-import SentEmail from "./components/SentEmail";
-import TrackedEmail from "./components/TrackedEmail";
-import TrackNew from "./components/TrackNew";
-import Layout from "./components/Layout";
-import Settings from "./components/Settings";
 import Home from "./components/Home";
+import Layout from "./components/Layout";
+import LoginWithHandler from "./components/login";
+import SentEmail from "./components/SentEmail";
+import Settings from "./components/Settings";
+import TrackedEmails from "./components/TrackedEmail";
+import TrackNew from "./components/TrackNew";
 
 const App = () => {
   return (
@@ -19,7 +16,7 @@ const App = () => {
       <Route path="/" element={<Layout />}>
         <Route index element={<Home />} />
         <Route path="tracked/detail/:id" element={<EmailDetail />} />
-        <Route path="tracked" element={<TrackedEmail />} />
+        <Route path="tracked" element={<TrackedEmails />} />
         <Route path="sent_emails" element={<SentEmail />} />
         <Route path="track_new" element={<TrackNew />} />
         <Route path="settings" element={<Settings />} />
