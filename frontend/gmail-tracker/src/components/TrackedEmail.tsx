@@ -609,11 +609,31 @@ const TrackedEmail = () => {
                           <div className="absolute -left-6.5 top-1.5 w-3.5 h-3.5 rounded-full bg-white border-2 border-[#3525cd] z-10 flex items-center justify-center">
                             <span className="w-1 h-1 bg-[#3525cd] rounded-full" />
                           </div>
-                          <div>
-                            <div></div>
-                            <p>{log.description}</p>
+                          <div className="bg-[#f8f9ff]/50 border border-[#c7c4d8]/15 rounded-xl p-4.5 space-y-2">
+                            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#c7c4d8]/10 pb-1.5">
+                              <span
+                                className={`px-2 py-0.5 rounded text-[9px] font-extrabold uppercase tracking-wider font-mono border ${badgeStyle}`}
+                              >
+                                {actionTitle}
+                              </span>
+                              <span className="text-[9px] text-[#777587] font-semibold whitespace-nowrap">
+                                {log.timestamp}
+                              </span>
+                            </div>
+                            <p className="font-sans text-[#464555] font-medium leading-relaxed pt-0.5">
+                              {log.description}
+                            </p>
 
-                            {repName && <div></div>}
+                            {repName && (
+                              <div className="flex items-center gap-1.5 pt-1">
+                                <span className="text-[10px] text-[#777587]  font-bold">
+                                  Recipient:
+                                </span>
+                                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-white border border-[#c7c4d8]/20  rounded text-[10px] font-semibold text-[#0b1c30]">
+                                  <User size={10} /> {repName}
+                                </span>
+                              </div>
+                            )}
                           </div>
                         </div>
                       );
@@ -624,7 +644,20 @@ const TrackedEmail = () => {
             </div>
 
             {/* Modal Footer */}
-            <div>Modal Footer</div>
+            <div className="px-6 py-4.5 border-t  border-[#c7c4d8]/10 flex items-center justify-between bg-slate-50/50">
+              <Link
+                to={`tracked/detail/${summaryEmail.id}`}
+                className="inline-flex items-center gap-1.5 text-xs font-bold text-[#3525cd] hover:underline cursor-pointer"
+              >
+                Go to Full Email Details Page →
+              </Link>
+              <button
+                onClick={() => setSummaryEmail(null)}
+                className="bg-[#0b1c30] hover:bg-[#0b1c30]/90 text-white px-4 py-2 rounded-xl text-xs font-bold font-sans cursor-pointer transition-all"
+              >
+                Close Summary
+              </button>
+            </div>
           </div>
         </div>
       )}
