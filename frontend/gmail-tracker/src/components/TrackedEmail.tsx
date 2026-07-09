@@ -1,9 +1,5 @@
 import { useToast } from "@/context/ToastContext";
 import {
-  getTrackedEmails,
-  type TrackedEmail,
-} from "..//data/mockTrackedEmails";
-import {
   AlertTriangle,
   ArrowUpDown,
   Calendar,
@@ -17,13 +13,15 @@ import {
   Plus,
   Search,
   SlidersHorizontal,
-  SpaceIcon,
   User,
-  UserCheck,
   X,
 } from "lucide-react";
-import React, { useMemo, useState } from "react";
-import { Link, type DiscoverBehavior } from "react-router";
+import { useMemo, useState } from "react";
+import { Link } from "react-router";
+import {
+  getTrackedEmails,
+  type TrackedEmail,
+} from "..//data/mockTrackedEmails";
 
 const TrackedEmails = () => {
   const { triggerToast } = useToast();
