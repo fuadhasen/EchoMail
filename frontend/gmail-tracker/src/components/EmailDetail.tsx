@@ -13,8 +13,10 @@ import {
   Check,
   CheckCircle2,
   Clock,
+  Divide,
   RefreshCcw,
   Send,
+  User,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router";
@@ -301,7 +303,38 @@ const EmailDetail = () => {
           </div>
 
           {/* recipient section */}
-          <div>recipient section</div>
+          <div className="space-y-4 text-left">
+            <h3 className="font-sans text-sm font-bold text-[#0b1c30 tracking-tight">
+              Recipient Matrix
+            </h3>
+            {/* Awaiting Response */}
+            <div>
+              <div>
+                <span>Awaiting Response ({pendingRecipients.length})</span>
+                <span>Requires Attention</span>
+              </div>
+
+              {pendingRecipients.length === 0 ? (
+                <div>All Recipients have responded! No actions pending</div>
+              ) : (
+                <div>
+                  {pendingRecipients.map((recipient) => (
+                    <div key={recipient.email}>
+                      <div>
+                        <div>
+                          <User />
+                        </div>
+                      </div>
+                      <div></div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* already responded */}
+            <div>already responded</div>
+          </div>
         </div>
 
         {/* Right side   */}
