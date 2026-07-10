@@ -104,7 +104,7 @@ const EmailDetail = () => {
   const handleSendIndividualReminder = (recipientEmail: string) => {
     const updatedRecipients = email.recipients.map((r) => {
       if (r.email === recipientEmail) {
-        return { ...r, reminderSent: r.remindersSent + 1 };
+        return { ...r, remindersSent: r.remindersSent + 1 };
       }
       return r;
     });
@@ -308,24 +308,68 @@ const EmailDetail = () => {
               Recipient Matrix
             </h3>
             {/* Awaiting Response */}
-            <div>
-              <div>
-                <span>Awaiting Response ({pendingRecipients.length})</span>
-                <span>Requires Attention</span>
+            <div className="bg-white border border-[#c7c4d8]/30 rounded-2xl overflow-hidden shadow-xs">
+              <div className="px-5 py-3.5 bg-slate-50 border border-[#c7c4d8]/20 flex items-center justify-between">
+                <span className="font-sans text-xs font-bold text-[#0b1c30]">
+                  Awaiting Response ({pendingRecipients.length})
+                </span>
+                <span className="text-[10px] font-extrabold text-amber-700 uppercase tracking-wider font-mono bg-amber-50 border border-amber-200 px-2 py-0.5 rounded">
+                  Requires Attention
+                </span>
               </div>
 
               {pendingRecipients.length === 0 ? (
-                <div>All Recipients have responded! No actions pending</div>
+                <div className="p-8 text-center text-[#777587] font-sans text-xs">
+                  All Recipients have responded! No actions pending
+                </div>
               ) : (
-                <div>
+                <div className="divide-y divide-[#c7c4d8]/15">
                   {pendingRecipients.map((recipient) => (
-                    <div key={recipient.email}>
-                      <div>
-                        <div>
-                          <User />
+                    <div
+                      key={recipient.email}
+                      className="p-5 flex flex-col md:flex-row md:items-center md:justify-between gap-4 hover:bg-slate-50/20 transition-all"
+                    >
+                      <div className="flex items-start gap-3">
+                        <div className="p-2 bg-amber-50 text-amber-600 rounded-xl shrink-0 mt-0.5">
+                          <User size={15} />
+                        </div>
+                        <div className="space-y-0.5">
+                          <p className="font-sans text-xs font-bold text-[#0b1c30]">
+                            {recipient.name}
+                          </p>
+                          <p className="font-mono text-[10px] text-[#777587">
+                            {recipient.email}
+                          </p>
                         </div>
                       </div>
-                      <div></div>
+
+                      <div className="flex flex-wrap items-center gap-x-6 gap-y-2 md:justify-end">
+                        <div className="text-xs">
+                          <span className="text-[#777587]">Reminders: </span>
+                          <strong className="text-amber-700 font-bold">
+                            {recipient.remindersSent}
+                          </strong>
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() =>
+                              handleSendIndividualReminder(recipient.email)
+                            }
+                            className="bg-[#3525cd] text-white hover:bg-[#3525cd]/95 text-[11px] font-bold py-1.5 px-3 rounded-lg transition-all cursor-pointer font-sans whitespace-nowrap"
+                          >
+                            Send Reminder
+                          </button>
+                          <button
+                            onClick={() =>
+                              handleToggleRecipientResponded(recipient.email)
+                            }
+                            className="bg-white border border-[#c7c4d8]/30 hover:bg-[#f8f9ff] text-[#464555] text-[11px] font-bold py-1.5 px-3 rounded-lg transition-all cursor-pointer font-sans whitespace-nowrap"
+                          >
+                            Log Response
+                          </button>
+                        </div>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -333,7 +377,57 @@ const EmailDetail = () => {
             </div>
 
             {/* already responded */}
-            <div>already responded</div>
+            {respondedRecipients.length > 0 && (
+              <div className="bg-white border border-[#c7c4d8]/30 rounded-2xl overflow-hidden shadow-xs">
+                <div className="px-5 py-3.5 bg-slate-50 border-b border-[#c7c4d8]/20 flex items-center justify-between">
+                  <span className="font-sans text-xs font-bold text-[#777587] ">
+                    Responded ({respondedRecipients.length})
+                  </span>
+                  <span className="text-[10px] font-extrabold text-emerald-700 uppercase tracking-wider font-mono bg-emerald-50 border border-emerald-100 px-2 py-0.5 rounded">
+                    Loop Closed
+                  </span>
+                </div>
+
+                <div className="divide-y divide-[#c7c4d8]/15 bg-white">
+                  {respondedRecipients.map((recipient) => (
+                    <div
+                      key={recipient.email}
+                      className="p-5 flex flex-col md:flex-row md:items-center md:justify-between gap-4 hover:bg-slate-50/20 transition-all opacity-85"
+                    >
+                      <div className="flex items-start gap-3">
+                        <div className="p-2 bg-emerald-50 text-emerald-600 rounded-xl shrink-0 mt-0.5">
+                          <Check size={14} className="stroke-2.5" />
+                        </div>
+                        <div className="space-y-0.5">
+                          <p className="font-sans text-xs font-bold text-[#777587] line-through">
+                            {recipient.name}
+                          </p>
+                          <p className="font-mono text-[10px] text-[#777587]">
+                            {recipient.email}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="flex flex-wrap items-center gap-x-6 gap-y-2 md:justify-end">
+                        {recipient.respondedAt && (
+                          <p className="font-sans text-xs text-emerald-600 font-semibold">
+                            Responded on {recipient.respondedAt}
+                          </p>
+                        )}
+                        <button
+                          onClick={() =>
+                            handleToggleRecipientResponded(recipient.email)
+                          }
+                          className="bg-white border border-[#c7c4d8]/30 hover:bg-[#ffebee] text-red-600 hover:text-red-700 hover:border-red-200 text-[11px] font-bold py-1.5 px-3 rounded-lg transition-all cursor-pointer font-sans whitespace-nowrap"
+                        >
+                          Undo Response
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
