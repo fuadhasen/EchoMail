@@ -12,6 +12,7 @@ import {
   ArrowLeft,
   Check,
   CheckCircle2,
+  Circle,
   Clock,
   Divide,
   RefreshCcw,
@@ -431,8 +432,47 @@ const EmailDetail = () => {
           </div>
         </div>
 
-        {/* Right side   */}
-        <div>right side will be putted here</div>
+        {/* Right side: Visual metrics and activity history */}
+        <div className="col-span-12 lg:col-span-4 xl:col-span-3 space-y-8 text-left">
+          <div className="bg-white border border-[#c7c4d8]/30 rounded-2xl p-6 shadow-xs">
+            <h4 className="font-sans text-xs font-extrabold text-[#777587] uppercase tracking-wider mb-4">
+              Progress Metrics
+            </h4>
+
+            {/* Circular progress bar */}
+            <div className="flex flex-col items-center justify-center py-4 text-center">
+              <div>
+                <svg>
+                  <Circle
+                    cx="64"
+                    cy="64"
+                    r="54"
+                    className="stroke-[#f1f0f7]"
+                    strokeWidth="8"
+                    fill="transparent"
+                  />
+                  <Circle
+                    cx="64"
+                    cy="64"
+                    r="54"
+                    className="stroke-[#3525cd] transition-all duration-500 ease-out"
+                    strokeWidth="8"
+                    fill="transparent"
+                    strokeDasharray={2 * Math.PI * 54}
+                    strokeDashoffset={
+                      2 * Math.PI * 54 * (1 - completionPercentage / 100)
+                    }
+                    strokeLinecap="round"
+                  />
+                </svg>
+                <div>complete</div>
+              </div>
+              <div>Awaiting responses</div>
+            </div>
+          </div>
+
+          <div>ACTIVITY TIMELINE</div>
+        </div>
       </div>
     </div>
   );
