@@ -644,7 +644,7 @@ const TrackedEmails = () => {
             {/* Modal Footer */}
             <div className="px-6 py-4.5 border-t  border-[#c7c4d8]/10 flex items-center justify-between bg-slate-50/50">
               <Link
-                to={`tracked/detail/${summaryEmail.id}`}
+                to={`/tracked/detail/${summaryEmail.id}`}
                 className="inline-flex items-center gap-1.5 text-xs font-bold text-[#3525cd] hover:underline cursor-pointer"
               >
                 Go to Full Email Details Page →

@@ -58,12 +58,12 @@ const SideBar = ({ activeItem = "Dashboared", onNavigate }: SideBarProps) => {
           const isActive = active === item.name;
 
           return (
-            <button
-              key={item.name}
-              onClick={() => handlItemClick(item.name)}
-              className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl font-sans text-xs font-bold tracking-wide transiton-all duration-150 cursor-pointer ${isActive ? "bg-[#eff4ff] text-[#3525cd]" : "text-[#777587] hover:bg-slate-50 hover:text-[#0b1c30]"} `}
-            >
-              <Link to={item.path}>
+            <Link to={item.path}>
+              <button
+                key={item.name}
+                onClick={() => handlItemClick(item.name)}
+                className={`w-full group flex items-center justify-between px-3.5 py-2.5 rounded-xl font-sans text-xs font-bold tracking-wide transiton-all duration-150 cursor-pointer ${isActive ? "bg-[#eff4ff] text-[#3525cd]" : "text-[#777587] hover:bg-slate-50 hover:text-[#0b1c30]"} `}
+              >
                 <div className="flex items-center gap-3">
                   <Icon
                     size={16}
@@ -71,8 +71,8 @@ const SideBar = ({ activeItem = "Dashboared", onNavigate }: SideBarProps) => {
                   />
                   <span>{item.name}</span>
                 </div>
-              </Link>
-            </button>
+              </button>
+            </Link>
           );
         })}
       </nav>

@@ -4,9 +4,18 @@ import {
   updateTrackedEmail,
   type TrackedEmail,
 } from "@/data/mockTrackedEmails";
+import { Button } from "@radix-ui/themes";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-import { AlertTriangle, ArrowLeft, CheckCircle2, Clock } from "lucide-react";
+import {
+  AlertTriangle,
+  ArrowLeft,
+  Check,
+  CheckCircle2,
+  Clock,
+  RefreshCcw,
+  Send,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router";
 dayjs.extend(relativeTime);
@@ -55,7 +64,7 @@ const EmailDetail = () => {
       : 0;
 
   // Actions
-  const handleSendBuldReminder = () => {
+  const handleSendBulkReminder = () => {
     if (pendingRecipients.length == 0) {
       triggerToast("All recipients have already responded!", "info");
       return;
@@ -216,19 +225,88 @@ const EmailDetail = () => {
   };
 
   return (
-    <div className="bg-red-100">
+    <div className="w-full text-left px-4 md:px-6 lg:px-8">
       {/* Back link and navigation */}
-      <div>
-        <div>
-          <Link to={}>
-            <ArrowLeft />
-            Back to Tracked Emails
-          </Link>
-        </div>
+      <div className="mb-6">
+        <Link
+          to={"/tracked"}
+          className="inline-flex items-center gap-2 text-xs font-bold text-[#777587] hover:text-[#0b1c30] transition-colors font-sans cursor-pointer group"
+        >
+          <ArrowLeft
+            size={14}
+            className="group-hover:-translate-x-1 transition-transform"
+          />
+          Back to Tracked Emails
+        </Link>
       </div>
 
       {/* main grid layout */}
-      <div>main grid layout</div>
+      <div className="grid grid-cols-12 gap-6 lg:gap-8 items-start">
+        {/* Left side: Email Header and recipients */}
+        <div className="col-span-12 lg:col-span-8 xl:col-span-9 space-y-8">
+          {/* main email overview section */}
+          <div className="bg-white border border-[#c7c4d8]/30 rounded-2xl p-6 shadow-xs relative">
+            {/* subject line and status */}
+            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-6">
+              <div className="space-y-1.5">
+                <span className="text-[10px] font-extrabold text-[#777587] uppercase tracking-wider font-mono">
+                  Tracked Thread
+                </span>
+                <h2 className="font-sans text-2xl font-black text-[#0b1c30] tracking-tight leading-tight">
+                  {email.subject}
+                </h2>
+                <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-[#777587] font-medium pt-1">
+                  <span>
+                    Sent on <strong>{email.sentDate}</strong>
+                  </span>
+                  <span className="w-1.5 h-1.5 rounded-full hidden bg-[#c7c4d8]/50 sm:inline" />
+                  <span>
+                    Deadline{" "}
+                    <strong className="text-[#0b1c30]">{email.deadline}</strong>
+                  </span>
+                </div>
+              </div>
+              <div className="sm:text-right shrink-0">
+                {getStatusBadge(email.status)}
+              </div>
+            </div>
+
+            {/* quick action panel */}
+            <div className="pt-6 border-t border-[#c7c4d8]/15 flex flex-wrap gap-3 items-center">
+              <button
+                onClick={handleSendBulkReminder}
+                disabled={pendingRecipients.length == 0}
+                className="bg-[#3525cd] text-white hover:bg-[#3525cd]/95 disabled:bg-[#f1f0f7] disabled:text-[#777587] disabled:cursor-not-allowed py-2 px-4 rounded-xl font-sans text-xs font-bold tracking-wide flex items-center gap-2 shadow-xs transition-all active:scale-98 cursor-pointer"
+              >
+                <Send size={13} className="stroke-2" /> Send Follow-up Reminder
+              </button>
+
+              {email.status !== "Completed" ? (
+                <button
+                  onClick={() => handleOverallStatus("Completed")}
+                  className="bg-emrald-50 text-emerald-700 hover:bg-emerald-100/80 border border-emerald-200 py-2 px-4 rounded-xl font-sans text-xs font-bold tracking-wide flex items-center gap-1.5 transition-all cursor-pointer"
+                >
+                  <Check size={14} className="stroke-2.5" />
+                  Mark Completed
+                </button>
+              ) : (
+                <button
+                  onClick={() => handleOverallStatus("Pending")}
+                  className="bg-amber-50 text-amber-700 hover:bg-amber-100/80 border border-amber-200 py-2 px-4 rounded-xl font-sans text-xs font-bold tracking-wide flex items-center gap-1.5 transition-all cursor-pointer"
+                >
+                  <RefreshCcw size={12} className="stroke-2.5" /> Mark Awaiting
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* recipient section */}
+          <div>recipient section</div>
+        </div>
+
+        {/* Right side   */}
+        <div>right side will be putted here</div>
+      </div>
     </div>
   );
 };
