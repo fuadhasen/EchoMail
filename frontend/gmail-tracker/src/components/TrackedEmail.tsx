@@ -268,6 +268,8 @@ const TrackedEmails = () => {
                   const responded = email.recipients.filter(
                     (r) => r.responded,
                   ).length;
+                  const responsePercent =
+                    total > 0 ? Math.round((responded / total) * 100) : 0;
 
                   return (
                     <tr
@@ -293,12 +295,18 @@ const TrackedEmails = () => {
 
                       {/* Column 3: Recipients with dynamic progress bar */}
                       <td className="px-6 py-4.5 whitespace-nowrap">
-                        <div>
-                          <div className="font-sans text-xs text-[#777587] font-medium">
-                            {responded}/{total} responded
+                        <div className="space-y-1.5">
+                          <div className="font-sans text-xs text-[11px]  font-extrabold text-[#0b1c30]">
+                            {responded} / {total}
+                            <span className="text-[#777587] font-medium">
+                              ({responsePercent}%)
+                            </span>
                           </div>
                           <div className="w-28 bg-[#f1f0f7] h-1.5 rounded-full overflow-hidden">
-                            <div className="" />
+                            <div
+                              className="bg-[#3525cd] h-full rounded-full transition-all duration-300"
+                              style={{ width: `${responsePercent}%` }}
+                            />
                           </div>
                         </div>
                       </td>
