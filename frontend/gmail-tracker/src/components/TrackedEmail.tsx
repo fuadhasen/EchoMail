@@ -16,7 +16,7 @@ import {
   User,
   X,
 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router";
 import {
   getTrackedEmails,
@@ -43,6 +43,10 @@ const TrackedEmails = () => {
   const [newSubject, setNewSubject] = useState("");
   const [newRecipientsCount, setNewRecipientsCount] = useState(5);
   const [newDeadline, setNewDeadline] = useState("Due in 3 Days");
+
+  useEffect(() => {
+    setEmails(getTrackedEmails());
+  }, []);
 
   // Summary/Audit Log modal state
   const [summaryEmail, setSummaryEmail] = useState<TrackedEmail | null>(null);
@@ -211,8 +215,17 @@ const TrackedEmails = () => {
                     <ArrowUpDown size={12} className="opacity-70" />
                   </div>
                 </th>
+                <th
+                  onClick={() => handleSort("sentDate")}
+                  className="px-6 py-4 text-left font-sans text-[11px] font-bold text-[#777587] uppercase tracking-wider cursor-pointer select-none hover:text-[#0b1c30]"
+                >
+                  <div className="flex items-center gap-1.5">
+                    Sent Date
+                    <ArrowUpDown size={12} className="opacity-70" />
+                  </div>
+                </th>
                 <th className="px-6 py-4 text-left font-sans text-[11px] font-bold text-[#777587] uppercase tracking-wider">
-                  Recipients
+                  Recipient Response
                 </th>
                 <th
                   onClick={() => handleSort("deadline")}
@@ -273,26 +286,36 @@ const TrackedEmails = () => {
                         </Link>
                       </td>
 
-                      {/* Column 2: Recipients */}
+                      {/* Column 2: Sent Date */}
+                      <td className="px-6 py-4.5 whitespace-nowrap text-xs font-sans font-semibold text-[#777587]">
+                        {email.sentDate}
+                      </td>
+
+                      {/* Column 3: Recipients with dynamic progress bar */}
                       <td className="px-6 py-4.5 whitespace-nowrap">
-                        <div className="font-sans text-xs text-[#777587] font-medium">
-                          {responded}/{total} responded
+                        <div>
+                          <div className="font-sans text-xs text-[#777587] font-medium">
+                            {responded}/{total} responded
+                          </div>
+                          <div className="w-28 bg-[#f1f0f7] h-1.5 rounded-full overflow-hidden">
+                            <div className="" />
+                          </div>
                         </div>
                       </td>
 
-                      {/* Column 3: Deadlines */}
+                      {/* Column 4: Deadlines */}
                       <td className="px-6 py-4.5 whitespace-nowrap">
                         <div className="font-sans text-xs text-[#464555] font-semibold">
                           {email.deadline}
                         </div>
                       </td>
 
-                      {/* Column 4: Status Badge*/}
+                      {/* Column 5: Status Badge*/}
                       <td className="px-6 py-4.5 whitespace-nowrap">
                         {getStatusBadge(email.status)}
                       </td>
 
-                      {/* Column 5: Actions */}
+                      {/* Column 6: Actions */}
                       <td className="px-6 py-4.5 whitespace-nowrap text-right">
                         <button
                           onClick={() => {

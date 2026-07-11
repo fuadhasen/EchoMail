@@ -407,6 +407,99 @@ const defaultEmails: TrackedEmail[] = [
 
 const LOCAL_STORAGE_KEY = "echomail_tracked_emails";
 
+export interface SentEmail {
+  id: string;
+  subject: string;
+  sentDate: string;
+  preview: string;
+  recipients: { name: string; email: string }[];
+}
+
+const mockSentEmails: SentEmail[] = [
+  {
+    id: "sent-1",
+    subject: "Project Apollo Design Guidelines Update",
+    sentDate: "Jul 10, 2026, 4:32 PM",
+    preview:
+      "Hi everyone, I've attached the finalized design tokens and component specs for the new mobile viewports. Please let me know if you see any conflicts with...",
+    recipients: [
+      { email: "sarah.j@organization.com", name: "Sarah Jenkins" },
+      { email: "clara.t@organization.com", name: "Clara Tsai" },
+      { email: "david.k@organization.com", name: "David Kim" },
+      { email: "elena.r@organization.com", name: "Elena Rostova" },
+      { email: "mike.r@organization.com", name: "Mike Ross" },
+    ],
+  },
+  {
+    id: "sent-2",
+    subject: "Annual Budget Planning FY27",
+    sentDate: "Jul 09, 2026, 9:15 AM",
+    preview:
+      "Attached is the spreadsheet with current department expenditures and projected allocations. Please check your team's portion and respond by Monday.",
+    recipients: [
+      { email: "alex.m@organization.com", name: "Alex Mercer" },
+      { email: "fiona.g@organization.com", name: "Fiona Gallagher" },
+      { email: "stephen.s@organization.com", name: "Stephen Strange" },
+      { email: "marcus.h@organization.com", name: "Marcus Holloway" },
+    ],
+  },
+  {
+    id: "sent-3",
+    subject: "Weekly Operations Sync Agenda",
+    sentDate: "Jul 08, 2026, 11:00 AM",
+    preview:
+      "Please review the agenda items for tomorrow's meeting. We'll be focusing on client onboarding times, outstanding tickets, and resource constraints.",
+    recipients: [
+      { email: "clara.t@organization.com", name: "Clara Tsai" },
+      { email: "stephen.s@organization.com", name: "Stephen Strange" },
+      { email: "harvey.s@organization.com", name: "Harvey Specter" },
+    ],
+  },
+  {
+    id: "sent-4",
+    subject: "Feedback Wanted: New Dashboard Mockups",
+    sentDate: "Jul 07, 2026, 1:40 PM",
+    preview:
+      "Hey team, I put together three layout directions for our analytics panel. Please leave your comments on the Figma link below so we can start building.",
+    recipients: [
+      { email: "david.k@organization.com", name: "David Kim" },
+      { email: "lisa.m@organization.com", name: "Lisa Min" },
+      { email: "ken.t@organization.com", name: "Ken Tanaka" },
+      { email: "joey.t@organization.com", name: "Joey Tribbiani" },
+    ],
+  },
+  {
+    id: "sent-5",
+    subject: "Updated Client Contract & SLA",
+    sentDate: "Jul 06, 2026, 3:15 PM",
+    preview:
+      "I have implemented the modifications requested by their legal counsel. If there are no objections, I'll send it for signature tomorrow morning.",
+    recipients: [
+      { email: "legal.team@organization.com", name: "Legal Ops" },
+      { email: "harvey.s@organization.com", name: "Harvey Specter" },
+      { email: "mike.r@organization.com", name: "Mike Ross" },
+    ],
+  },
+  {
+    id: "sent-6",
+    subject: "Product Roadmap Sync Notes",
+    sentDate: "Jul 05, 2026, 10:05 AM",
+    preview:
+      "Thanks for attending the session today. Here is the summary of agreed-upon epics, milestones, and responsible team members for Q3/Q4 deliverables.",
+    recipients: [
+      { email: "sarah.j@organization.com", name: "Sarah Jenkins" },
+      { email: "david.c@organization.com", name: "David Cho" },
+      { email: "lisa.m@organization.com", name: "Lisa Min" },
+      { email: "ken.t@organization.com", name: "Ken Tanaka" },
+      { email: "bruce.b@organization.com", name: "Bruce Banner" },
+    ],
+  },
+];
+
+export function getSentEmails(): SentEmail[] {
+  return mockSentEmails;
+}
+
 export function getTrackedEmails(): TrackedEmail[] {
   const data = localStorage.getItem(LOCAL_STORAGE_KEY);
   if (!data) {
