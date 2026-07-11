@@ -50,14 +50,14 @@ const SideBar = ({ activeItem = "Dashboared", onNavigate }: SideBarProps) => {
         </div>
       </div>
 
-      {/* Primary Action Button */}
+      {/* Primary Action Button
       <button className="mb-6 w-full bg-[#3525cd] text-white hover:bg-[#3525cd]/95 px-4 py-3 rounded-xl font-sans text-xs font-bold tracking-wide flex items-center justify-center gap-2 cursor-pointer">
         <Plus
           size={16}
           className="stroke-[2.5] group-hover:scale-110 transition-transform"
         />
         Track New
-      </button>
+      </button> */}
 
       {/* Navigation Items */}
       <nav className="flex-1 space-y-1 overflow-y-auto custom-scrollbar pr-1 mt-1">
