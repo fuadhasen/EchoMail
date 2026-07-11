@@ -4,7 +4,6 @@ import {
   updateTrackedEmail,
   type TrackedEmail,
 } from "@/data/mockTrackedEmails";
-import { Button } from "@radix-ui/themes";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import {
@@ -12,12 +11,11 @@ import {
   ArrowLeft,
   Check,
   CheckCircle2,
-  Circle,
   Clock,
-  Divide,
   RefreshCcw,
   Send,
   User,
+  History,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router";
@@ -63,7 +61,7 @@ const EmailDetail = () => {
   const pendingRecipients = email.recipients.filter((r) => !r.responded);
   const completionPercentage =
     totalRecipients > 0
-      ? Math.round(respondedRecipients.length / totalRecipients) * 100
+      ? Math.round((respondedRecipients.length / totalRecipients) * 100)
       : 0;
 
   // Actions
@@ -441,9 +439,9 @@ const EmailDetail = () => {
 
             {/* Circular progress bar */}
             <div className="flex flex-col items-center justify-center py-4 text-center">
-              <div>
-                <svg>
-                  <Circle
+              <div className="relative w-32 h-32 flex items-center justify-center">
+                <svg className="w-full h-full transform -rotate-90">
+                  <circle
                     cx="64"
                     cy="64"
                     r="54"
@@ -451,7 +449,7 @@ const EmailDetail = () => {
                     strokeWidth="8"
                     fill="transparent"
                   />
-                  <Circle
+                  <circle
                     cx="64"
                     cy="64"
                     r="54"
@@ -465,13 +463,88 @@ const EmailDetail = () => {
                     strokeLinecap="round"
                   />
                 </svg>
-                <div>complete</div>
+                <div className="absolute flex flex-col items-center justify-center">
+                  <span className="font-mono text-2xl font-black text-[#0b1c30]">
+                    {completionPercentage}%
+                  </span>
+                  <span className="text-[10px] text-[#777587] font-semibold font-sans">
+                    Complete
+                  </span>
+                </div>
               </div>
-              <div>Awaiting responses</div>
+              <div className="mt-6 w-full grid grid-cols-2 gap-4 text-center border-t border-[#c7c4d8]/15 pt-4">
+                <div>
+                  <span className="text-[10px] font-bold text-[#777587] block">
+                    Responded
+                  </span>
+                  <span className="font-mono text-lg font-black text-[#2e7d32]">
+                    {respondedRecipients.length}{" "}
+                    <span className="text-xs text-[#777587] font-medium">
+                      / {totalRecipients}
+                    </span>
+                  </span>
+                </div>
+                <div>
+                  <span className="text-[10px] font-bold text-[#777587] block">
+                    Awaiting
+                  </span>
+                  <span className="font-mono text-lg font-black text-amber-600">
+                    {pendingRecipients.length}{" "}
+                    <span className="text-xs text-[#777587] font-medium">
+                      / {totalRecipients}
+                    </span>
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
 
-          <div>ACTIVITY TIMELINE</div>
+          <div className="bg-white border border-[#c7c4d8]/30 rounded-2xl p-6 shadow-xs">
+            <div className="flex items-center justify-between mb-5 border-b border-[#c7c4d8]/10 pb-3">
+              <div className="flex items-center gap-2 text-[#0b1c30]">
+                <History size={14} className="text-[#3525cd]" />{" "}
+                <h4 className="font-sans text-xs font-extrabold uppercase tracking-wider">
+                  Audit History
+                </h4>
+              </div>
+            </div>
+
+            <div className="relative border border-[#c7c4d8]/30 ml-2 pl-4 space-y-5 max-h-95 overflow-y-auto custom-scrollbar pr-1 scrollbar-none">
+              {email.activityLogs.map((log) => {
+                let badgeColor = "bg-[#eff4ff] text-[#3525cd]";
+                if (log.type === "reply")
+                  badgeColor =
+                    "bg-emerald-50 text-emerald-600 border border-emerald-100";
+                if (log.type === "reminder")
+                  badgeColor =
+                    "bg-amber-50 text-amber-600 border border-amber-100";
+
+                if (log.type === "status_change")
+                  badgeColor =
+                    "bg-[#eff4ff] text-[#3525cd] border border-[#c7c4d8]/15";
+                return (
+                  <div key={log.id} className="relative group text-xs pt-2 p-1">
+                    <div className="absolute -left-5.25 top-1.5 w-2.5 h-2.5 rounded-full bg-white border-2 border-[#3525cd] z-10" />
+                    <div className="space-y-1">
+                      <div className="flex items-center justify-between gap-2">
+                        <span
+                          className={`px-1.5 py-0.5 rounded text-[9px] font-extrabold uppercase tracking-wider font-mono ${badgeColor}`}
+                        >
+                          {log.type}
+                        </span>
+                        <span className="text-[9px] text-[#777587] font-semibold whitespace-nowrap">
+                          {log.timestamp}
+                        </span>
+                      </div>
+                      <p className="font-sans text-[#464555] font-medium leading-relaxed">
+                        {log.description}
+                      </p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
         </div>
       </div>
     </div>
