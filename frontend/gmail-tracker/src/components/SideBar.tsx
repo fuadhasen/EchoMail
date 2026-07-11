@@ -1,4 +1,12 @@
-import { BarChart3, Grid, Mail, Plus, Settings } from "lucide-react";
+import {
+  BarChart3,
+  Grid,
+  Mail,
+  Plus,
+  Radar,
+  ScanSearch,
+  Settings,
+} from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router";
 
@@ -20,7 +28,7 @@ const SideBar = ({ activeItem = "Dashboared", onNavigate }: SideBarProps) => {
   const navItems = [
     { name: "Dashboard", icon: Grid, path: "/" },
     { name: "Tracked Emails", icon: Mail, path: "/tracked" },
-    { name: "SentEmails", icon: Mail, path: "/sent_emails" },
+    { name: "Track New", icon: ScanSearch, path: "/track_new" },
     { name: "Analytics", icon: BarChart3, path: "/analytics" },
     { name: "Settings", icon: Settings, path: "/settings" },
   ];

@@ -17,7 +17,6 @@ const App = () => {
         <Route index element={<Home />} />
         <Route path="tracked/detail/:id" element={<EmailDetail />} />
         <Route path="tracked" element={<TrackedEmails />} />
-        <Route path="sent_emails" element={<SentEmail />} />
         <Route path="track_new" element={<TrackNew />} />
         <Route path="settings" element={<Settings />} />
         <Route path="analytics" element={<Analytics />} />

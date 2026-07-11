@@ -139,13 +139,15 @@ const TrackedEmails = () => {
             Monitor emails awaiting responses and track recipient progress.
           </p>
         </div>
-        <button
-          onClick={() => setIsTrackeModelOpen(true)}
-          className="bg-[#3525cd] text-white hover:bg-[#3525cd]/95 py-2.5 px-5 rounded-xl font-sans text-xs font-bold tracking-wide flex items-center justify-center gap-2 shadow-sm transition-all active:scale-98 cursor-pointer"
-        >
-          <Plus className="stroke-[2.5]" />
-          Track Email
-        </button>
+        <Link to={"/track_new"}>
+          <button
+            onClick={() => setIsTrackeModelOpen(true)}
+            className="bg-[#3525cd] text-white hover:bg-[#3525cd]/95 py-2.5 px-5 rounded-xl font-sans text-xs font-bold tracking-wide flex items-center justify-center gap-2 shadow-sm transition-all active:scale-98 cursor-pointer"
+          >
+            <Plus className="stroke-[2.5]" />
+            Track Email
+          </button>
+        </Link>
       </div>
       {/* Tool bar area */}
       <div className="bg-white border border-[#c7c4d8]/30 rounded-2xl p-4 mb-6 shadow-xs flex flex-col md:flex-row gap-4 items-center justify-between">

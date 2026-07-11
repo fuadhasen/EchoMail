@@ -329,6 +329,80 @@ const defaultEmails: TrackedEmail[] = [
       },
     ],
   },
+  {
+    id: "5",
+    subject: "AI Automation Engineer and Backend developer",
+    sentDate: "Jun 22, 2026, 11:30 AM",
+    deadline: "Due in 5 days",
+    status: "Pending",
+    recipients: [
+      {
+        email: "david.c@organization.com",
+        name: "David Cho",
+        responded: true,
+        respondedAt: "Jun 23, 2026, 9:00 AM",
+        remindersSent: 0,
+      },
+      {
+        email: "lisa.m@organization.com",
+        name: "Lisa Min",
+        responded: true,
+        respondedAt: "Jun 23, 2026, 1:45 PM",
+        remindersSent: 0,
+      },
+      {
+        email: "ken.t@organization.com",
+        name: "Ken Tanaka",
+        responded: true,
+        respondedAt: "Jun 24, 2026, 4:30 PM",
+        remindersSent: 0,
+      },
+      {
+        email: "rachel.g@organization.com",
+        name: "Rachel Green",
+        responded: false,
+        remindersSent: 0,
+      },
+      {
+        email: "joey.t@organization.com",
+        name: "Joey Tribbiani",
+        responded: false,
+        remindersSent: 0,
+      },
+      {
+        email: "chandler.b@organization.com",
+        name: "Chandler Bing",
+        responded: false,
+        remindersSent: 0,
+      },
+    ],
+    activityLogs: [
+      {
+        id: "log-4-1",
+        type: "sent",
+        description: "Email tracking started with 6 recipients",
+        timestamp: "Jun 22, 2026, 11:30 AM",
+      },
+      {
+        id: "log-4-2",
+        type: "reply",
+        description: "Response received from David Cho",
+        timestamp: "Jun 23, 2026, 9:00 AM",
+      },
+      {
+        id: "log-4-3",
+        type: "reply",
+        description: "Response received from Lisa Min",
+        timestamp: "Jun 23, 2026, 1:45 PM",
+      },
+      {
+        id: "log-4-4",
+        type: "reply",
+        description: "Response received from Ken Tanaka",
+        timestamp: "Jun 24, 2026, 4:30 PM",
+      },
+    ],
+  },
 ];
 
 const LOCAL_STORAGE_KEY = "echomail_tracked_emails";
