@@ -7,7 +7,16 @@ import {
   type SentEmail,
   type TrackedEmail,
 } from "@/data/mockTrackedEmails";
-import { ArrowLeft } from "lucide-react";
+import {
+  ArrowLeft,
+  Check,
+  CheckCircle,
+  CheckCircle2,
+  Divide,
+  Mail,
+  Search,
+} from "lucide-react";
+import React from "react";
 import { useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router";
 
@@ -136,14 +145,14 @@ const TrackNew = () => {
 
   // helper to format steps title
   const steps = [
-    { num: 1, label: "Select Email" },
-    { num: 2, label: "Recipients" },
-    { num: 3, label: "Deadline" },
-    { num: 4, label: "Review & Start" },
+    { num: 1, label: "Select Email", desc: "Choose outbox thread" },
+    { num: 2, label: "Recipients", desc: "Map respondents" },
+    { num: 3, label: "Deadline", desc: "Set due date & time" },
+    { num: 4, label: "Review & Start", desc: "Activate tracking" },
   ];
 
   return (
-    <div className=" w-full text-left px-4 md:px-6 lg:px-8 max-w-7xl mx-auto">
+    <div className="w-full text-left px-6 md:px-8">
       {/* Navigation Breadcrumb */}
       <div className="mb-6 flex items-center justify-between">
         <Link
@@ -169,13 +178,162 @@ const TrackNew = () => {
         </p>
       </div>
 
-      {/* steeper progress bar */}
-      <div className="bg-white border border-[#c7c4d8]/30 rounded-2xl p-5 mb-8 shadow-xs">
-        steeper progress bar
-      </div>
+      {/* Primary Workflow container */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        {/* left main area */}
+        <div className="lg:col-span-8 space-y-6">
+          {/* steeper progress bar */}
+          <div className="bg-white border border-[#c7c4d8]/20 rounded-2xl p-5 shadow-[0_2px_8px_-3px_rgba(0,0,0,0.04)]">
+            <div className="flex flex-col items-center justify-center gap-4">
+              <div className="flex items-center justify-between w-full">
+                {steps.map((s, index) => {
+                  const isActive = step === s.num;
+                  const isCompleted = step > s.num;
+                  const isUpcoming = step < s.num;
 
-      {/* primary workflow container */}
-      <div>primary workflow contianer</div>
+                  return (
+                    <React.Fragment key={s.num}>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          // only allow going back to already completed steps
+                          if (s.num == 1) setStep(1);
+                          else if (s.num == 2 && selectedEmail) setStep(2);
+                          else if (s.num == 3 && selectedEmail) setStep(3);
+                        }}
+                        disabled={
+                          s.num > step &&
+                          (!selectedEmail ||
+                            (s.num === 3 &&
+                              selectedRecipientEmails.length === 0))
+                        }
+                        className="flex items-center gap-2 md:gap-2.5 text-left focus:outline-none group disable:cursor-not-allowed transition-all duration-200 shrink-0"
+                      >
+                        {/* step circle */}
+                        <div
+                          className={`w-8 h-8 rounded-full flex items-center justify-center font-mono text-xs font-bold transition-all duration-300 shrink-0 ${
+                            isActive
+                              ? "bg-[#3525cd] text-white shadow-md shadow-[#3525cd]/15 ring-4 ring-[#3525cd]/15"
+                              : isCompleted
+                                ? "bg-emerald-50 text-emerald-600 border border-emerald-200"
+                                : "bg-white border border-[#c7c4d8]/40 text-[#777587]/70"
+                          }`}
+                        >
+                          {isCompleted ? (
+                            <Check size={14} className="stroke-3" />
+                          ) : (
+                            <span>{s.num}</span>
+                          )}
+                        </div>
+
+                        {/* step Titles */}
+                        <div className="hidden sm:block">
+                          <p
+                            className={`font-sans text-xs font-bold transition-colors duration-200 whitespace-nowrap
+                              ${isActive ? "text-[#0b1c30]" : isCompleted ? "text-emerald-700/90" : "text-[#777587] group-hover:text-[#0b1c30]"}
+                              `}
+                          >
+                            {s.label}
+                          </p>
+                          <p className="font-sans text-[10px] text-[#777587]/60 hidden lg:block font-medium mt-0.5 leading-tight">
+                            {s.desc}
+                          </p>
+                        </div>
+                      </button>
+
+                      {/* modern connector lines */}
+                      {index < steps.length - 1 && (
+                        <div className="relative flex-1 mx-2 md:mx-4 h-[1.5px] rounded-full bg-[#f1f0f7] overflow-hidden min-w-3">
+                          <div
+                            className={`absolute top-0 left-0 h-full transition-all duration-500 ease-out ${
+                              isCompleted
+                                ? "bg-emerald-500 w-full"
+                                : isActive
+                                  ? "bg-[#3525cd]/40 w-1/2"
+                                  : "w-0"
+                            }`}
+                          />
+                        </div>
+                      )}
+                    </React.Fragment>
+                  );
+                })}
+              </div>
+
+              {/* contextual indicator */}
+              {selectedEmail && (
+                <div className="text-center w-full mt-1 border-t border-[#c7c4d8]/10  pt-3 flex justify-center">
+                  <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#3525cd] bg-[#eff4ff] px-3 py-1 rounded-full border border-[#3525cd]/10 font-sans">
+                    <CheckCircle2 />
+                    Loop target:
+                    <strong className="font-bold">
+                      {selectedEmail.subject.substring(0, 32)}...
+                    </strong>
+                  </span>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* step1: Search and select emails */}
+          {step === 1 && (
+            <div className="bg-white border border-[#c7c4d8]/30 rounded-2xl p-6 shadow-xs space-y-6">
+              <div className="border border-[#c7c4d8]/15 pb-4">
+                <h3 className="font-sans text-base font-black text-[#0b1c30]">
+                  Step 1: Select a Sent Email
+                </h3>
+                <p className="font-sans text-xs text-[#777587] mt-0.5">
+                  Choose the email thread you have already dispatched that
+                  requires structured responses.
+                </p>
+              </div>
+
+              {/* Search bar */}
+              <div className="relative">
+                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#777587] w-4 h-4" />
+                <input
+                  type="text"
+                  placeholder="Search sent emails by subject or keywords..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full bg-[#f8f9ff] border border-[#c7c4d8]/30 rounded-xl pl-10 pr-4 py-2.5 text-xs text-[#0b1c30] placeholder-[#777587]/60 focus:outline-none focus:ring-1  focus:ring-[#3525cd] font-sans "
+                />
+              </div>
+              <div>
+                {filteredSentEmails.length === 0 ? (
+                  <div>
+                    <Mail />
+                    <p>No matches found for "{searchTerm}"</p>
+                    <p>Try searching with a different term.</p>
+                  </div>
+                ) : (
+                  filteredSentEmails.map((email) => (
+                    <div className="group border border-[#c7c4d8]/20  hover:border-[#3525cd]/40 hover:bg-[#f8f9ff]/20 rounded-2xl transition-all cursor-pointer text-left space-y-2 relative">
+                      <div>first div</div>
+
+                      <p>paragraph</p>
+
+                      <div>second div</div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* step2
+          <div>step2</div>
+
+          {/* step3 */}
+          {/* <div>step2</div> */}
+
+          {/* step4 */}
+          {/* <div>step2</div> */}
+        </div>
+
+        {/* Right side: side bar with contextual tips */}
+        <div>Right side</div>
+      </div>
     </div>
   );
 };
