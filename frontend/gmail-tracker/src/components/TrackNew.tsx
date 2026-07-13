@@ -8,10 +8,14 @@ import {
   type TrackedEmail,
 } from "@/data/mockTrackedEmails";
 import {
+  AlertCircle,
   ArrowLeft,
+  ArrowRight,
+  Calendar,
   Check,
   CheckCircle,
   CheckCircle2,
+  Clock,
   Divide,
   Mail,
   Search,
@@ -347,14 +351,263 @@ const TrackNew = () => {
             </div>
           )}
 
-          {/* step2
-          <div>step2</div>
+          {/* step2: choose recipients */}
+          {step === 2 && selectedEmail && (
+            <div className="bg-white border border-[#c7c4d8]/30 rounded-2xl p-6 shadow-xs space-y-6">
+              <div className="border-b border-[#c7c4d8]/15 pb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <div>
+                  <h3 className="font-sans text-base font-black text-[#0b1c30]">
+                    Step 2: Map Required Respondents
+                  </h3>
+                  <p className="font-sans text-xs text-[#777587] mt-0.5">
+                    Which recipients are required to provide a reply to this
+                    thread?
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleSelectAllRecipients}
+                  className="bg-slate-50 border  border-[#c7c4d8]/30 hover:bg-[#f8f9ff] text-[#464555] text-[11px] font-bold py-1.5 px-3 rounded-lg transition-all cursor-pointer font-sans self-start sm:self-center"
+                >
+                  {selectedRecipientEmails.length ===
+                  selectedEmail.recipients.length
+                    ? "Deselect All"
+                    : "select All Recipients"}
+                </button>
+              </div>
 
-          {/* step3 */}
-          {/* <div>step2</div> */}
+              {/* recipient checklist Grid */}
+              <div className="border border-[#c7c4d8]/20 rounded-2xl overflow-hidden divide-y divide-[#c7c4d8]/15 bg-[#f8f9ff]/10">
+                {selectedEmail.recipients.map((recipient) => {
+                  const isSelected = selectedRecipientEmails.includes(
+                    recipient.email,
+                  );
+                  return (
+                    <div
+                      key={recipient.email}
+                      onClick={() => handleToggleRecipient(recipient.email)}
+                      className={`p-4 flex items-center justify-between hover:bg-[#f8f9ff]/30 transition-all cursor-pointer ${isSelected ? "bg-[#eff4ff]/10" : ""}`}
+                    >
+                      <div className="flex items-center gap-3.5">
+                        {/* custom checkbox */}
+                        <div
+                          className={`w-4.5 h-4.5 rounded border flex items-center justify-center transition-all 
+                          ${isSelected ? "bg-[#3525cd] border-[#3525cd] text-white" : "border-[#c7c4d8]/60 bg-white"}
+                        `}
+                        >
+                          {isSelected && (
+                            <Check size={11} className="stroke-3.5" />
+                          )}
+                        </div>
 
-          {/* step4 */}
-          {/* <div>step2</div> */}
+                        <div className="text-left">
+                          <p
+                            className={`font-sans text-xs font-bold transition-colors ${isSelected ? "text-[#0b1c30]" : "text-[#464555]"}`}
+                          >
+                            {recipient.name}
+                          </p>
+                          <p className="font-mono text-[10px] text-[#777587]">
+                            {recipient.email}
+                          </p>
+                        </div>
+                      </div>
+                      <span
+                        className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
+                          isSelected
+                            ? "bg-amber-50 text-amber-700 border-amber-200"
+                            : "bg-slate-100 text-[#777587] border-slate-200 opacity-60"
+                        }`}
+                      >
+                        {isSelected ? "Tracking Active" : "Ignored"}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* bottom actions */}
+              <div className="pt-5 border-t border-[#c7c4d8]/10 flex items-center justify-between">
+                <button
+                  type="button"
+                  onClick={() => setStep(1)}
+                  className="bg-white border border-[#c7c4d8]/30 hover:bg-slate-50 text-[#777587] py-2 px-4 rounded-xl text-xs font-bold font-sans cursor-pointer transition-all flex items-center gap-1.5"
+                >
+                  <ArrowLeft size={13} className="stroke-2.5" /> Back
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setStep(3)}
+                  disabled={selectedRecipientEmails.length === 0}
+                  className="bg-[#3525cd] text-white hover:bg-[#3525cd]/95 disabled:bg-slate-200  disabled:text-slate-400 disabled:cursor-not-allowed py-2.5 px-5 rounded-xl text-xs font-bold font-sans cursor-pointer transition-all flex items-center gap-1.5"
+                >
+                  setDeadline <ArrowRight size={13} className="stroke-2.5" />
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* step 3: Set Deadline */}
+          {step === 3 && selectedEmail && (
+            <div className="bg-white border border-[#c7c4d8]/30 rounded-2xl p-6 shadow-xs space-y-6">
+              <div className="border border-[#c7c4d8]/15 pb-4">
+                <h3 className="font-sans text-base font-black text-[#0b1c30]">
+                  Step 3: Establish Deadline Target
+                </h3>
+                <p className="font-sans text-xs text-[#777587] mt-0.5">
+                  Set the absolute target window for recipients to reply before
+                  flagging thier status as overdue.
+                </p>
+              </div>
+
+              {/* date time picker input */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-[10px] font-extrabold text-[#777587] uppercase tracking-wider mb-2">
+                    Date of Deadline
+                  </label>
+                  <div className="relative">
+                    <Calendar className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#777587] w-4 h-4" />
+                    <input
+                      type="date"
+                      value={deadlineDate}
+                      onChange={(e) => setDeadlineDate(e.target.value)}
+                      min={new Date().toISOString().split("T")[0]}
+                      className="w-full bg-[#f8f9ff] border  border-[#c7c4d8]/30 rounded-xl pl-10 pr-4 py-2.5 text-xs text-[#0b1c30] focus:outline-none focus:ring-1 focus:ring-[#3525cd] font-sans cursor-pointer"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-[10px] font-extrabold text-[#777587] uppercase tracking-wider mb-2">
+                    Time of Deadline
+                  </label>
+                  <div className="relative">
+                    <Clock className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#777587] w-4 h-4" />
+                    <input
+                      type="time"
+                      value={deadlineTime}
+                      onChange={(e) => setDeadlineTime(e.target.value)}
+                      className="w-full bg-[#f8f9ff] border border-[#c7c4d8]/30 rounded-xl pl-10 pr-4 py-2.5 text-xs text-[#0b1c30] focus:outline-none focus:ring-1 focus:ring-[#3525cd] font-sans cursor-pointer"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* informative helper card */}
+              <div className="p-4 bg-amber-50/50 border border-amber-200/40 rounded-xl flex items-start gap-3">
+                <AlertCircle
+                  size={15}
+                  className="text-amber-600 mt-0.5 shrink-0"
+                />
+                <div className="text-left text-xs">
+                  <p className="font-sans font-bold text-amber-900">
+                    Calculated Alert Window
+                  </p>
+                  <p className="font-sans text-amber-700/90 mt-0.5 leading-relaxed">
+                    Once the deadline passes on{" "}
+                    <strong className="font-extrabold">
+                      {new Date(
+                        `${deadlineDate}T${deadlineTime}`,
+                      ).toLocaleString("en-US", {
+                        dateStyle: "medium",
+                        timeStyle: "short",
+                      })}
+                    </strong>
+                    , automated reminders will fire at regular intervals and the
+                    overall thread is labeled "Overdue".
+                  </p>
+                </div>
+              </div>
+
+              {/* bottom action */}
+              <div className="pt-5 border-t border-[#c7c4d8]/10 flex items-center justify-between">
+                <button
+                  type="button"
+                  onClick={() => setStep(2)}
+                  className="bg-white border border-[#c7c4d8]/30 hover:bg-slate-50 text-[#777587] py-2 px-4 rounded-xl text-xs font-bold font-sans cursor-pointer transitiona-all flex items-center gap-1.5"
+                >
+                  <ArrowLeft size={13} className="stroke-2.5" />
+                  Back
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setStep(4)}
+                  className="bg-[#3525cd] text-white hover:bg-[#3525cd]/95 py-2.5 px-5 rounded-xl text-xs font-bold font-sans cursor-pointer transition-all flex items-center gap-1.5 "
+                >
+                  Review Summary
+                  <ArrowRight size={13} className="stroke-2.5" />
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* step4: Review Summary */}
+          {step === 4 && selectedEmail && (
+            <div className="bg-white border border-[#c7c4d8]/30 rounded-2xl p-6 shadow-xs space-y-6">
+              <div className="border-b border-[#c7c4d8]/15 pb-4">
+                <h3 className="font-sans text-base font-black text-[#0b1c30]">
+                  Step 4: Finalize & Launch Response Loop
+                </h3>
+                <p className="font-sans text-xs text-[#777587] mt-0.5">
+                  Ensure all details are accurate before locking this email
+                  thread into the active response monitoring system.
+                </p>
+              </div>
+              <div className="space-y-4">
+                {/* email subject section */}
+                <div className="bg-[#f8f9ff] border border-[#c7c4d8]/20 rounded-xl p-4 text-left">
+                  <span className="block text-[10px] font-bold text-[#777587] uppercase tracking-wider">
+                    Email Subject
+                  </span>
+                  <span className="block text-sm font-extrabold text-[#0b1c30] mt-1 leading-snug">
+                    {selectedEmail.subject}
+                  </span>
+                  <span className="inline-block font-mono text-[9px] text-[#777587] font-semibold bg-white border border-slate-100 px-2 py-0.5 rounded mt-2">
+                    Sent Date: {selectedEmail.sentDate}
+                  </span>
+                </div>
+
+                {/* deadline and tracking settings */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="bg-[#f8f9ff] border border-[#c7c4d8]/20 rounded-xl p-4 text-left">
+                    <span className="block text-[10px] font-bold text-[#777587] uppercase tracking-wider">
+                      Configured Deadline
+                    </span>
+                    <div className="flex items-center gap-2 mt-1.5 text-xs text-amber-700 font-extrabold">
+                      <Calendar size={13} className="text-amber-600" />
+                      <span>
+                        {new Date(
+                          `${deadlineDate}T${deadlineTime}`,
+                        ).toLocaleDateString("en-US", {
+                          weekday: "short",
+                          month: "short",
+                          day: "numeric",
+                          year: "numeric",
+                        })}
+                      </span>
+                      <span className="text-slate-300">|</span>
+                      <span>{deadlineTime}</span>
+                    </div>
+                  </div>
+                  <div className="bg-[#f8f9ff] border border-[#c7c4d8]/20 rounded-xl p-4 text-left ">
+                    <span className="block text-[10px] font-bold text-[#777587] uppercase tracking-wider">
+                      Tracking Recipients
+                    </span>
+                    <div className="flex items-center gap-2 mt-1.5 text-xs text-[#3525cd] font-bold">
+                      <User size={13} />
+                      <span>
+                        {selectedRecipientEmails.length} of{" "}
+                        {selectedEmail.recipients.length} Recipients Tracked
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* recipient breakdown list */}
+                <div>recipient breakdown list</div>
+              </div>
+              <div>bottom actions</div>
+            </div>
+          )}
         </div>
 
         {/* Right side: side bar with contextual tips */}
