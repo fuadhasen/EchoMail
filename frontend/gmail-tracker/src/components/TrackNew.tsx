@@ -603,15 +603,129 @@ const TrackNew = () => {
                 </div>
 
                 {/* recipient breakdown list */}
-                <div>recipient breakdown list</div>
+                <div className="space-y-2 text-left">
+                  <span className="block text-[10px] font-bold text-[#777587] uppercase tracking-wider px-1">
+                    Selected Respondents
+                  </span>
+                  <div className="border border-[#c7c4d8]/15 rounded-xl divide-y divide-[#c7c4d8]/10 max-h-48 overflow-y-auto custom-scrollbar bg-slate-50/20 scrollbar-none">
+                    {selectedEmail.recipients
+                      .filter((r) => selectedRecipientEmails.includes(r.email))
+                      .map((r) => (
+                        <div
+                          key={r.email}
+                          className="p-3 flex items-center justify-between text-xs"
+                        >
+                          <div className="flex items-center gap-2">
+                            <div className="w-5 h-5 rounded-full bg-[#eff4ff] text-[#3525cd] flex items-center justify-center font-bold text-[10px] font-sans">
+                              {r.name.charAt(0)}
+                            </div>
+                            <span className="font-sans font-bold text-[#0b1c30]">
+                              {r.name}
+                            </span>
+                          </div>
+                          <span className="font-mono text-[10px] text-[#777587]">
+                            {r.email}
+                          </span>
+                        </div>
+                      ))}
+                  </div>
+                </div>
               </div>
-              <div>bottom actions</div>
+              <div className="pt-5 border-t border-[#c7c4d8]/10 flex items-center justify-between">
+                <button
+                  type="button"
+                  onClick={() => setStep(3)}
+                  className="bg-white border border-[#c7c4d8]/30 hover:bg-slate-50 text-[#777587] py-2 px-4 rounded-xl text-xs font-bold font-sans cursor-pointer transition-all flex items-center gap-1.5"
+                >
+                  <ArrowLeft size={13} className="stroke-2.5" />
+                  Back
+                </button>
+                <button
+                  type="button"
+                  onClick={handleStartTracking}
+                  className="bg-[#3525cd] text-white hover:bg-[#3525cd]/95 py-2.5 px-6 rounded-xl text-xs font-black font-sans cursor-pointer transition-all flex items-center gap-1.5 shadow-md active:scale-98"
+                >
+                  <CheckCircle2 size={13} className="stroke-2.5" />
+                  Track Email
+                </button>
+              </div>
             </div>
           )}
         </div>
 
         {/* Right side: side bar with contextual tips */}
-        <div>Right side</div>
+        <div className="lg:col-span-4 space-y-6 text-left">
+          <div className="bg-white border border-[#c7c4d8]/30 rounded-2xl p-6 shadow-xs">
+            <h4 className="font-sans text-xs font-bold text-[#0b1c30] uppercase tracking-wider mb-3">
+              Echomail Tracking Engine
+            </h4>
+            <div className="space-y-4 text-xs text-[#464555] leading-relaxed">
+              <div className="border-l-2 border-[#3525cd] pl-3">
+                <p className="font-sans font-bold text-[#0b1c30]">
+                  How response tracking works
+                </p>
+                <p className="font-sans text-[#777587] mt-0.5">
+                  EchoMail connects to your sent outbox. It scans recipient
+                  incoming replies to automatically mark tracking goals as
+                  completed.
+                </p>
+              </div>
+              <div className="border-l-2 border-amber-500 pl-3">
+                <p className="font-sans font-bold text-[#0b1c30]">
+                  The "Must Respond" setting
+                </p>
+                <p className="font-sans text-[#777587] mt-0.5">
+                  Only selected recipients will trigger alerts or reminders.
+                  Unselected contact are kept on the thread but won't block
+                  completion.
+                </p>
+              </div>
+              <div className="border-l-2 border-emerald-500 pl-3">
+                <p className="font-sans font-bold text-[#0b1c30]">
+                  Seamless FastAPI Migration
+                </p>
+                <p className="font-sans text-[#777587] mt-0.5">
+                  The architecture mapped in this workflow utilizes standalone
+                  mail-item parameters that directly trace to future cloud
+                  database models.
+                </p>
+              </div>
+            </div>
+          </div>
+          {selectedEmail && step > 1 && (
+            <div className="bg-slate-50 border border-[#c7c4d8]/20 rounded-2xl p-6 text-left">
+              <h5 className="font-sans text-[11px] font-extrabold text-[#777587] uppercase tracking-wider mb-2">
+                Selected Email Specs
+              </h5>
+              <div className="space-y-2 text-xs font-sans">
+                <div>
+                  <span className="text-[#777587] block text-[10px] uppercase">
+                    Subject
+                  </span>
+                  <span className="text-[#0b1c30] font-bold line-clamp-1">
+                    {selectedEmail.subject}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-[#777587] block text-[10px] uppercase">
+                    Sent Date
+                  </span>
+                  <span className="text-[#0b1c30] font-semibold">
+                    {selectedEmail.sentDate}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-[#777587] block text-[10px] uppercase">
+                    Original Recipients
+                  </span>
+                  <span className="text-[#0b1c30] font-semibold">
+                    {selectedEmail.recipients.length}
+                  </span>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
