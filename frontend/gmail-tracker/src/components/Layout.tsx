@@ -22,10 +22,10 @@ const Layout = () => {
   return (
     <>
       {"authenticated" == "authenticated" && (
-        <div className="flex h-screen font-sans bg-[#f8f9ff]">
+        <div className="flex flex-col md:flex-row h-screen bg-[#f8f9ff]">
           <SideBar />
           {/* Main Content Area */}
-          <main className="flex-1 overflow-y-auto bg-[#f8f9ff] p-8 relative">
+          <main className="flex-1 overflow-y-auto scrollbar-none  p-5 md:p-8 relative">
             <Outlet />
             <ToastContainer />
           </main>
