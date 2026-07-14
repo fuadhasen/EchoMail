@@ -198,7 +198,7 @@ const SideBar = ({ activeItem = "Dashboared", onNavigate }: SideBarProps) => {
       )}
 
       {/* desktop side bar */}
-      <aside className="hidden md:flex flex-col w-64 border border-[#c7c4d8]/30 px-4 py-6 shrink-0 bg-white">
+      <aside className="hidden md:flex flex-col w-64 border border-[#c7c4d8]/30 px-4 py-6 shrink-0 bg-[#fcfcfd] relative">
         {/* {Brand Logo section} */}
         <div className="mb-8 px-2 flex items-center gap-3">
           <div className="w-8 h-8 bg-[#3525cd] rounded-lg flex items-center justify-center text-white font-extrabold shadow-sm font-sans">
@@ -209,33 +209,46 @@ const SideBar = ({ activeItem = "Dashboared", onNavigate }: SideBarProps) => {
               EchoMail
             </h1>
             <p className="font-sans text-[10px] uppercase tracking-widest text-[#777587] font-semibold mt-1">
-              Pro Workspace
+              Communication loops
             </p>
           </div>
         </div>
 
         {/* Navigation Items */}
-        <nav className="flex-1 space-y-1 overflow-y-auto custom-scrollbar pr-1 mt-1">
+        <nav className="flex-1 space-y-1.5 overflow-y-auto custom-scrollbar pr-1 -mr-1">
           {navItems.map((item) => {
             const Icon = item.icon;
-            const isActive = active === item.name;
 
             return (
-              <Link to={item.path}>
-                <button
-                  key={item.name}
-                  onClick={() => handlItemClick(item.name)}
-                  className={`w-full group flex items-center justify-between px-3.5 py-2.5 rounded-xl font-sans text-xs font-bold tracking-wide transiton-all duration-150 cursor-pointer ${isActive ? "bg-[#eff4ff] text-[#3525cd]" : "text-[#777587] hover:bg-slate-50 hover:text-[#0b1c30]"} `}
-                >
-                  <div className="flex items-center gap-3">
+              <NavLink
+                key={item.name}
+                to={item.path}
+                end={item.path === "/"}
+                className={({ isActive }) =>
+                  `group w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl font-sans text-xs font-semibold tracking-wide transition-all duration-200 cursor-pointer border ${
+                    isActive
+                      ? "bg-white border-zinc-200/60 text-[#3525cd] shadow-[0_1.5px_4px_rgba(0,0,0,0.03)]"
+                      : "bg-transparent border-transparent text-zinc-500 hover:bg-zinc-100/60 hover:text-zinc-900"
+                  }`
+                }
+                id={`sidebar-nav-${item.name.toLowerCase().replace(/\s+/g, "-")}`}
+              >
+                {({ isActive }) => (
+                  <div className="flex items-center gap-3 w-full">
                     <Icon
-                      size={16}
-                      className={`transition-colors ${isActive ? "text-[#3525cd] stroke-[2.2]" : "text-[#777587] group-hover:text-[#0b1c30]"}`}
+                      size={15}
+                      className={`transition-all duration-200 shrink-0 ${
+                        isActive
+                          ? "text-[#3525cd] stroke-[2.2] scale-105"
+                          : "text-zinc-400 group-hover:text-zinc-700 group-hover:scale-105 group-hover:translate-x-0.5"
+                      }`}
                     />
-                    <span>{item.name}</span>
+                    <span className="transition-colors duration-200">
+                      {item.name}
+                    </span>
                   </div>
-                </button>
-              </Link>
+                )}
+              </NavLink>
             );
           })}
         </nav>
