@@ -253,25 +253,67 @@ const SideBar = ({ activeItem = "Dashboared", onNavigate }: SideBarProps) => {
           })}
         </nav>
 
-        <div className="mt-auto pt-6 border-t border-[#c7c4d8]/15">
-          <div className="bg-slate-50/70 border border-[#c7c4d8]/20 rounded-xl p-3.5">
-            <div className="flex items-center gap-3">
-              {/* Avatar */}
-              <div className="w-10 h-10 rounded-full bg-[#3525cd]/10 flex items-center justify-center">
-                <span className="text-sm font-bold text-[#3525cd]">FH</span>
+        <div className="relative mt-auto pt-4 border-t border-[#c7c4d8]/15 text-left">
+          <button
+            onClick={() => setIsMobileProfileOpen(!isMobileProfileOpen)}
+            className="w-full flex items-center justify-between p-2 rounded-xl hover:bg-zinc-100/60 transition-all text-left group cursor-pointer"
+          >
+            <div className="flex items-center gap-2.5 overflow-hidden">
+              <div className="w-8 h-8 rounded-full bg-zinc-900 text-white font-sans text-xs font-extrabold flex items-center justify-center shrink-0">
+                AR
               </div>
-
-              {/* User INfo */}
-              <div className="flex-1 min-w-0">
-                <p className="font-sans text-xs font-bold text-[#0b1c30] truncate">
-                  Fuad Hassen
-                </p>
-                <p className="font-sans text-[11px]  text-[#777587] truncate">
-                  fuad@example.com
+              <div className="overflow-hidden">
+                <h4 className="font-sans text-xs font-bold text-[#0b1c30] truncate leading-tight">
+                  Alex Revera
+                </h4>
+                <p className="font-sans text-[10px] text-zinc-500 truncate leading-none mt-0.5 font-medium">
+                  fuya241@gmail.com
                 </p>
               </div>
             </div>
-          </div>
+            <ChevronsUpDown size={13} />
+          </button>
+          {isMobileProfileOpen && (
+            <>
+              <div
+                className="fixed inset-0 z-40"
+                onClick={() => setIsMobileProfileOpen(false)}
+              />
+              <div className="absolute bottom-14 left-0 right-0 bg-white border border-zinc-200/80 rounded-xl shadow-[0_4px_12px_rgba(0,0,0,0.08)] p-1.5 z-50 animate-in fade-in slide-in-from-bottom-2 duration-150">
+                <button
+                  onClick={() => {
+                    setIsMobileProfileOpen(false);
+                    setIsMobileDrawerOpen(false);
+                  }}
+                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-left font-sans text-xs font-bold text-zinc-700 hover:bg-zinc-50 hover:text-zinc-950  transition-all cursor-pointer"
+                >
+                  <User size={14} className="text-zinc-400" />
+                  Profile
+                </button>
+                <button
+                  onClick={() => {
+                    setIsMobileProfileOpen(false);
+                    setIsMobileDrawerOpen(false);
+                  }}
+                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-left font-sans text-xs font-bold text-zinc-700 hover:bg-zinc-50 hover:text-[#3525cd] transition-all cursor-pointer"
+                >
+                  <Settings size={14} className="text-zinc-400" />
+                  Account Settings
+                </button>
+                <div className="h-px bg-zinc-100 my-1" />
+                <button
+                  onClick={() => {
+                    setIsMobileProfileOpen(false);
+                    setIsMobileDrawerOpen(false);
+                  }}
+                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-left font-sans text-xs font-bold text-red-600 hover:bg-red-50 transition-all cursor-pointer"
+                >
+                  <LogOut size={14} className="text-red-400" />
+                  Sign Out
+                </button>
+              </div>
+            </>
+          )}
         </div>
       </aside>
     </>
