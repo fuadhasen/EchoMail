@@ -1,5 +1,13 @@
 import { useToast } from "@/context/ToastContext";
-import { Check, CheckCircle2, Loader2, Sliders, User } from "lucide-react";
+import {
+  Check,
+  CheckCircle2,
+  Loader2,
+  Sliders,
+  ToggleLeft,
+  ToggleRight,
+  User,
+} from "lucide-react";
 import React, { useState } from "react";
 
 interface ProfileSettings {
@@ -317,13 +325,119 @@ const Settings = () => {
               </div>
 
               {/* Template content */}
-              <div>template content</div>
+              <div className="space-y-1.5 text-left">
+                <div className="flex items-center justify-between">
+                  <label className="block font-sans text-xs font-bold text-[#0b1c30] tracking-wide uppercase">
+                    Default Follow-up Copy Template
+                  </label>
+                  <span className="font-mono text-[9px] font-bold text-[#3525cd] bg-indigo-50 px-2 py-0.5 rounded">
+                    Use variable: {"{name}"}
+                  </span>
+                </div>
+                <textarea
+                  rows={5}
+                  value={reminders.templateMessage}
+                  onChange={(e) =>
+                    setReminders({
+                      ...reminders,
+                      templateMessage: e.target.value,
+                    })
+                  }
+                  className="w-full bg-zinc-50 border border-zinc-200 hover:border-zinc-300 focus:border-[#3525cd] focus:bg-white focus:outline-none rounded-xl p-4 font-sans text-xs font-semibold leading-relaxed text-zinc-700 transition-all shadow-[inset_0_1px_2px_rgba(0,0,0,0.01)]"
+                />
+                <p className="font-sans text-[10px] text-zinc-400 leading-normal font-medium">
+                  This copy automatically populates as draft text when trigger
+                  deadlines approach. Feel free to refine.
+                </p>
+              </div>
 
               {/* Toggle Policies */}
-              <div>toggle policies</div>
+              <div className="space-y-3.5 pt-2 border-t border-zinc-50">
+                {/* policy 1 */}
+                <div className="flex items-start justify-between gap-4">
+                  <div className="text-left">
+                    <h4 className="font-sans text-xs font-bold text-[#0b1c30]">
+                      Auto-Close on Recipient Reply
+                    </h4>
+                    <p className="font-sans text-[10px] text-zinc-500 font-medium leading-normal mt-0.5">
+                      Mark the tracked item as "Completed" immediately when a
+                      response lands in your Gmail folder.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setReminders({
+                        ...reminders,
+                        autoArchiveOnReply: !reminders.autoArchiveOnReply,
+                      })
+                    }
+                    className="text-[#3525cd] hover:text-[#3525cd]/80 transition-colors focus:outline-none cursor-pointer"
+                  >
+                    {reminders.autoArchiveOnReply ? (
+                      <ToggleRight size={38} className="stroke-1.2" />
+                    ) : (
+                      <ToggleLeft
+                        size={38}
+                        className="text-zinc-300 stroke-1.2"
+                      />
+                    )}
+                  </button>
+                </div>
+
+                {/* policy 2 */}
+                <div className="flex items-start justify-between gap-4">
+                  <div className="text-left">
+                    <h4 className="font-sans text-xs font-bold text-[#0b1c30]">
+                      Auto-escalate Overdue Threads
+                    </h4>
+                    <p className="font-sans text-[10px] text-zinc-500 font-medium leading-normal mt-0.5">
+                      Add "URGENT" warning banners to communication items that
+                      remain unanswered 48h past deadline.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setReminders({
+                        ...reminders,
+                        autoEscalateOverdue: !reminders.autoEscalateOverdue,
+                      })
+                    }
+                    className="text-[#3525cd] hover:text-[#3525cd]/80 transition-colors focus:outline-none cursor-pointer"
+                  >
+                    {reminders.autoArchiveOnReply ? (
+                      <ToggleRight size={38} className="stroke-1.2" />
+                    ) : (
+                      <ToggleLeft
+                        size={38}
+                        className="text-zinc-300 stroke-1.2"
+                      />
+                    )}
+                  </button>
+                </div>
+              </div>
 
               {/* button */}
-              <div>button</div>
+              <div className="flex items-center justify-end border-t border-zinc-50 pt-5 mt-2">
+                <button
+                  type="submit"
+                  disabled={isSavingReminders}
+                  className="bg-[#3525cd] hover:bg-[#3525cd]/95  active:scale-[0.98] text-white text-xs font-bold py-2.5 px-5 rounded-xl transition-all font-sans flex items-center gap-2 cursor-pointer shadow-sm focus:outline-none disabled:opacity-70"
+                >
+                  {isSavingReminders ? (
+                    <>
+                      <Loader2 size={13} className="animate-spin text-white" />
+                      <span>Saving Policies...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Check size={13} className="text-white" />
+                      <span>Save Tracking Defaults</span>
+                    </>
+                  )}
+                </button>
+              </div>
             </form>
           </section>
         </div>
