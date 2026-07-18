@@ -6,8 +6,6 @@ import {
   Mail,
   Menu,
   Plus,
-  Radar,
-  ScanSearch,
   Settings,
   User,
   X,
@@ -45,21 +43,21 @@ const SideBar = ({ activeItem = "Dashboared", onNavigate }: SideBarProps) => {
   return (
     <>
       {/* Mobile Header Bar */}
-      <div className="md:hidden flex items-center justify-between px-5 py-3.5 bg-[#fcfcfd]  border-b border-[#c7c4d8]/15 sticky top-0 z-40 w-full">
+      <div className="md:hidden flex items-center justify-between px-5 py-3.5 bg-white   border-b border-zinc-200/80 sticky top-0 z-40 w-full">
         <div className="flex items-center gap-3">
           <button
             type="button"
             onClick={() => setIsMobileDrawerOpen(true)}
-            className="p-1.5 rounded-lg text-zinc-500 transition-colors focus:outline-none cursor-pointer"
+            className="p-1.5 rounded-lg text-zinc-500 hover:bg-zinc-100  transition-colors focus:outline-none cursor-pointer"
             areia-label="Open menu"
           >
             <Menu size={20} className="stroke-2.2" />
           </button>
           <Link to="/" className="flex items-center gap-2.5 cursor-pointer">
-            <div className="w-6.5 h-6.5 bg-[#3525cd] rounded-lg flex items-center justify-center text-white font-black shadow-xs font-sans text-xs">
+            <div className="w-6.5 h-6.5 bg-zinc-900 border border-zinc-800 rounded-md flex items-center justify-center  text-zinc-100 font-extrabold  shadow-xs font-sans text-[11px]">
               E
             </div>
-            <span className="font-sans text-sm font-bold text-[#0b1c30] tracking-tight">
+            <span className="font-sans text-[13px] font-bold text-zinc-900 tracking-tight">
               EchoMail
             </span>
           </Link>
@@ -70,14 +68,20 @@ const SideBar = ({ activeItem = "Dashboared", onNavigate }: SideBarProps) => {
       {isMobileDrawerOpen && (
         <>
           {/* backdrop overlay */}
-          <div className="fixed inset-0 bg-zinc-950/20 backdrop-blur-[1px] z-50 md:hidden animate-in fade-in duration-200" />
+          <div
+            className="fixed inset-0 bg-zinc-950/20 backdrop-blur-[1px] z-50 md:hidden animate-in fade-in duration-200"
+            onClick={() => {
+              setIsMobileDrawerOpen(false);
+              setIsMobileProfileOpen(false);
+            }}
+          />
 
           {/* drawer panel */}
-          <div className="fixed inset-y-0 left-0 w-70 max-w-[80vw] bg-[#fcfcfd] border-r border-[#c7c4d8]/20 p-5 flex flex-col z-50 md:hidden shadow-2xl animate-in slide-in-from-left duration-200">
+          <div className="fixed inset-y-0 left-0 w-70 max-w-[80vw] bg-zinc-50 border-r border-zinc-200/80 p-5 flex flex-col z-50 md:hidden shadow-xl animate-in slide-in-from-left duration-200">
             {/* Drawer header */}
-            <div className="flex items-center justify-between mb-6 pb-2 border-b  border-zinc-100">
+            <div className="flex items-center justify-between mb-5 pb-3 border-b  border-zinc-200/50">
               <div className="flex items-center gap-2.5">
-                <div className="w-7 h-7 bg-[#3525cd] rounded-lg flex items-center justify-center text-white font-black shadow-sm font-sans text-sm">
+                <div className="w-6.5 h-6.5 bg-zinc-900 border border-zinc-800 rounded-md flex items-center justify-center text-zinc-100  shadow-sm font-sans text-[11px]">
                   E
                 </div>
                 <div className="text-left">
@@ -92,7 +96,7 @@ const SideBar = ({ activeItem = "Dashboared", onNavigate }: SideBarProps) => {
                   setIsMobileDrawerOpen(false);
                   setIsMobileProfileOpen(false);
                 }}
-                className="p-1.5 rounded-lg text-zinc-400 hover:text-zinc-600 hover:bg-zinc-100 transition-colors focus:outline-none cursor-pointer"
+                className="p-1.5 rounded-lg text-zinc-400 hover:text-zinc-600 hover:bg-zinc-100/50 transition-colors focus:outline-none cursor-pointer"
               >
                 <X size={16} className="stroke-2.5" />
               </button>
@@ -102,7 +106,6 @@ const SideBar = ({ activeItem = "Dashboared", onNavigate }: SideBarProps) => {
             <nav className="flex-1 space-y-1 overflow-y-auto">
               {navItems.map((item) => {
                 const Icon = item.icon;
-                const isActive = active === item.name;
 
                 return (
                   <NavLink
@@ -110,19 +113,27 @@ const SideBar = ({ activeItem = "Dashboared", onNavigate }: SideBarProps) => {
                     to={item.path}
                     end={item.path === "/"}
                     onClick={() => setIsMobileDrawerOpen(false)}
-                    className={`group w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-sans text-xs font-bold tracking-wide transition-all duration-150 cursor-pointer ${
-                      isActive
-                        ? "bg-zinc-100 text-[#0b1c30]"
-                        : "text-zinc-500 hover:bg-zinc-50 hover:text-zinc-900"
-                    }`}
+                    className={({ isActive }) =>
+                      `group w-full flex items-center justify-between px-3 py-2 rounded-lg font-sans text-xs font-semibold tracking-wide transition-all duration-150 cursor-pointer border ${
+                        isActive
+                          ? "bg-white border-zinc-200/80 text-zinc-900 shadow-[0_1px_2px_rgba(0,0,0,0.03)] font-bold"
+                          : "bg-transparent border-transparent text-zinc-500 hover:bg-zinc-200/30 hover:text-zinc-950"
+                      }`
+                    }
                   >
-                    <div className="flex items-center gap-3">
-                      <Icon
-                        size={15}
-                        className={`transition-colors shrink-0 ${isActive ? "text-[#3525cd] stroke-[2.2]" : "text-zinc-400 group-hover:text-zinc-800"}`}
-                      />
-                      <span>{item.name}</span>
-                    </div>
+                    {({ isActive }) => (
+                      <div className="flex items-center gap-2.5 w-full">
+                        <Icon
+                          size={14}
+                          className={`transition-all duration-150 shrink-0 ${
+                            isActive
+                              ? "text-zinc-900 stroke-[2.2]"
+                              : "text-zinc-400 group-hover:text-zinc-600"
+                          }`}
+                        />
+                        <span>{item.name}</span>
+                      </div>
+                    )}
                   </NavLink>
                 );
               })}
@@ -198,21 +209,24 @@ const SideBar = ({ activeItem = "Dashboared", onNavigate }: SideBarProps) => {
       )}
 
       {/* desktop side bar */}
-      <aside className="hidden md:flex flex-col w-64 border border-[#c7c4d8]/30 px-4 py-6 shrink-0 bg-[#fcfcfd] relative">
+      <aside className="hidden md:flex flex-col w-64 border-r border-zinc-200/80 px-4 py-6 shrink-0 bg-zinc-50 relative">
         {/* {Brand Logo section} */}
-        <div className="mb-8 px-2 flex items-center gap-3">
-          <div className="w-8 h-8 bg-[#3525cd] rounded-lg flex items-center justify-center text-white font-extrabold shadow-sm font-sans">
+        <Link
+          to={"/"}
+          className="group mb-8 px-2 flex items-center gap-2.5 focus:outline-none cursor-pointer"
+        >
+          <div className="w-6.5 h-6.5 bg-zinc-900 border border-zinc-800 rounded-md flex items-center justify-center text-zinc-100 text-[11px] transition-all duration-200 group-hover:scale-[1.02] font-extrabold shadow-sm font-sans">
             E
           </div>
-          <div>
-            <h1 className="font-sans text-lg font-bold text-[#0b1c30] leading-none">
+          <div className="text-left">
+            <h1 className="font-sans text-[13px] font-bold text-zinc-900 leading-none tracking-tight">
               EchoMail
             </h1>
-            <p className="font-sans text-[10px] uppercase tracking-widest text-[#777587] font-semibold mt-1">
+            <p className="font-sans text-[8px] uppercase tracking-wider text-zinc-400/80 font-bold mt-0.5">
               Communication loops
             </p>
           </div>
-        </div>
+        </Link>
 
         {/* Navigation Items */}
         <nav className="flex-1 space-y-1.5 overflow-y-auto custom-scrollbar pr-1 -mr-1">
