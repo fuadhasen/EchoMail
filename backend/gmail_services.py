@@ -1,5 +1,5 @@
 """Service module for managing and processing data.
-This module provides a set of functions to comunicate with Gmail API
+This module provides a set of functions to communicate with Gmail API
 """
 
 import base64
@@ -360,7 +360,9 @@ class GmailService:
             return ""
 
     def get_email_recipient(self, user_id="me", msg_id=""):
-        """Get the recipient of a specific email message.
+        """Get the recipient of a specific email message
+        when we track new sent email we need to get its recipient, 
+        so this is where we get this.
         Args:
             user_id (str): The user's email address. The special value "me"
                 indicates the authenticated user.
@@ -397,7 +399,7 @@ class GmailService:
     def get_emails_with_details(
         self, user_id="me", criteria: Dict[str, Any] = None, max_results: int = 20
     ) -> List[Dict[str, Any]]:
-        """Get emails with their details in a single call.
+        """Get emails (can be a list if they match the criteria) with their details in a single call.
 
         Args:
             user_id (str): The user's email address. The special value "me"
