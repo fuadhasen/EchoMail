@@ -10,7 +10,7 @@ class EmailTrackerService:
 
     @staticmethod
     def get_tracked_email(db: Session, email_id: str) -> Optional[TrackedEmail]:
-        """Get a tracked email by its Gmail message ID."""
+        """Get a tracked email by its Gmail message ID(email_id)."""
         return db.query(TrackedEmail).filter(TrackedEmail.email_id == email_id).first()
 
     @staticmethod
@@ -82,9 +82,9 @@ class EmailTrackerService:
             is_done=False,
         )
         db.add(tracked_email)
-        db.flush()  # Flush to get the ID without committing
+        db.flush()  # Flush to get the ID without committing to associate it with its recipient  
 
-        # Create or get recipients and associate them with the tracked email
+        # Create if the recipient of this email was not created before or get recipients and associate them with the tracked email
         for email in recipient_emails:
             recipient = db.query(Recipient).filter(Recipient.email == email).first()
             if not recipient:
@@ -111,7 +111,7 @@ class EmailTrackerService:
         db: Session, tracked_email_id: int, recipient_email: str, response_id: str
     ) -> bool:
         """
-        Mark a recipient as having responded to a tracked email.
+        Mark a recipient as having responded to a tracked email (log response).
 
         Args:
             db: Database session
@@ -147,7 +147,7 @@ class EmailTrackerService:
         association.response_id = response_id
         db.add(association)
 
-        # Check if email is now done and update its status
+        # Check if tracked email is now done and update its status
         tracked_email = (
             db.query(TrackedEmail).filter(TrackedEmail.id == tracked_email_id).first()
         )
@@ -192,7 +192,7 @@ class EmailTrackerService:
         content: Optional[str] = None,
     ) -> Optional[Reminder]:
         """
-        Add a record of a reminder sent to a recipient.
+        Add a record of a reminder sent to single recipient.
 
         Args:
             db: Database session
