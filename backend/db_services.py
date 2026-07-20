@@ -246,7 +246,7 @@ class EmailTrackerService:
         - responded_recipients: Required recipients who have responded
         - pending_recipients: Required recipients who haven't responded
         """
-        # Get all associations for this email
+        # Get all associations for this email (1 email to many recipients)
         associations = (
             db.query(TrackedEmailRecipient)
             .filter(TrackedEmailRecipient.tracked_email_id == tracked_email_id)

@@ -5,7 +5,7 @@ export type Status = "loading" | "authenticated" | "unauthenticated";
 
 const useAuth = () => {
   const checkStatus = async () => {
-    const res = await axios.get("http://localhost:8000/me");
+    const res = await axios.get("http://localhost:8000/auth/status");
     return res.data;
   };
 
@@ -18,8 +18,8 @@ const useAuth = () => {
   const status: Status = isPending
     ? "loading"
     : data.status == "authenticated"
-    ? "authenticated"
-    : "unauthenticated";
+      ? "authenticated"
+      : "unauthenticated";
 
   return { status, isPending, error };
 };

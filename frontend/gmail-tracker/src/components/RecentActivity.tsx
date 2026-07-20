@@ -1,14 +1,7 @@
-import React, { useState } from "react";
+import { useState } from "react";
 
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardContent,
-} from "../components/ui/card";
-
-import { Mail, Reply, Bell, Eye, Loader2 } from "lucide-react";
 import type { ActivityItems } from "@/type";
+import { Bell, Eye, Loader2, Mail, Reply } from "lucide-react";
 
 interface RecentActivityProps {
   initialItems: ActivityItems[];

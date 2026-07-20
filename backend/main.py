@@ -31,6 +31,7 @@ class RecipientBase(BaseModel):
     name: Optional[str] = None
 
 
+# when returning tracked email details
 class RecipientWithResponse(RecipientBase):
     has_responded: bool
     must_respond: bool
@@ -60,6 +61,7 @@ class TrackedEmailResponse(BaseModel):
     recipients: List[RecipientWithResponse]
 
     class Config:
+        # convert db objects to json
         from_attributes = True
 
 
@@ -77,7 +79,7 @@ class SendReminderRequest(BaseModel):
 async def lifespan(app: FastAPI):
     # Startup: create tables and start the scheduler
     create_tables()
-    start_scheduler()
+    # start_scheduler()
     print(
         "Application started - Background scheduler is running to check emails every 10 minutes"
     )
@@ -85,7 +87,7 @@ async def lifespan(app: FastAPI):
     yield  # This is where the application runs
 
     # Shutdown: stop the scheduler
-    stop_scheduler()
+    # stop_scheduler()
     print("Application shutting down - Background scheduler stopped")
 
 
@@ -103,7 +105,7 @@ app.add_middleware(
 
 @app.get("/")
 async def root():
-    return {"message": "Email Tracker API"}
+    return {"message": "Welcome to my very first app"}
 
 
 @app.get("/auth/callback")
@@ -127,14 +129,13 @@ async def auth_callback(code: str):
         json.dump(token_data, f)
 
 
-    return RedirectResponse(url="http://localhost:5173")
+    return RedirectResponse(url="http://localhost:5174")
 
 
 @app.get('/user_info')
 async def user_info():
     """Retrieve user information
     """
-    print('user info is hitted')
     gmail_service = GmailService()
 
     if not gmail_service.is_available():
@@ -158,7 +159,7 @@ async def logout():
         raise HTTPException(status_code=403, detail="logout Failed")
 
 
-@app.get("/me")
+@app.get("/auth/status")
 async def status_checking():
     """check status"""
 

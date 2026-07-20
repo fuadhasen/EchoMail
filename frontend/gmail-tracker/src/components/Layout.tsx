@@ -1,27 +1,29 @@
-import { Outlet } from "react-router";
+import { Outlet, useNavigate } from "react-router";
 // import NavBar from "./NavBar";
 import SideBar from "./SideBar";
 import ToastContainer from "./ToastContainer";
+import useAuth from "@/hooks/useAuth";
+import { useEffect } from "react";
 
 const Layout = () => {
   // const location = useLocation();
-  // const navigate = useNavigate();
+  const navigate = useNavigate();
 
-  // const { status, error } = useAuth();
+  const { status, error } = useAuth();
 
-  // useEffect(() => {
-  //   if (status == "unauthenticated") {
-  //     navigate("/login");
-  // //   }
-  // // }, [status, navigate]);
+  useEffect(() => {
+    if (status == "unauthenticated") {
+      navigate("/login");
+    }
+  }, [status, navigate]);
 
-  // if (error) return <p className="m-10 p-4 bg-red-100">{error.message}</p>;
+  if (error) return <p className="m-10 p-4 bg-red-100">{error.message}</p>;
 
   // Email
 
   return (
     <>
-      {"authenticated" == "authenticated" && (
+      {status == "authenticated" && (
         <div className="flex flex-col md:flex-row h-screen bg-[#f8f9ff]">
           <SideBar />
           {/* Main Content Area */}
