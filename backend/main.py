@@ -2,6 +2,7 @@ import uvicorn
 import httpx
 import json
 import os
+from urllib.parse import urlencode
 from fastapi import FastAPI, Query, Depends, HTTPException, Body
 from fastapi.responses import RedirectResponse
 from typing import List, Optional
@@ -75,6 +76,13 @@ class SendReminderRequest(BaseModel):
     custom_message: Optional[str] = None
 
 
+scopes = [
+        "https://www.googleapis.com/auth/gmail.readonly",
+        "https://www.googleapis.com/auth/userinfo.profile",
+        "https://www.googleapis.com/auth/userinfo.email"
+    ]
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Startup: create tables and start the scheduler
@@ -107,7 +115,25 @@ app.add_middleware(
 async def root():
     return {"message": "Welcome to my very first app"}
 
+# google login endpoint
+@app.get("/auth/google")
+async def google_login():
+    google_auth_url = "https://accounts.google.com/o/oauth2/auth"
 
+    params = {
+        "client_id": Config.CLIENT_ID,
+        "redirect_uri": Config.REDIRECT_URI,
+        "response_type": "code",
+        "scope": " ".join(scopes),
+        "access_type": "offline",
+        "prompt": "consent",
+    }
+
+    url = f"{google_auth_url}?{urlencode(params)}"
+    return RedirectResponse(url=url)
+
+
+# redirect uri
 @app.get("/auth/callback")
 async def auth_callback(code: str):
     "Google redirect url"
@@ -129,7 +155,7 @@ async def auth_callback(code: str):
         json.dump(token_data, f)
 
 
-    return RedirectResponse(url="http://localhost:5174")
+    return RedirectResponse(url="http://localhost:5173")
 
 
 @app.get('/user_info')
