@@ -1,11 +1,21 @@
+import api from "@/services/api";
 import { useQuery } from "@tanstack/react-query";
-import axios from "axios";
 
 export type Status = "loading" | "authenticated" | "unauthenticated";
 
+interface User {
+  name: string;
+  email: string;
+}
+
+interface AuthResponse {
+  authenticated: boolean;
+  user: User | null;
+}
+
 const useAuth = () => {
-  const checkStatus = async () => {
-    const res = await axios.get("http://localhost:8000/auth/status");
+  const checkStatus = async (): Promise<AuthResponse> => {
+    const res = await api.get("/auth/me");
     return res.data;
   };
 
@@ -15,12 +25,15 @@ const useAuth = () => {
     staleTime: 5 * 60 * 1000, // cache for 5 min
   });
 
-  if (isPending) return { status: "loading", isPending, error };
+  const status: Status = isPending
+    ? "loading"
+    : data?.authenticated
+      ? "authenticated"
+      : "unauthenticated";
 
-  const status: Status =
-    data?.status == "authenticated" ? "authenticated" : "unauthenticated";
+  console.log(data?.user);
 
-  return { status, isPending, error };
+  return { status, user: data?.user ?? null, isPending, error };
 };
 
 export default useAuth;

@@ -172,16 +172,6 @@ const SideBar = ({ activeItem = "Dashboared", onNavigate }: SideBarProps) => {
                         setIsMobileProfileOpen(false);
                         setIsMobileDrawerOpen(false);
                       }}
-                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-left font-sans text-xs font-bold text-zinc-700 hover:bg-zinc-50 hover:text-zinc-950  transition-all cursor-pointer"
-                    >
-                      <User size={14} className="text-zinc-400" />
-                      Profile
-                    </button>
-                    <button
-                      onClick={() => {
-                        setIsMobileProfileOpen(false);
-                        setIsMobileDrawerOpen(false);
-                      }}
                       className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-left font-sans text-xs font-bold text-zinc-700 hover:bg-zinc-50 hover:text-[#3525cd] transition-all cursor-pointer"
                     >
                       <Settings size={14} className="text-zinc-400" />
@@ -294,26 +284,18 @@ const SideBar = ({ activeItem = "Dashboared", onNavigate }: SideBarProps) => {
                 onClick={() => setIsMobileProfileOpen(false)}
               />
               <div className="absolute bottom-14 left-0 right-0 bg-white border border-zinc-200/80 rounded-xl shadow-[0_4px_12px_rgba(0,0,0,0.08)] p-1.5 z-50 animate-in fade-in slide-in-from-bottom-2 duration-150">
-                <button
-                  onClick={() => {
-                    setIsMobileProfileOpen(false);
-                    setIsMobileDrawerOpen(false);
-                  }}
-                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-left font-sans text-xs font-bold text-zinc-700 hover:bg-zinc-50 hover:text-zinc-950  transition-all cursor-pointer"
-                >
-                  <User size={14} className="text-zinc-400" />
-                  Profile
-                </button>
-                <button
-                  onClick={() => {
-                    setIsMobileProfileOpen(false);
-                    setIsMobileDrawerOpen(false);
-                  }}
-                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-left font-sans text-xs font-bold text-zinc-700 hover:bg-zinc-50 hover:text-[#3525cd] transition-all cursor-pointer"
-                >
-                  <Settings size={14} className="text-zinc-400" />
-                  Account Settings
-                </button>
+                <Link to={"/settings"}>
+                  <button
+                    onClick={() => {
+                      setIsMobileProfileOpen(false);
+                      setIsMobileDrawerOpen(false);
+                    }}
+                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-left font-sans text-xs font-bold text-zinc-700 hover:bg-zinc-50 hover:text-[#3525cd] transition-all cursor-pointer"
+                  >
+                    <Settings size={14} className="text-zinc-400" />
+                    Account Settings
+                  </button>
+                </Link>
                 <div className="h-px bg-zinc-100 my-1" />
                 <button
                   onClick={() => {

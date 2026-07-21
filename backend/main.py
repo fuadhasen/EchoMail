@@ -11,6 +11,8 @@ from sqlalchemy.orm import Session
 from pydantic import BaseModel, EmailStr, Field
 from contextlib import asynccontextmanager
 from config import Config
+from config import TOKEN_PATH
+from config import USER_PATH
 
 from gmail_services import GmailService
 from models import get_db, create_tables
@@ -76,6 +78,12 @@ class SendReminderRequest(BaseModel):
     custom_message: Optional[str] = None
 
 
+class UserResponse(BaseModel):
+    name: str
+    email: str
+    avatar: Optional[str] = None
+
+
 scopes = [
         "https://www.googleapis.com/auth/gmail.readonly",
         "https://www.googleapis.com/auth/userinfo.profile",
@@ -100,7 +108,9 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(lifespan=lifespan)
-TOKEN_PATH=Path("token.json")
+
+# Temporarily for single user support!
+# TOKEN_PATH=Path("token.json")
 
 app.add_middleware(
     CORSMiddleware,
@@ -150,33 +160,49 @@ async def auth_callback(code: str):
         res = await client.post(token_url, data=data)
         res.raise_for_status()
         token_data = res.json()
-    
+
     with open(TOKEN_PATH, "w") as f:
         json.dump(token_data, f)
-
+    
+    # make sure to save the authenticated user too
+    gmail_service = GmailService()
+    user_info = gmail_service.get_user_info()
+    gmail_service.save_user_info(user_info)
 
     return RedirectResponse(url="http://localhost:5173")
 
 
-@app.get('/user_info')
-async def user_info():
-    """Retrieve user information
-    """
+@app.get("/auth/me")
+async def get_current_user():
+    """check status and return logged-in user"""
+        
+    # better to use dependecy injection here
     gmail_service = GmailService()
 
-    if not gmail_service.is_available():
-        error_message = (gmail_service.get_credentials_error() or "Gmail service not available")
-        return {"error": error_message, "user_info": ""}
-    
-    user_info = gmail_service.get_user_info()
-    return {"user_info": user_info}
+    if not gmail_service.is_authenticated():
+        return {"authenticated": False, "user": None}
 
+    if not USER_PATH.exists():
+        return {
+            "authenticated": False,
+            "user": None
+        }
+    
+    with open(USER_PATH, "r") as f:
+        user = json.load(f)
+
+    return {
+        "authenticated": True,
+        "user": user
+    }
+    
 
 @app.post('/logout')
 async def logout():
     """user logout endpoint
     """
-    if not TOKEN_PATH.exists():
+    gmail_service = GmailService()
+    if not gmail_service.is_authenticated():
         return {"status": "unauthenticated"}
 
     try:
@@ -184,14 +210,6 @@ async def logout():
     except Exception as e:
         raise HTTPException(status_code=403, detail="logout Failed")
 
-
-@app.get("/auth/status")
-async def status_checking():
-    """check status"""
-
-    if TOKEN_PATH.exists():
-        return {"status": "authenticated"}
-    return {"status": "unauthenticated"}
 
 
 @app.get("/search-sent-emails")

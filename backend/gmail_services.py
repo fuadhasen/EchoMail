@@ -7,12 +7,15 @@ import json
 from config import Config
 from pathlib import Path
 from typing import List, Dict, Any, Optional, Union
+from config import USER_PATH
 
 
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
+from google.auth.exceptions import RefreshError
+
 
 
 class GmailService:
@@ -76,6 +79,15 @@ class GmailService:
             bool: True if service is available, False otherwise
         """
         return self.service is not None and self.error is None
+    
+    def is_authenticated(self):
+        """Check if the user is authenticated or not
+
+        Returns:
+            bool: True if its authenticated , False otherwise
+        """
+        return self.TOKEN_PATH.exists()
+
 
     def get_credentials_error(self):
         """Return the credentials error message if any.
@@ -108,22 +120,41 @@ class GmailService:
             print(f"An error occurred: {error}")
             return []
     
+    def save_user_info(self, user_info):
+        """save the authenticated user information
+        """
+        user = {
+            "name": user_info["names"][0]["displayName"],
+            "email": user_info["emailAddresses"][0]["value"],
+            "avatar": user_info["photos"][0]["url"]
+            if user_info.get("photos")
+            else None,
+        }
+
+        with open(USER_PATH, "w") as f:
+            json.dump(user, f)
+        
+        return user
+
     def get_user_info(self):
         """Get user information (email_addresses, photos, names)
         """
-        people_service = build("people", "v1", credentials=self.creds)
-        print("scopes", self.creds.scopes)
-        if people_service is None:
-            return {"error": "user is not authenticated"}
         
         try:
+            people_service = build("people", "v1", credentials=self.creds)
             user_info = (
                 people_service.people().get(resourceName='people/me', personFields='names,emailAddresses,photos').execute()
             )
             return user_info
+        
+        except RefreshError as error:
+            print(f"Token refresh error: {error}")
+            return {"error": "Authentication expired"}
+
         except HttpError as error:
-            print (f'An error occurred: {error}')
-            return []
+            print(f"Google API error: {error}")
+            return {"error": "Google API request failed"}
+
 
     def search_emails(
         self,

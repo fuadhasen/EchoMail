@@ -1,6 +1,7 @@
 """Configuration Setting"""
 
 from pydantic_settings import BaseSettings
+from pathlib import Path
 
 class Settings(BaseSettings):
     DATABASE_URL: str
@@ -13,5 +14,8 @@ class Settings(BaseSettings):
         "env_file": ".env",
         "extra": "ignore"
     }
+
+USER_PATH=Path("user.json")
+TOKEN_PATH=Path("token.json")
 
 Config = Settings()

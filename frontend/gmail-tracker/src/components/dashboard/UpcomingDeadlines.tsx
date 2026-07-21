@@ -1,6 +1,6 @@
 import { Card } from "@radix-ui/themes";
 import React from "react";
-import { CardContent, CardHeader, CardTitle } from "./ui/card";
+import { CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Calendar, CalendarClock } from "lucide-react";
 
 const upcomingDeadlines = [
