@@ -1,8 +1,8 @@
-import AnalyticsPreview from "./AnalyticsPreview";
-import NeedsAttention from "./NeedsAttention";
-import RecentActivity from "./RecentActivity";
-import SummaryCards from "./SummaryCards";
-import UpcomingDeadlines from "./UpcomingDeadlines";
+import AnalyticsPreview from "../components/AnalyticsPreview";
+import NeedsAttention from "../components/NeedsAttention";
+import RecentActivity from "../components/RecentActivity";
+import SummaryCards from "../components/SummaryCards";
+import UpcomingDeadlines from "../components/UpcomingDeadlines";
 
 const initialAttentionItems = [
   {

@@ -15,11 +15,10 @@ const useAuth = () => {
     staleTime: 5 * 60 * 1000, // cache for 5 min
   });
 
-  const status: Status = isPending
-    ? "loading"
-    : data.status == "authenticated"
-      ? "authenticated"
-      : "unauthenticated";
+  if (isPending) return { status: "loading", isPending, error };
+
+  const status: Status =
+    data?.status == "authenticated" ? "authenticated" : "unauthenticated";
 
   return { status, isPending, error };
 };

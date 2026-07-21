@@ -1,12 +1,12 @@
 import { Navigate, Route, Routes } from "react-router";
-import Analytics from "./components/Analytics";
-import EmailDetail from "./components/EmailDetail";
-import Home from "./components/Home";
-import Layout from "./components/Layout";
-import LoginWithHandler from "./components/login";
-import Settings from "./components/Settings";
-import TrackedEmails from "./components/TrackedEmail";
-import TrackNew from "./components/TrackNew";
+import Analytics from "./pages/Analytics";
+import EmailDetail from "./pages/EmailDetail";
+import Home from "./pages/Home";
+import Layout from "./components/layout/Layout";
+import LoginWithHandler from "./pages/login";
+import Settings from "./pages/Settings";
+import TrackedEmails from "./pages/TrackedEmail";
+import TrackNew from "./pages/TrackNew";
 
 const App = () => {
   return (

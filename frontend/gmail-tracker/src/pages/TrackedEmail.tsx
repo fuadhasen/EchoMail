@@ -18,10 +18,7 @@ import {
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router";
-import {
-  getTrackedEmails,
-  type TrackedEmail,
-} from "..//data/mockTrackedEmails";
+import { getTrackedEmails, type TrackedEmail } from "../data/mockTrackedEmails";
 
 const TrackedEmails = () => {
   const { triggerToast } = useToast();

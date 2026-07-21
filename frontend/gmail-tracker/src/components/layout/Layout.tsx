@@ -1,7 +1,7 @@
 import { Outlet, useNavigate } from "react-router";
 // import NavBar from "./NavBar";
-import SideBar from "./SideBar";
-import ToastContainer from "./ToastContainer";
+import SideBar from "../SideBar";
+import ToastContainer from "../common/ToastContainer";
 import useAuth from "@/hooks/useAuth";
 import { useEffect } from "react";
 
@@ -19,7 +19,9 @@ const Layout = () => {
 
   if (error) return <p className="m-10 p-4 bg-red-100">{error.message}</p>;
 
-  // Email
+  if (status === "loading") {
+    return "Loading Screen";
+  }
 
   return (
     <>
