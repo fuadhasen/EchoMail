@@ -1,42 +1,38 @@
 import React, { useState } from "react";
-import { Lock, Sparkles, ShieldCheck, ArrowRight } from "lucide-react";
+import { Lock } from "lucide-react";
 
-export default function LoginPage() {
+const login = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   const handleGoogleLogin = () => {
     setIsLoading(true);
-    window.location.href = "http://localhost:8000/auth/google";
+    setTimeout(() => {
+      window.location.href = "/";
+    }, 1000);
   };
 
   return (
-    <div
-      className="min-h-screen flex flex-col items-center justify-center bg-[#fafafb] p-6 relative overflow-hidden"
-      id="echomail-login-root"
-    >
-      {/* Background Decorative Accent 1: Minimalist premium micro-grid */}
-      <div className="absolute inset-0 opacity-[0.03] pointer-events-none bg-[linear-gradient(to_right,#000_1px,transparent_1px),linear-gradient(to_bottom,#000_1px,transparent_1px)] bg-[size:24px_24px]" />
+    <div className="min-h-screen flex flex-col items-center justify-center bg-[#fafafb] p-6 relative overflow-hidden">
+      {/* Background decorative accent 1: Minimalist premium micor-grid */}
+      <div className="absolute inset-0 opacity-[0.03] pionter-events-none bg-[linear-gradient(to_right,#000_1px,transparent_1px),linear-gradient(to_bottom,#000_1px,transparent_1px)] bg-[size:24px_24px]" />
 
-      {/* Background Decorative Accent 2: Soft, organic ambient glow shapes in the distant background */}
-      <div className="absolute top-[10%] left-[15%] w-[450px] h-[450px] bg-indigo-500/[0.03] rounded-full blur-[130px] pointer-events-none animate-pulse duration-[6s]" />
-      <div className="absolute bottom-[10%] right-[15%] w-[500px] h-[500px] bg-violet-500/[0.02] rounded-full blur-[140px] pointer-events-none animate-pulse duration-[8s]" />
+      {/* Background decorative accent 2: Soft, organic ambient shapes in the distance background */}
+      <div className="absolute top-[10%] left-[15%] w-[450px] h-[450px] bg-indigo-500/[0.03] rounded-full pointer-events-none blur-[130px] animate-pulse duration-[6s] " />
+      <div className="absolute bottom-[10%] right-[15%] w-[500px] h-[500px] bg-violet-500/[0.02] rounded-full  blur-[140px] pointer-events-none animate-pulse duration-[8s]" />
 
-      {/* Decorative center ring overlay for visual layering and depth */}
+      {/* decorative center ring overlay for visual layering and depth */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] border border-zinc-200/[0.15] rounded-full pointer-events-none" />
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] border border-zinc-200/[0.08] rounded-full pointer-events-none" />
 
-      {/* Main Single-Column Premium Login Card with Double Layered Shadow and Border */}
-      <div
-        className="w-full max-w-[440px] bg-white border border-zinc-200/60 rounded-[28px] p-10 md:p-14 shadow-[0_20px_50px_rgba(0,0,0,0.02),0_1px_3px_rgba(0,0,0,0.01),inset_0_1px_0_rgba(255,255,255,0.6)] relative z-10 transition-all duration-300 hover:shadow-[0_24px_60px_rgba(0,0,0,0.03)]"
-        id="login-card"
-      >
-        {/* Subtle, glowing light bar on top of card for premium hardware-like feel */}
-        <div className="absolute inset-x-12 -top-px h-[2px] bg-gradient-to-r from-transparent via-indigo-500/25 to-transparent" />
+      {/* main login card */}
+      <div className="w-full max-w-[440px] bg-white border border-zinc-200/60 rounded-[28px] p-10 md:p-14 shadow-[0_20px_50px_rgba(0,0,0,0.02),0_1px_3px_rgba(0,0,0,0.01),inset_0_1px_0_rgba(255,255,255,0.6)] relative z-10 transition-all duration-300 hover:shadow-[0_24px_60px_rgba(0,0,0,0.03)]">
+        {/* light bar on the top of card for premium hardware-like feel  */}
+        <div className="absolute inset-x-12 -top-px h-0.5 bg-linear-to from-transparent via-indigo-500/25 to-transparent" />
 
         <div className="flex flex-col items-center text-center space-y-10">
-          {/* EchoMail Brand Section with refined spacing */}
-          <div className="flex flex-col items-center gap-2.5 select-none animate-in fade-in slide-in-from-top-3 duration-500">
-            <div className="w-10 h-10 bg-zinc-950 text-zinc-100 rounded-xl flex items-center justify-center font-sans font-black text-sm tracking-tighter shadow-[0_4px_12px_rgba(0,0,0,0.08)] hover:scale-105 transition-transform duration-200">
+          {/* Echomail brand section */}
+          <div className="flex flex-col items-center gap-2.5 select-none animate-in fade-in slide-in-from-top-3 duration-300">
+            <div className="w-10 h-10 bg-zinc-950 text-zinc-100 rounded-xl flex items-center justify-center font-sans font-black text-xs tracking-tighter shadow-[0_4px_12px_rgba(0,0,0,0.08)] hover:scale-105 transition-transform duration-200">
               E
             </div>
             <div className="space-y-0.5">
@@ -49,7 +45,7 @@ export default function LoginPage() {
             </div>
           </div>
 
-          {/* Typography Heading & Description with elegant mathematical line heights */}
+          {/* Typography heading and descriptions */}
           <div className="space-y-4 animate-in fade-in slide-in-from-top-4 duration-700">
             <h1 className="font-sans text-[24px] md:text-[27px] font-bold text-[#0b1c30] tracking-tight leading-[1.28] px-1">
               Track your important emails and make sure conversations get
@@ -58,18 +54,17 @@ export default function LoginPage() {
             <p className="font-sans text-xs text-zinc-400 leading-relaxed font-medium px-2">
               EchoMail sits silently above your primary inbox to securely audit
               outgoing threads and guarantee every critical send meets its
-              matching response.
+              matching responses.
             </p>
           </div>
 
-          {/* Core Login Call to Action with enhanced depth */}
-          <div className="w-full space-y-4.5 pt-3 animate-in fade-in slide-in-from-top-5 duration-1000">
+          {/* Core login call */}
+          <div className="w-full space-y-4.5 pt-3 animate-in fade-in slide-in-from-top-5 duration-1000 ">
             <button
               type="button"
               onClick={handleGoogleLogin}
               disabled={isLoading}
               className="w-full flex items-center justify-center gap-3 py-3.5 px-6 bg-zinc-950 hover:bg-zinc-900 active:scale-[0.98] rounded-xl font-sans text-xs font-bold text-white transition-all duration-150 shadow-[0_4px_12px_rgba(0,0,0,0.1),inset_0_1px_1px_rgba(255,255,255,0.15)] cursor-pointer focus:outline-none disabled:opacity-75 relative overflow-hidden group"
-              id="google-login-button"
             >
               {isLoading ? (
                 <div className="flex items-center gap-2">
@@ -80,7 +75,6 @@ export default function LoginPage() {
                 </div>
               ) : (
                 <>
-                  {/* Google SVG Vector Graphic */}
                   <svg
                     className="w-4 h-4 shrink-0 transition-transform duration-200 group-hover:scale-105"
                     viewBox="0 0 24 24"
@@ -111,7 +105,6 @@ export default function LoginPage() {
               )}
             </button>
 
-            {/* Small trust/security micro-copy with refined contrast */}
             <div className="flex items-center justify-center gap-1.5 text-[10px] text-zinc-400 font-semibold select-none">
               <Lock size={11} className="text-zinc-300" />
               <span>
@@ -122,7 +115,6 @@ export default function LoginPage() {
         </div>
       </div>
 
-      {/* Floating minimalistic footer - raised slightly and with extra breathing room */}
       <footer className="absolute bottom-10 text-[9.5px] text-zinc-400 font-bold font-sans tracking-wide space-x-4 select-none animate-in fade-in duration-1000">
         <span>© 2026 ECHOMAIL CORP.</span>
         <span className="text-zinc-300">•</span>
@@ -144,4 +136,6 @@ export default function LoginPage() {
       </footer>
     </div>
   );
-}
+};
+
+export default login;

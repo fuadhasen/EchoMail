@@ -6,6 +6,7 @@ export type Status = "loading" | "authenticated" | "unauthenticated";
 interface User {
   name: string;
   email: string;
+  avatar: string;
 }
 
 interface AuthResponse {

@@ -1,3 +1,4 @@
+import useAuth from "@/hooks/useAuth";
 import {
   BarChart3,
   ChevronsUpDown,
@@ -7,7 +8,6 @@ import {
   Menu,
   Plus,
   Settings,
-  User,
   X,
 } from "lucide-react";
 import { useState } from "react";
@@ -19,8 +19,9 @@ interface SideBarProps {
 }
 
 const SideBar = ({ activeItem = "Dashboared", onNavigate }: SideBarProps) => {
-  const [active, setActive] = useState(activeItem);
+  const { user } = useAuth();
 
+  const [active, setActive] = useState(activeItem);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState(false);
   const [isMobileProfileOpen, setIsMobileProfileOpen] = useState(false);
@@ -263,15 +264,25 @@ const SideBar = ({ activeItem = "Dashboared", onNavigate }: SideBarProps) => {
             className="w-full flex items-center justify-between p-2 rounded-xl hover:bg-zinc-100/60 transition-all text-left group cursor-pointer"
           >
             <div className="flex items-center gap-2.5 overflow-hidden">
-              <div className="w-8 h-8 rounded-full bg-zinc-900 text-white font-sans text-xs font-extrabold flex items-center justify-center shrink-0">
-                AR
+              <div className="w-8 h-8 rounded-full overflow-hidden border border-[#3525cd]/20 shadow-sm bg-zinc-900 text-white font-sans text-xs font-extrabold flex items-center justify-center shrink-0">
+                {user?.avatar ? (
+                  <img
+                    src={user.avatar}
+                    alt={user.name}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <span className="text-white text-xs font-bold">
+                    {user?.name?.charAt(0).toUpperCase()}
+                  </span>
+                )}
               </div>
               <div className="overflow-hidden">
                 <h4 className="font-sans text-xs font-bold text-[#0b1c30] truncate leading-tight">
-                  Alex Revera
+                  {user?.name}
                 </h4>
                 <p className="font-sans text-[10px] text-zinc-500 truncate leading-none mt-0.5 font-medium">
-                  fuya241@gmail.com
+                  {user?.email}
                 </p>
               </div>
             </div>
