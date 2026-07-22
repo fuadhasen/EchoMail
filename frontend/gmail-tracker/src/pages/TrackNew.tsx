@@ -13,16 +13,13 @@ import {
   ArrowRight,
   Calendar,
   Check,
-  CheckCircle,
   CheckCircle2,
   Clock,
-  Divide,
   Mail,
   Search,
   User,
 } from "lucide-react";
-import React from "react";
-import { useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router";
 
 const TrackNew = () => {
@@ -305,48 +302,14 @@ const TrackNew = () => {
                 />
               </div>
               <div className="space-y-3.5">
-                {filteredSentEmails.length === 0 ? (
-                  <div className="p-8 text-center border border-dashed border-[#c7c4d8]/20 rounded-2xl bg-[#f8f9ff]/30">
-                    <Mail className="mx-auto text-[#777587]/40 mb-2" />
-                    <p className="font-sans text-xs font-semibold text-[#777587]">
-                      No matches found for "{searchTerm}"
-                    </p>
-                    <p className="font-sans text-[11px] text-[#777587]/70 mt-1">
-                      Try searching with a different term.
-                    </p>
-                  </div>
-                ) : (
-                  filteredSentEmails.map((email) => (
-                    <div
-                      key={email.id}
-                      onClick={() => handleSelectEmail(email)}
-                      className="group p-5 border border-[#c7c4d8]/20  hover:border-[#3525cd]/40 hover:bg-[#f8f9ff]/20 rounded-2xl transition-all cursor-pointer text-left space-y-2 relative"
-                    >
-                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-                        <h4 className="font-sans text-xs font-extrabold text-[#0b1c30] group-hover:text-[#3525cd] transition-colors line-clamp-1 pr-6 ">
-                          {email.subject}
-                        </h4>
-                        <span className="font-mono text-[10px] text-[#777587] font-semibold bg-slate-100 px-2 py-0.5 rounded-md whitespace-nowrap">
-                          {email.sentDate}
-                        </span>
-                      </div>
+                <div className="p-8 text-center border border-dashed border-[#c7c4d8]/20 rounded-2xl bg-[#f8f9ff]/30">
+                  <Mail className="mx-auto text-[#777587]/40 mb-2" />
 
-                      <p className="font-sans text-[11px] text-[#464555] line-clamp-2 leading-relaxed">
-                        {email.preview}
-                      </p>
-
-                      <div className="flex items-center justify-between pt-1 border-t border-[#c7c4d8]/5 mt-2 text-[10px]">
-                        <span className="inline-flex items-center gap-1 font-sans text-[#3525cd] bg-[#eff4ff] px-2 py-0.5 rounded-md font-bold">
-                          <User size={10} />
-                          {email.recipients.length} recipients included
-                        </span>
-                        <span className="text-[#3525cd] font-bold group-hover:translate-x-1 transition-transform inline-flex items-center gap-0.5">
-                          Select Email →
-                        </span>
-                      </div>
-                    </div>
-                  ))
-                )}
+                  <p className="font-sans text-[11px] text-[#777587]/70 mt-1">
+                    Choose the email thread you have already dispatched that
+                    requires structured responses.
+                  </p>
+                </div>
               </div>
             </div>
           )}

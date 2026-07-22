@@ -7,7 +7,7 @@ const login = () => {
   const handleGoogleLogin = () => {
     setIsLoading(true);
     setTimeout(() => {
-      window.location.href = "/";
+      window.location.href = "http://localhost:8000/auth/google";
     }, 1000);
   };
 
