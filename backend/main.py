@@ -247,6 +247,7 @@ async def search_sent_emails_endpoint(
             "id": msg_id,
             "subject": gmail_service.get_email_subject(msg_id=msg_id),
             "sender": gmail_service.get_email_sender(msg_id=msg_id),
+            # recipients should not be included here
             "recipients": gmail_service.get_email_recipient(msg_id=msg_id),
             "snippet": email.get("snippet", ""),
             "thread_id": email.get("threadId", ""),

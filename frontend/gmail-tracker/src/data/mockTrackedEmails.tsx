@@ -407,91 +407,227 @@ const defaultEmails: TrackedEmail[] = [
 
 const LOCAL_STORAGE_KEY = "echomail_tracked_emails";
 
+export interface SentEmailRecipient {
+  name: string;
+  email: string;
+  avatar?: string;
+  role?: string;
+}
+
+export interface SentEmailSender {
+  name: string;
+  email: string;
+  avatar?: string;
+}
+
 export interface SentEmail {
   id: string;
+  thread_id: string;
+  sender: SentEmailSender;
   subject: string;
   sentDate: string;
   preview: string;
-  recipients: { name: string; email: string }[];
+  snippet: string;
+  recipients: SentEmailRecipient[];
 }
 
 const mockSentEmails: SentEmail[] = [
   {
     id: "sent-1",
+    thread_id: "thread_apollo_9021",
     subject: "Project Apollo Design Guidelines Update",
+    sender: { name: "You (Product Lead)", email: "lead@echomail.app" },
     sentDate: "Jul 10, 2026, 4:32 PM",
     preview:
       "Hi everyone, I've attached the finalized design tokens and component specs for the new mobile viewports. Please let me know if you see any conflicts with...",
+    snippet:
+      "Hi everyone, I've attached the finalized design tokens and component specs for the new mobile viewports. Please review the attached Figma tokens...",
     recipients: [
-      { email: "sarah.j@organization.com", name: "Sarah Jenkins" },
-      { email: "clara.t@organization.com", name: "Clara Tsai" },
-      { email: "david.k@organization.com", name: "David Kim" },
-      { email: "elena.r@organization.com", name: "Elena Rostova" },
-      { email: "mike.r@organization.com", name: "Mike Ross" },
+      {
+        email: "sarah.j@organization.com",
+        name: "Sarah Jenkins",
+        role: "Design Lead",
+      },
+      {
+        email: "clara.t@organization.com",
+        name: "Clara Tsai",
+        role: "Frontend Architect",
+      },
+      {
+        email: "david.k@organization.com",
+        name: "David Kim",
+        role: "Product Designer",
+      },
+      {
+        email: "elena.r@organization.com",
+        name: "Elena Rostova",
+        role: "QA Engineer",
+      },
+      {
+        email: "mike.r@organization.com",
+        name: "Mike Ross",
+        role: "Product Manager",
+      },
     ],
   },
   {
     id: "sent-2",
+    thread_id: "thread_budget_4812",
     subject: "Annual Budget Planning FY27",
+    sender: { name: "You (Product Lead)", email: "lead@echomail.app" },
     sentDate: "Jul 09, 2026, 9:15 AM",
     preview:
       "Attached is the spreadsheet with current department expenditures and projected allocations. Please check your team's portion and respond by Monday.",
+    snippet:
+      "Attached is the spreadsheet with current department expenditures and projected allocations. Please confirm department headcount needs...",
     recipients: [
-      { email: "alex.m@organization.com", name: "Alex Mercer" },
-      { email: "fiona.g@organization.com", name: "Fiona Gallagher" },
-      { email: "stephen.s@organization.com", name: "Stephen Strange" },
-      { email: "marcus.h@organization.com", name: "Marcus Holloway" },
+      {
+        email: "alex.m@organization.com",
+        name: "Alex Mercer",
+        role: "VP Engineering",
+      },
+      {
+        email: "fiona.g@organization.com",
+        name: "Fiona Gallagher",
+        role: "Finance Director",
+      },
+      {
+        email: "stephen.s@organization.com",
+        name: "Stephen Strange",
+        role: "Ops Manager",
+      },
+      {
+        email: "marcus.h@organization.com",
+        name: "Marcus Holloway",
+        role: "Tech Lead",
+      },
     ],
   },
   {
     id: "sent-3",
+    thread_id: "thread_ops_7731",
     subject: "Weekly Operations Sync Agenda",
+    sender: { name: "You (Product Lead)", email: "lead@echomail.app" },
     sentDate: "Jul 08, 2026, 11:00 AM",
     preview:
       "Please review the agenda items for tomorrow's meeting. We'll be focusing on client onboarding times, outstanding tickets, and resource constraints.",
+    snippet:
+      "Please review the agenda items for tomorrow's meeting. We'll be focusing on client onboarding SLA metrics, ticket backlogs, and on-call rotations...",
     recipients: [
-      { email: "clara.t@organization.com", name: "Clara Tsai" },
-      { email: "stephen.s@organization.com", name: "Stephen Strange" },
-      { email: "harvey.s@organization.com", name: "Harvey Specter" },
+      {
+        email: "clara.t@organization.com",
+        name: "Clara Tsai",
+        role: "Frontend Architect",
+      },
+      {
+        email: "stephen.s@organization.com",
+        name: "Stephen Strange",
+        role: "Ops Manager",
+      },
+      {
+        email: "harvey.s@organization.com",
+        name: "Harvey Specter",
+        role: "Legal Counsel",
+      },
     ],
   },
   {
     id: "sent-4",
+    thread_id: "thread_dash_1102",
     subject: "Feedback Wanted: New Dashboard Mockups",
+    sender: { name: "You (Product Lead)", email: "lead@echomail.app" },
     sentDate: "Jul 07, 2026, 1:40 PM",
     preview:
       "Hey team, I put together three layout directions for our analytics panel. Please leave your comments on the Figma link below so we can start building.",
+    snippet:
+      "Hey team, I put together three layout directions for our analytics panel. Please review variant B vs C for density and high-contrast light mode...",
     recipients: [
-      { email: "david.k@organization.com", name: "David Kim" },
-      { email: "lisa.m@organization.com", name: "Lisa Min" },
-      { email: "ken.t@organization.com", name: "Ken Tanaka" },
-      { email: "joey.t@organization.com", name: "Joey Tribbiani" },
+      {
+        email: "david.k@organization.com",
+        name: "David Kim",
+        role: "Product Designer",
+      },
+      {
+        email: "lisa.m@organization.com",
+        name: "Lisa Min",
+        role: "UI Engineer",
+      },
+      {
+        email: "ken.t@organization.com",
+        name: "Ken Tanaka",
+        role: "Data Scientist",
+      },
+      {
+        email: "joey.t@organization.com",
+        name: "Joey Tribbiani",
+        role: "Growth Lead",
+      },
     ],
   },
   {
     id: "sent-5",
+    thread_id: "thread_sla_9921",
     subject: "Updated Client Contract & SLA",
+    sender: { name: "You (Product Lead)", email: "lead@echomail.app" },
     sentDate: "Jul 06, 2026, 3:15 PM",
     preview:
       "I have implemented the modifications requested by their legal counsel. If there are no objections, I'll send it for signature tomorrow morning.",
+    snippet:
+      "I have implemented the modifications requested by their legal counsel regarding indemnity clauses and 99.9% uptime guarantees...",
     recipients: [
-      { email: "legal.team@organization.com", name: "Legal Ops" },
-      { email: "harvey.s@organization.com", name: "Harvey Specter" },
-      { email: "mike.r@organization.com", name: "Mike Ross" },
+      {
+        email: "legal.team@organization.com",
+        name: "Legal Ops",
+        role: "Compliance Dept",
+      },
+      {
+        email: "harvey.s@organization.com",
+        name: "Harvey Specter",
+        role: "Senior Partner",
+      },
+      {
+        email: "mike.r@organization.com",
+        name: "Mike Ross",
+        role: "Associate",
+      },
     ],
   },
   {
     id: "sent-6",
+    thread_id: "thread_roadmap_3320",
     subject: "Product Roadmap Sync Notes",
+    sender: { name: "You (Product Lead)", email: "lead@echomail.app" },
     sentDate: "Jul 05, 2026, 10:05 AM",
     preview:
       "Thanks for attending the session today. Here is the summary of agreed-upon epics, milestones, and responsible team members for Q3/Q4 deliverables.",
+    snippet:
+      "Thanks for attending the session today. Here is the summary of agreed-upon epics including AI response classification and OAuth scopes...",
     recipients: [
-      { email: "sarah.j@organization.com", name: "Sarah Jenkins" },
-      { email: "david.c@organization.com", name: "David Cho" },
-      { email: "lisa.m@organization.com", name: "Lisa Min" },
-      { email: "ken.t@organization.com", name: "Ken Tanaka" },
-      { email: "bruce.b@organization.com", name: "Bruce Banner" },
+      {
+        email: "sarah.j@organization.com",
+        name: "Sarah Jenkins",
+        role: "Design Lead",
+      },
+      {
+        email: "david.c@organization.com",
+        name: "David Cho",
+        role: "Staff Engineer",
+      },
+      {
+        email: "lisa.m@organization.com",
+        name: "Lisa Min",
+        role: "UI Engineer",
+      },
+      {
+        email: "ken.t@organization.com",
+        name: "Ken Tanaka",
+        role: "Data Scientist",
+      },
+      {
+        email: "bruce.b@organization.com",
+        name: "Bruce Banner",
+        role: "Infra Lead",
+      },
     ],
   },
 ];

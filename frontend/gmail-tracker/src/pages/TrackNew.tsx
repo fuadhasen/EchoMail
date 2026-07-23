@@ -27,19 +27,31 @@ const TrackNew = () => {
   const { triggerToast } = useToast();
 
   // workflow step state (1 to 4)
-  const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
+  const [step, setStep] = useState<1 | 2 | 3>(1);
 
-  // Data state
+  // Sent Emails master data
   const sentEmails = useMemo(() => getSentEmails(), []);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedEmail, setSelectedEmail] = useState<SentEmail | null>(null);
 
-  // step 2: Recipient selection
+  // Step 1: States
+  const [searchInput, setSearchInput] = useState("");
+  const [activeQuery, setActiveQuery] = useState("");
+  const [hasSearched, setHasSearched] = useState("");
+  const [isSearching, setIsSearching] = useState("");
+  const [dateFilter, setDateFilter] = useState("");
+
+  // Thread selection state
+  const [selectedEmail, setSelectedEmail] = useState<SentEmail | null>(null);
+  const [fetchingThreadId, setFetchingThreadId] = useState<string | null>(null);
+
+  const [searchTerm, setSearchTerm] = useState("");
+
+  // step 2: States (Recipient)
+  const [isLoadingRecipients, setIsLoadingRecipients] = useState(false);
   const [selectedRecipientEmails, setSelectedRecipientEmails] = useState<
     string[]
   >([]);
 
-  // step 3:Deadline
+  // step 3: States (Tracking Settings)
   const [deadlineDate, setDeadlineDate] = useState(() => {
     // default to 3 days from now
     const d = new Date();
@@ -47,6 +59,21 @@ const TrackNew = () => {
     return d.toISOString().split("T")[0];
   });
   const [deadlineTime, setDeadlineTime] = useState("17:00"); //5 pm
+  const [reminderInterval, setReminderInterval] = useState<
+    "24h" | "48h" | "12h_before"
+  >("24h");
+  const [notifyOnResponse, setNotifyOnResponse] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Suggested quick search terms
+  const suggestedKeywords = [
+    "Project Apollo",
+    "Annual Budget",
+    "Operations",
+    "Dashboard",
+    "Contract",
+    "Roadmap",
+  ];
 
   const filteredSentEmails = useMemo(() => {
     return sentEmails.filter(
