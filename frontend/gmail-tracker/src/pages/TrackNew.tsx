@@ -16,7 +16,9 @@ import {
   CheckCircle2,
   Clock,
   Mail,
+  RefreshCw,
   Search,
+  SpaceIcon,
   User,
 } from "lucide-react";
 import React, { useMemo, useState } from "react";
@@ -261,11 +263,12 @@ const TrackNew = () => {
   return (
     <div className="w-full text-left space-y-6 pb-12">
       {/*Top Header Navigation and Status Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-4 border-slate-200/60 pb-5">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200/60 pb-5">
         <div className="flex items-center gap-3">
           <Link
             to={"/tracked"}
             className="p-2 rounded-xl bg-white border border-slate-200 text-[#777587] hover:text-[#3525cd] hover:border-[#3525cd]/30 shadow-2xs gap-2 cursor-pointer group"
+            title="Back to Tracked Emails"
           >
             <ArrowLeft
               size={14}
@@ -274,121 +277,139 @@ const TrackNew = () => {
           </Link>
           <div>
             <div className="flex items-center gap-2">
-              <span className="px-2.5">Response Loop Builder</span>
-              <span>•</span>
-              <span>Gmail Outbox Sync</span>
+              <span className="px-2.5 py-0.5 rounded-md bg-[#3525cd]/10 text-[#3525cd] text-[10px] font-extrabold uppercase tracking-widest font-mono">
+                Response Loop Builder
+              </span>
+              <span className="text-slate-300">•</span>
+              <span className="text-slate-400 font-mono text-[11px]">
+                Gmail Outbox Sync
+              </span>
             </div>
-            <h1>Track New Sent Email</h1>
+            <h1 className="font-sans text-2xl md:text-3xl font-black text-[#0b1c30] tracking-tight mt-0.5">
+              Track New Sent Email
+            </h1>
           </div>
         </div>
 
         {/* Live API Telemetry badge */}
-        <div className="">
-          <h2 className="font-sans text-2xl md:text-3xl font-black text-[#0b1c30] tracking-tight">
-            Track New Response Loop
-          </h2>
-          <p className="font-sans text-sm text-[#777587] mt-1.5 max-w-2xl">
-            Set up accountability workflows by mapping existing sent emails to
-            response goals, deadline, and automated reminders
-          </p>
-        </div>
-      </div>
-
-      {/* Full width stepper progress bar */}
-      <div>
-        <div className="bg-white border border-[#c7c4d8]/20 rounded-2xl p-5 shadow-[0_2px_8px_-3px_rgba(0,0,0,0.04)]">
-          <div className="flex flex-col items-center justify-center gap-4">
-            <div className="flex items-center justify-between w-full">
-              {steps.map((s, index) => {
-                const isActive = step === s.num;
-                const isCompleted = step > s.num;
-                const isUpcoming = step < s.num;
-
-                return (
-                  <React.Fragment key={s.num}>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        // only allow going back to already completed steps
-                        if (s.num == 1) setStep(1);
-                        else if (s.num == 2 && selectedEmail) setStep(2);
-                        else if (s.num == 3 && selectedEmail) setStep(3);
-                      }}
-                      disabled={
-                        s.num > step &&
-                        (!selectedEmail ||
-                          (s.num === 3 && selectedRecipientEmails.length === 0))
-                      }
-                      className="flex items-center gap-2 md:gap-2.5 text-left focus:outline-none group disable:cursor-not-allowed transition-all duration-200 shrink-0"
-                    >
-                      {/* step circle */}
-                      <div
-                        className={`w-8 h-8 rounded-full flex items-center justify-center font-mono text-xs font-bold transition-all duration-300 shrink-0 ${
-                          isActive
-                            ? "bg-[#3525cd] text-white shadow-md shadow-[#3525cd]/15 ring-4 ring-[#3525cd]/15"
-                            : isCompleted
-                              ? "bg-emerald-50 text-emerald-600 border border-emerald-200"
-                              : "bg-white border border-[#c7c4d8]/40 text-[#777587]/70"
-                        }`}
-                      >
-                        {isCompleted ? (
-                          <Check size={14} className="stroke-3" />
-                        ) : (
-                          <span>{s.num}</span>
-                        )}
-                      </div>
-
-                      {/* step Titles */}
-                      <div className="hidden sm:block">
-                        <p
-                          className={`font-sans text-xs font-bold transition-colors duration-200 whitespace-nowrap
-                              ${isActive ? "text-[#0b1c30]" : isCompleted ? "text-emerald-700/90" : "text-[#777587] group-hover:text-[#0b1c30]"}
-                              `}
-                        >
-                          {s.label}
-                        </p>
-                        <p className="font-sans text-[10px] text-[#777587]/60 hidden lg:block font-medium mt-0.5 leading-tight">
-                          {s.desc}
-                        </p>
-                      </div>
-                    </button>
-
-                    {/* modern connector lines */}
-                    {index < steps.length - 1 && (
-                      <div className="relative flex-1 mx-2 md:mx-4 h-[1.5px] rounded-full bg-[#f1f0f7] overflow-hidden min-w-3">
-                        <div
-                          className={`absolute top-0 left-0 h-full transition-all duration-500 ease-out ${
-                            isCompleted
-                              ? "bg-emerald-500 w-full"
-                              : isActive
-                                ? "bg-[#3525cd]/40 w-1/2"
-                                : "w-0"
-                          }`}
-                        />
-                      </div>
-                    )}
-                  </React.Fragment>
-                );
-              })}
-            </div>
-
-            {/* contextual indicator */}
-            {selectedEmail && (
-              <div className="text-center w-full mt-1 border-t border-[#c7c4d8]/10  pt-3 flex justify-center">
-                <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#3525cd] bg-[#eff4ff] px-3 py-1 rounded-full border border-[#3525cd]/10 font-sans">
-                  <CheckCircle2 />
-                  Loop target:
-                  <strong className="font-bold">
-                    {selectedEmail.subject.substring(0, 32)}...
-                  </strong>
-                </span>
-              </div>
-            )}
+        <div className="flex items-center gap-3 self-start sm:self-auto">
+          <div className="flex items-center gap-2 bg-emerald-50 border border-emerald-200/80 py-1.5 px-3 rounded-xl text-xs font-mono text-emerald-800 font-bold shadow-2xs">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+            <span>Outbox Connection</span>
+          </div>
+          <div className="hidden md:flex items-center gap-1.5 bg-slate-100border border-slate-200/80 px-3 py-1.5 rounded-xl text-xs font-mono text-[#777587]">
+            <RefreshCw size={12} className="text-slate-400" />
+            <span>OAuth 2.0 Active</span>
           </div>
         </div>
       </div>
 
-      {/* Primary Workflow container */}
+      {/* Full width stepper progress bar */}
+      <div className="bg-white border border-[#c7c4d8]/30 rounded-2xl p-4 md:p-6  shadow-[0_2px_12px_-4px_rgba(0,0,0,0.03)]">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {steps.map((s, index) => {
+            const isActive = step === s.num;
+            const isCompleted = step > s.num;
+
+            return (
+              <button
+                key={s.num}
+                type="button"
+                onClick={() => {
+                  // only allow going back to already completed steps
+                  if (s.num == 1) setStep(1);
+                  else if (s.num == 2 && selectedEmail) setStep(2);
+                }}
+                disabled={
+                  s.num > step &&
+                  (!selectedEmail ||
+                    (s.num === 3 && selectedRecipientEmails.length === 0))
+                }
+                className={`p-3.5 rounded-xl border text-left transition-all flex items-center justify-between cursor-pointer disabled:cursor-not-allowed ${
+                  isActive
+                    ? "border-[#3525cd] bg-indigo-50/40 ring-2 ring-[#3525cd]/10 shadow-2xs"
+                    : isCompleted
+                      ? "border-emerald-200 bg-emerald-50/30"
+                      : "border-slate-200/80 bg-slate-50/50 hover:bg-slate-100/50"
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <div
+                    className={`w-9 h-9 rounded-xl flex items-center justify-center font-mono text-xs font-bold transition-all shrink-0 ${
+                      isActive
+                        ? "bg-[#3525cd] text-white shadow-md shadow-[#3525cd]/20"
+                        : isCompleted
+                          ? "bg-emerald-500 text-white shadow-2xs"
+                          : "bg-white border border-slate-300 text-slate-400"
+                    }`}
+                  >
+                    {isCompleted ? (
+                      <Check size={16} className="stroke-3" />
+                    ) : (
+                      <span>0{s.num}</span>
+                    )}
+                  </div>
+                  <div>
+                    <p
+                      className={`font-sans text-xs font-extrabold ${
+                        isActive
+                          ? "text-[#0b1c30]"
+                          : isCompleted
+                            ? "text-emerald-900"
+                            : "text-[#777587]"
+                      }`}
+                    >
+                      {s.label}
+                    </p>
+                    <p className="font-sans text-[11px] text-[#777587] font-medium mt-0.5">
+                      {s.desc}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="hidden lg:block">
+                  {isCompleted && (
+                    <span className="text-[10px] font-mono font-bold text-emerald-600 uppercase bg-emerald-100/60 px-2 py-0.5 rounded">
+                      Ready
+                    </span>
+                  )}
+                  {isActive && (
+                    <span className="text-[10px] font-mono font-bold text-[#3525cd] uppercase bg-indigo-100/60 px-2 py-0.5 rounded">
+                      In Progress
+                    </span>
+                  )}
+                </div>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Selected Email Banner Context Bar */}
+        {selectedEmail && step > 1 && (
+          <div className="mt-4 pt-3.5 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
+            <div className="flex items-center gap-3 overflow-hidden">
+              <span className="text-[10px] uppercase font-mono font-bold text-[#777587] bg-slate-100 px-2 py-0.5 rounded shrink-0">
+                Active Thread
+              </span>
+              <span className="font-mono text-[11px] font-bold text-[#3525cd] shrink-0">
+                #{selectedEmail?.thread_id}
+              </span>
+              <span className="font-sans font-bold text-[#0b1c30] truncate">
+                {selectedEmail?.subject}
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={() => setStep(1)}
+              className="text-[#3525cd] font-bold hover:underline cursor-pointer shrink-0 text-right"
+            >
+              Change Email
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* Main 12 Column Responsive Dashboared Layout*/}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         {/* left main area */}
         <div className="lg:col-span-8 space-y-6">
@@ -732,80 +753,80 @@ const TrackNew = () => {
             </div>
           )}
         </div>
-      </div>
 
-      {/* Right side: side bar with contextual tips */}
-      <div className="lg:col-span-4 space-y-6 text-left">
-        <div className="bg-white border border-[#c7c4d8]/30 rounded-2xl p-6 shadow-xs">
-          <h4 className="font-sans text-xs font-bold text-[#0b1c30] uppercase tracking-wider mb-3">
-            Echomail Tracking Engine
-          </h4>
-          <div className="space-y-4 text-xs text-[#464555] leading-relaxed">
-            <div className="border-l-2 border-[#3525cd] pl-3">
-              <p className="font-sans font-bold text-[#0b1c30]">
-                How response tracking works
-              </p>
-              <p className="font-sans text-[#777587] mt-0.5">
-                EchoMail connects to your sent outbox. It scans recipient
-                incoming replies to automatically mark tracking goals as
-                completed.
-              </p>
-            </div>
-            <div className="border-l-2 border-amber-500 pl-3">
-              <p className="font-sans font-bold text-[#0b1c30]">
-                The "Must Respond" setting
-              </p>
-              <p className="font-sans text-[#777587] mt-0.5">
-                Only selected recipients will trigger alerts or reminders.
-                Unselected contact are kept on the thread but won't block
-                completion.
-              </p>
-            </div>
-            <div className="border-l-2 border-emerald-500 pl-3">
-              <p className="font-sans font-bold text-[#0b1c30]">
-                Seamless FastAPI Migration
-              </p>
-              <p className="font-sans text-[#777587] mt-0.5">
-                The architecture mapped in this workflow utilizes standalone
-                mail-item parameters that directly trace to future cloud
-                database models.
-              </p>
+        {/* Right side: side bar with contextual tips */}
+        <div className="lg:col-span-4 space-y-6 text-left">
+          <div className="bg-white border border-[#c7c4d8]/30 rounded-2xl p-6 shadow-xs">
+            <h4 className="font-sans text-xs font-bold text-[#0b1c30] uppercase tracking-wider mb-3">
+              Echomail Tracking Engine
+            </h4>
+            <div className="space-y-4 text-xs text-[#464555] leading-relaxed">
+              <div className="border-l-2 border-[#3525cd] pl-3">
+                <p className="font-sans font-bold text-[#0b1c30]">
+                  How response tracking works
+                </p>
+                <p className="font-sans text-[#777587] mt-0.5">
+                  EchoMail connects to your sent outbox. It scans recipient
+                  incoming replies to automatically mark tracking goals as
+                  completed.
+                </p>
+              </div>
+              <div className="border-l-2 border-amber-500 pl-3">
+                <p className="font-sans font-bold text-[#0b1c30]">
+                  The "Must Respond" setting
+                </p>
+                <p className="font-sans text-[#777587] mt-0.5">
+                  Only selected recipients will trigger alerts or reminders.
+                  Unselected contact are kept on the thread but won't block
+                  completion.
+                </p>
+              </div>
+              <div className="border-l-2 border-emerald-500 pl-3">
+                <p className="font-sans font-bold text-[#0b1c30]">
+                  Seamless FastAPI Migration
+                </p>
+                <p className="font-sans text-[#777587] mt-0.5">
+                  The architecture mapped in this workflow utilizes standalone
+                  mail-item parameters that directly trace to future cloud
+                  database models.
+                </p>
+              </div>
             </div>
           </div>
+          {selectedEmail && step > 1 && (
+            <div className="bg-slate-50 border border-[#c7c4d8]/20 rounded-2xl p-6 text-left">
+              <h5 className="font-sans text-[11px] font-extrabold text-[#777587] uppercase tracking-wider mb-2">
+                Selected Email Specs
+              </h5>
+              <div className="space-y-2 text-xs font-sans">
+                <div>
+                  <span className="text-[#777587] block text-[10px] uppercase">
+                    Subject
+                  </span>
+                  <span className="text-[#0b1c30] font-bold line-clamp-1">
+                    {selectedEmail.subject}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-[#777587] block text-[10px] uppercase">
+                    Sent Date
+                  </span>
+                  <span className="text-[#0b1c30] font-semibold">
+                    {selectedEmail.sentDate}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-[#777587] block text-[10px] uppercase">
+                    Original Recipients
+                  </span>
+                  <span className="text-[#0b1c30] font-semibold">
+                    {selectedEmail.recipients.length}
+                  </span>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
-        {selectedEmail && step > 1 && (
-          <div className="bg-slate-50 border border-[#c7c4d8]/20 rounded-2xl p-6 text-left">
-            <h5 className="font-sans text-[11px] font-extrabold text-[#777587] uppercase tracking-wider mb-2">
-              Selected Email Specs
-            </h5>
-            <div className="space-y-2 text-xs font-sans">
-              <div>
-                <span className="text-[#777587] block text-[10px] uppercase">
-                  Subject
-                </span>
-                <span className="text-[#0b1c30] font-bold line-clamp-1">
-                  {selectedEmail.subject}
-                </span>
-              </div>
-              <div>
-                <span className="text-[#777587] block text-[10px] uppercase">
-                  Sent Date
-                </span>
-                <span className="text-[#0b1c30] font-semibold">
-                  {selectedEmail.sentDate}
-                </span>
-              </div>
-              <div>
-                <span className="text-[#777587] block text-[10px] uppercase">
-                  Original Recipients
-                </span>
-                <span className="text-[#0b1c30] font-semibold">
-                  {selectedEmail.recipients.length}
-                </span>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );
