@@ -14,12 +14,16 @@ import {
   Calendar,
   Check,
   CheckCircle2,
+  ChevronRight,
   Clock,
+  Inbox,
   Mail,
   RefreshCw,
   Search,
   SpaceIcon,
+  Tag,
   User,
+  X,
 } from "lucide-react";
 import React, { useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router";
@@ -44,8 +48,6 @@ const TrackNew = () => {
   // Thread selection state
   const [selectedEmail, setSelectedEmail] = useState<SentEmail | null>(null);
   const [fetchingThreadId, setFetchingThreadId] = useState<string | null>(null);
-
-  const [searchTerm, setSearchTerm] = useState("");
 
   // step 2: States (Recipient)
   const [isLoadingRecipients, setIsLoadingRecipients] = useState(false);
@@ -84,7 +86,7 @@ const TrackNew = () => {
       const matchesQuery =
         email.subject.toLowerCase().includes(query) ||
         email.snippet.toLowerCase().includes(query) ||
-        email.recipients.filter(
+        email.recipients.some(
           (r) =>
             r.name.toLowerCase().includes(query) ||
             r.email.toLowerCase().includes(query),
@@ -93,6 +95,7 @@ const TrackNew = () => {
       return matchesQuery;
     });
   }, [sentEmails, activeQuery]);
+  console.log(searchResults);
 
   const handleExecuteSearch = (queryToSearch?: string) => {
     const term = queryToSearch !== undefined ? queryToSearch : searchInput;
@@ -109,6 +112,7 @@ const TrackNew = () => {
 
     setIsSearching(true);
     setHasSearched(true);
+    // search input will be used as active query
     setActiveQuery(term);
 
     // simulate real backend query delay
@@ -417,38 +421,273 @@ const TrackNew = () => {
 
           {/* step1: Search and select emails */}
           {step === 1 && (
-            <div className="bg-white border border-[#c7c4d8]/30 rounded-2xl p-6 shadow-xs space-y-6">
-              <div className="border border-[#c7c4d8]/15 pb-4">
-                <h3 className="font-sans text-base font-black text-[#0b1c30]">
-                  Step 1: Select a Sent Email
-                </h3>
-                <p className="font-sans text-xs text-[#777587] mt-0.5">
-                  Choose the email thread you have already dispatched that
-                  requires structured responses.
-                </p>
-              </div>
-
-              {/* Search bar */}
-              <div className="relative">
-                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#777587] w-4 h-4" />
-                <input
-                  type="text"
-                  placeholder="Search sent emails by subject or keywords..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full bg-[#f8f9ff] border border-[#c7c4d8]/30 rounded-xl pl-10 pr-4 py-2.5 text-xs text-[#0b1c30] placeholder-[#777587]/60 focus:outline-none focus:ring-1  focus:ring-[#3525cd] font-sans "
-                />
-              </div>
-              <div className="space-y-3.5">
-                <div className="p-8 text-center border border-dashed border-[#c7c4d8]/20 rounded-2xl bg-[#f8f9ff]/30">
-                  <Mail className="mx-auto text-[#777587]/40 mb-2" />
-
-                  <p className="font-sans text-[11px] text-[#777587]/70 mt-1">
-                    Choose the email thread you have already dispatched that
-                    requires structured responses.
+            <div className="bg-white border border-[#c7c4d8]/30 rounded-2xl p-6 sm:p-8 shadow-xs space-y-6">
+              <div className="border-b border-slate-100 pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div>
+                  <h3 className="font-sans text-lg text-[#0b1c30] font-black flex items-center gap-2">
+                    <Search size={18} className="text-[#3525cd]" />
+                    Search Sent Outbox
+                  </h3>
+                  <p className="font-sans text-xs text-[#777587] mt-0.5">
+                    Search your sent emails by subject line, recipient name, or
+                    keywords.
                   </p>
                 </div>
+                <div className="flex items-center gap-2 text-xs font-mono text-slate-400">
+                  <Mail size={13} />
+                  <span>Showing gmail sent items</span>
+                </div>
               </div>
+
+              {/* Search Input Bar */}
+              <div className="space-y-3">
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    handleExecuteSearch();
+                  }}
+                  className="flex flex-col sm:flex-row gap-3"
+                >
+                  <div className="relative flex-1">
+                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
+                    <input
+                      type="text"
+                      placeholder="Type email subject, recipient address, or project keywords..."
+                      value={searchInput}
+                      onChange={(e) => setSearchInput(e.target.value)}
+                      className="w-full bg-[#f8f9ff] border border-[#c7c4d8]/30 rounded-xl pl-11 pr-10 py-3 text-xs text-[#0b1c30] placeholder-slate-400  focus:outline-none focus:ring-2  focus:ring-[#3525cd]/20 focus:border-[#3525cd] font-sans transition-all shadow-2xs"
+                    />
+                    {searchInput && (
+                      <button
+                        type="button"
+                        onClick={handleClearSearch}
+                        className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1 rounded-full"
+                      >
+                        <X size={14} />
+                      </button>
+                    )}
+                  </div>
+                  <button
+                    type="submit"
+                    disabled={isSearching}
+                    className="bg-[#3525cd] hover:bg-[#3525cd]/90 active:scale-[0.98] text-white py-3 px-7 rounded-xl text-xs font-black font-sans cursor-pointer transition-all flex items-center justify-center gap-2 shadow-sm disabled:opacity-75 shrink-0"
+                  >
+                    {isSearching ? (
+                      <>
+                        <RefreshCw size={14} className="animate-spin" />
+                        <span>Searching...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Search size={14} className="stroke-2.5" />
+                        <span>Search Sent Emails</span>
+                      </>
+                    )}
+                  </button>
+                </form>
+
+                {/* Suggested Search Chips */}
+                <div className="flex items-center gap-2 flex-wrap pt-1">
+                  <span className="text-[11px] font-bold text-[#777587] uppercase tracking-wider mr-1 flex items-center gap-1">
+                    <Tag size={11} />
+                    Suggested queries:
+                  </span>
+                  {suggestedKeywords.map((tag) => (
+                    <button
+                      key={tag}
+                      type="button"
+                      onClick={() => handleTagClick(tag)}
+                      className={`text-xs font-semibold px-3 py-1 rounded-lg border transition-all cursor-pointer ${
+                        activeQuery === tag
+                          ? "bg-[#3525cd] text-white border-[#3525cd] shadow-2xs"
+                          : "bg-slate-50 border-slate-200 text-[#464555] hover:border-[#3525cd]/40 hover:bg-indigo-50/40"
+                      }`}
+                    >
+                      {tag}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* SEARCH RESULTS DISPLAY ENGINE */}
+
+              {/* STATE A: Initial Empty Search Hero state */}
+              {!hasSearched && !isSearching && (
+                <div className="p-8 md:p-12 border-2 border-dashed border-[#c7c4d8]/30 rounded-2xl bg-[#f8f9ff]/50 text-center space-y-4">
+                  <div className="w-14 h-14 rounded-2xl bg-indigo-50 border border-indigo-100 flex items-center justify-center mx-auto text-[#3525cd] shadow-2xs">
+                    <Inbox size={26} />
+                  </div>
+                  <div className="space-y-1.5 max-w-lg mx-auto">
+                    <h4 className="font-sans text-base font-extrabold text-[#0b1c30]">
+                      Search your sent Gmail outbox to initiate response
+                      tracking
+                    </h4>
+                    <p className="font-sans text-xs text-[#777587] leading-relaxed">
+                      Enter a subject keyword or select one of the suggested
+                      tags above. EchoMail will scan your outbox threads and map
+                      required respondents automatically.
+                    </p>
+                  </div>
+
+                  <div className="pt-2 flex justify-center gap-3">
+                    <button
+                      type="button"
+                      onClick={() => handleExecuteSearch("Project Apollo")}
+                      className="inline-flex items-center gap-2 text-xs font-extrabold text-white bg-[#3525cd] px-5 py-2.5 rounded-xl hover:bg-[#3525cd]/90 transition-all cursor-pointer shadow-xs"
+                    >
+                      <span>Search "Project Apollo"</span>
+                      <ArrowRight size={14} />
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* STATE B: Asynchronus loading skeletons */}
+              {isSearching && (
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between text-xs text-slate-400 font-medium px-1">
+                    <span className="flex items-center gap-2 font-mono">
+                      <RefreshCw
+                        size={12}
+                        className="animate-spin text-[#3525cd]"
+                      />
+                      Querying Gmail Outbox API...
+                    </span>
+                    <span className="font-mono text-[10px] bg-slate-100 px-2 py-0.5 rounded">
+                      200 OK
+                    </span>
+                  </div>
+
+                  {[1, 2, 3].map((skeletonId) => (
+                    <div
+                      key={skeletonId}
+                      className="p-6  border-slate-200/80 rounded-2xl bg-white space-y-3 relative overflow-hidden animate-pulse shadow-2xs"
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="h-4 bg-slate-200 rounded-md w-1/2" />
+                        <div className="h-3 bg-slate-200 rounded w-28" />
+                      </div>
+                      <div className="space-y-2">
+                        <div className="h-3 bg-slate-100 rounded-md w-full" />
+                        <div className="h-3 bg-slate-100 rounded-md w-3/4" />
+                      </div>
+                      <div className="flex items-center justify-between pt-2 border-t border-slate-100">
+                        <div className="h-5 bg-indigo-50 rounded-md w-32" />
+                        <div className="h-4 bg-slate-100 rounded-md w-24" />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* STATE C: no results , empty state */}
+              {hasSearched && !isSearching && searchResults.length === 0 && (
+                <div className="p-10 text-center border-2 border-dashed border-slate-200 rounded-2xl bg-slate-50/50 space-y-3">
+                  <div className="w-12 h-12 rounded-full bg-amber-50 text-amber-600 flex items-center justify-center mx-auto">
+                    <AlertCircle size={22} />
+                  </div>
+                  <h4 className="font-sans text-sm font-bold text-[#0b1c30]">
+                    No outbox threads found matching "{activeQuery}"
+                  </h4>
+
+                  <p className="font-sans text-xs text-[#777587] max-w-md mx-auto">
+                    Check for typos or try searching by recipient email address
+                    or broader project keywords.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={handleClearSearch}
+                    className="inline-block text-xs font-bold text-[#3525cd] bg-white border border-[#3525cd]/30 px-4 py-2 rounded-xl hover:bg-indigo-50 transition-all cursor-pointer mt-2"
+                  >
+                    Clear Search Filter
+                  </button>
+                </div>
+              )}
+
+              {/* STATE D: Spacious Full Width Search Results Cards */}
+              {hasSearched && !isSearching && searchResults.length > 0 && (
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between text-xs text-[#777587] px-1 font-sans">
+                    <span className="font-bold text-[#0b1c30]">
+                      Found {searchResults.length} matching sent outbox threads
+                    </span>
+                    <span className="font-mono text-[11px] bg-slate-100 px-2.5 py-0.5 rounded-md">
+                      Query: "{activeQuery}"
+                    </span>
+                  </div>
+
+                  {searchResults.map((email) => {
+                    console.log(email);
+                    const isFetchingThis = fetchingThreadId === email.id;
+
+                    return (
+                      <div
+                        key={email.id}
+                        onClick={() =>
+                          !fetchingThreadId && handleSelectEmail(email)
+                        }
+                        className={`group p-6 border rounded-2xl transition-all cursor-pointer text-left space-y-4 relative ${
+                          isFetchingThis
+                            ? "border-[#3525cd] bg-indigo-50/50 shadow-md ring-2 ring-[#3525cd]/10"
+                            : "border-[#c7c4d8]/30 hover:border-[#3525cd]/60 hover:bg-[#f8f9ff]/50 bg-white hover:shadow-xs"
+                        }`}
+                      >
+                        {/* header row */}
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100/80 pb-3">
+                          <div className="flex items-center gap-2.5 pr-4">
+                            <span className="font-mono text-[11px] font-extrabold text-[#3525cd] bg-indigo-50 border border-indigo-100 px-2.5 py-1 rounded-md shrink-0">
+                              #{email.thread_id}
+                            </span>
+                            <h4 className="font-sans text-sm sm:text-base font-extrabold text-[#0b1c30] group-hover:text-[#3525cd] transition-colors line-clamp-1">
+                              {email.subject}
+                            </h4>
+                          </div>
+                          <span className="font-mono text-[11px] text-[#777587] font-bold bg-slate-100 px-3 py-1 rounded-lg whitespace-nowrap self-start sm:self-auto">
+                            {email.sentDate}
+                          </span>
+                        </div>
+
+                        {/* Body snippet */}
+                        <div className="font-sans text-xs text-[#464555] line-clamp-2 leading-relaxed">
+                          {email.snippet || email.preview}
+                        </div>
+
+                        {/* Footer bar */}
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1 text-xs">
+                          <div className="flex items-center gap-3">
+                            <span className="inline-flex items-center gap-1.5 font-sans text-[#3525cd] bg-[#eff4ff] px-3 py-1 rounded-lg font-bold text-xs border border-indigo-100/60">
+                              <User size={13} />
+                              {email.recipients.length} Recipients
+                            </span>
+                            <div className="flex -space-x-1.5 overflow-hidden">
+                              {email.recipients.map((r, i) => (
+                                <div
+                                  title={r.name}
+                                  className="w-6 h-6 rounded-full bg-slate-200 border-2 border-white text-[10px] font-bold text-slate-600 flex items-center justify-center font-mono"
+                                >
+                                  {r.name.charAt(0)}
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+
+                          {isFetchingThis ? (
+                            <span className="text-[#3525cd] font-bold inline-flex items-center gap-2 font-mono text-xs">
+                              <RefreshCw size={14} className="animate-spin" />
+                              Loading Thread Metadata...
+                            </span>
+                          ) : (
+                            <span className="text-[#3525cd] font-bold group-hover:translate-x-1 transition-transform inline-flex items-center gap-1.5 bg-indigo-50/60 px-3 py-1.5 rounded-xl border border-indigo-100">
+                              <span>Select & Map Recipients</span>
+                              <ChevronRight size={14} className="stroke-2.5" />
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           )}
 
