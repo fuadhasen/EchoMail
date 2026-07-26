@@ -23,6 +23,7 @@ import {
   SpaceIcon,
   Tag,
   User,
+  UserCheck,
   X,
 } from "lucide-react";
 import React, { useMemo, useState } from "react";
@@ -693,76 +694,123 @@ const TrackNew = () => {
 
           {/* step2: choose recipients */}
           {step === 2 && selectedEmail && (
-            <div className="bg-white border border-[#c7c4d8]/30 rounded-2xl p-6 shadow-xs space-y-6">
-              <div className="border-b border-[#c7c4d8]/15 pb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div className="bg-white border border-[#c7c4d8]/30 rounded-2xl p-6 sm:p-8 shadow-xs space-y-6">
+              <div className="border-b border-slate-100 pb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
-                  <h3 className="font-sans text-base font-black text-[#0b1c30]">
-                    Step 2: Map Required Respondents
+                  <h3 className="font-sans text-lg  font-black text-[#0b1c30] flex items-center gap-2">
+                    <UserCheck size={18} className="text-[#3525cd]" />
+                    Select Required Recipients
                   </h3>
                   <p className="font-sans text-xs text-[#777587] mt-0.5">
-                    Which recipients are required to provide a reply to this
-                    thread?
+                    Select the respondents whose replies are mandatory for this
+                    email thread.
                   </p>
                 </div>
-                <button
-                  type="button"
-                  onClick={handleSelectAllRecipients}
-                  className="bg-slate-50 border  border-[#c7c4d8]/30 hover:bg-[#f8f9ff] text-[#464555] text-[11px] font-bold py-1.5 px-3 rounded-lg transition-all cursor-pointer font-sans self-start sm:self-center"
-                >
-                  {selectedRecipientEmails.length ===
-                  selectedEmail.recipients.length
-                    ? "Deselect All"
-                    : "select All Recipients"}
-                </button>
+
+                <div className="flex items-center gap-2 self-start sm:self-auto">
+                  <button
+                    type="button"
+                    onClick={handleSelectAllRecipients}
+                    className="bg-slate-50 border  border-slate-200 hover:bg-slate-100 text-[#464555] text-xs font-bold py-2 px-3.5 rounded-xl transition-all cursor-pointer font-sans"
+                  >
+                    {selectedRecipientEmails.length ===
+                    selectedEmail.recipients.length
+                      ? "Deselect All"
+                      : "Select All"}
+                  </button>
+                </div>
               </div>
 
               {/* recipient checklist Grid */}
-              <div className="border border-[#c7c4d8]/20 rounded-2xl overflow-hidden divide-y divide-[#c7c4d8]/15 bg-[#f8f9ff]/10">
-                {selectedEmail.recipients.map((recipient) => {
-                  const isSelected = selectedRecipientEmails.includes(
-                    recipient.email,
-                  );
-                  return (
+              {isLoadingRecipients ? (
+                <div className="border border-slate-200/80 rounded-xl divide-y divide-slate-100 bg-white overflow-hidden">
+                  {[1, 2, 3, 4].map((id) => (
                     <div
-                      key={recipient.email}
-                      onClick={() => handleToggleRecipient(recipient.email)}
-                      className={`p-4 flex items-center justify-between hover:bg-[#f8f9ff]/30 transition-all cursor-pointer ${isSelected ? "bg-[#eff4ff]/10" : ""}`}
+                      key={id}
+                      className="p-3.5 flex items-center gap-3 animate-pulse bg-slate-50/30"
                     >
-                      <div className="flex items-center gap-3.5">
-                        {/* custom checkbox */}
-                        <div
-                          className={`w-4.5 h-4.5 rounded border flex items-center justify-center transition-all 
-                          ${isSelected ? "bg-[#3525cd] border-[#3525cd] text-white" : "border-[#c7c4d8]/60 bg-white"}
-                        `}
-                        >
-                          {isSelected && (
-                            <Check size={11} className="stroke-3.5" />
-                          )}
+                      <div className="w-4 h-4 rounded bg-slate-200 shrink-0" />
+                      <div className="w-8 h-8 rounded-full bg-slate-200 shrink-0" />
+                      <div className="flex-1 space-y-1">
+                        <div className="w-32 h-3.5 bg-slate-200 rounded" />
+                        <div className="w-48 h-3 bg-slate-100 rounded" />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="border border-slate-200/80 rounded-xl overflow-hidden divide-y divide-slate-100 max-h-95 bg-white overflow-y-auto shadow-2xs">
+                  {selectedEmail.recipients.map((recipient) => {
+                    const isSelected = selectedRecipientEmails.includes(
+                      recipient.email,
+                    );
+                    return (
+                      <div
+                        key={recipient.email}
+                        onClick={() => handleToggleRecipient(recipient.email)}
+                        className={`px-4 py-3 transition-colors cursor-pointer flex items-center justify-between text-left space-x-3 select-none  ${isSelected ? "bg-[#eff4ff]/60 hover:bg-[#eff4ff]/80" : "bg-white hover:bg-slate-50/80"}`}
+                      >
+                        <div className="flex items-center gap-3.5 min-w-0">
+                          {/* CheckBox */}
+                          <div
+                            className={`w-4 h-4 rounded border flex items-center justify-center transition-all shrink-0 ${
+                              isSelected
+                                ? "bg-[#3525cd] border-[#3525cd] text-white"
+                                : "border-slate-300 bg-white"
+                            }`}
+                          >
+                            {isSelected && (
+                              <Check size={11} className="stroke-3" />
+                            )}
+                          </div>
+
+                          {/* Avatar Circle with initials */}
+                          <div
+                            className={`w-8 h-8 rounded-full text-xs font-black flex items-center justify-center shrink-0 font-sans transition-colors ${
+                              isSelected
+                                ? "bg-[#3525cd] text-white shadow-2xs"
+                                : "bg-indigo-50/80 text-[#3525cd] border border-indigo-100"
+                            }`}
+                          >
+                            {recipient.name.charAt(0)}
+                          </div>
+
+                          {/* Recipient Details */}
+                          <div className="min-w-0">
+                            <p
+                              className={`font-sans text-xs font-extrabold truncate ${isSelected ? "text-[#0b1c30]" : "text-[#2a2938]"}`}
+                            >
+                              {recipient.name}
+                            </p>
+                            <p className="font-mono text-[11px] text-[#777587] truncate mt-0.5">
+                              {recipient.email}
+                            </p>
+                          </div>
                         </div>
 
-                        <div className="text-left">
-                          <p
-                            className={`font-sans text-xs font-bold transition-colors ${isSelected ? "text-[#0b1c30]" : "text-[#464555]"}`}
-                          >
-                            {recipient.name}
-                          </p>
-                          <p className="font-mono text-[10px] text-[#777587]">
-                            {recipient.email}
-                          </p>
-                        </div>
+                        {recipient.role && (
+                          <span className="text-[10px] font-semibold text-[#777587] bg-slate-100 border border-slate-200/60 px-2 py-0.5 rounded-md shrink-0 hidden sm:inline-block">
+                            {recipient.role}
+                          </span>
+                        )}
                       </div>
-                      <span
-                        className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
-                          isSelected
-                            ? "bg-amber-50 text-amber-700 border-amber-200"
-                            : "bg-slate-100 text-[#777587] border-slate-200 opacity-60"
-                        }`}
-                      >
-                        {isSelected ? "Tracking Active" : "Ignored"}
-                      </span>
-                    </div>
-                  );
-                })}
+                    );
+                  })}
+                </div>
+              )}
+
+              {/* Status Bar */}
+              <div className="flex items-center justify-between text-xs text-[#777587] pt-1">
+                <span>
+                  <strong>{selectedRecipientEmails.length}</strong> of{" "}
+                  <strong>{selectedEmail.recipients.length}</strong>
+                </span>
+                {selectedRecipientEmails.length === 0 && (
+                  <span className="text-amber-600 font-bold text-xs flex items-center gap-1">
+                    <AlertCircle size={13} />
+                    At least 1 recipient is required
+                  </span>
+                )}
               </div>
 
               {/* bottom actions */}
@@ -770,17 +818,20 @@ const TrackNew = () => {
                 <button
                   type="button"
                   onClick={() => setStep(1)}
-                  className="bg-white border border-[#c7c4d8]/30 hover:bg-slate-50 text-[#777587] py-2 px-4 rounded-xl text-xs font-bold font-sans cursor-pointer transition-all flex items-center gap-1.5"
+                  className="bg-white border border-slate-200 hover:bg-slate-50 text-[#777587] py-2.5 px-5 rounded-xl text-xs font-bold font-sans cursor-pointer transition-all flex items-center gap-2"
                 >
-                  <ArrowLeft size={13} className="stroke-2.5" /> Back
+                  <ArrowLeft size={14} className="stroke-2.5" />
+                  <span>Back to Search</span>
                 </button>
+
                 <button
                   type="button"
                   onClick={() => setStep(3)}
                   disabled={selectedRecipientEmails.length === 0}
-                  className="bg-[#3525cd] text-white hover:bg-[#3525cd]/95 disabled:bg-slate-200  disabled:text-slate-400 disabled:cursor-not-allowed py-2.5 px-5 rounded-xl text-xs font-bold font-sans cursor-pointer transition-all flex items-center gap-1.5"
+                  className="bg-[#3525cd] text-white hover:bg-[#3525cd]/90 disabled:bg-slate-200  disabled:text-slate-400 disabled:cursor-not-allowed py-2.5 px-7 rounded-xl text-xs font-black font-sans cursor-pointer transition-all flex items-center gap-2 shadow-sm"
                 >
-                  setDeadline <ArrowRight size={13} className="stroke-2.5" />
+                  <span>Configure SLA & Deadline</span>
+                  <ArrowRight size={14} className="stroke-2.5" />
                 </button>
               </div>
             </div>
