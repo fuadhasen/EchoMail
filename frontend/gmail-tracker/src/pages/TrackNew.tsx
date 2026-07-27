@@ -1,12 +1,12 @@
 import { useToast } from "@/context/ToastContext";
 import {
   addTrackedEmail,
-  getSentEmails,
   type ActivityLog,
   type Recipient,
-  type SentEmail,
   type TrackedEmail,
 } from "@/data/mockTrackedEmails";
+import useSentEmails from "@/hooks/useSentEmails";
+import type { SentEmailB } from "@/services/email";
 import {
   AlertCircle,
   ArrowLeft,
@@ -22,13 +22,12 @@ import {
   RefreshCw,
   Search,
   ShieldCheck,
-  SpaceIcon,
   Tag,
   User,
   UserCheck,
   X,
 } from "lucide-react";
-import React, { useMemo, useState } from "react";
+import { useState } from "react";
 import { Link, useNavigate } from "react-router";
 
 const TrackNew = () => {
@@ -38,9 +37,6 @@ const TrackNew = () => {
   // workflow step state (1 to 4)
   const [step, setStep] = useState<1 | 2 | 3>(1);
 
-  // Sent Emails master data
-  const sentEmails = useMemo(() => getSentEmails(), []);
-
   // Step 1: States
   const [searchInput, setSearchInput] = useState("");
   const [activeQuery, setActiveQuery] = useState("");
@@ -48,8 +44,13 @@ const TrackNew = () => {
   const [isSearching, setIsSearching] = useState(false);
   const [dateFilter, setDateFilter] = useState("");
 
+  // Sent Emails master data
+  const { data, isPending, error } = useSentEmails(activeQuery);
+  console.log("real backend data", data?.emails);
+  const sentEmails = data?.emails ?? [];
+
   // Thread selection state
-  const [selectedEmail, setSelectedEmail] = useState<SentEmail | null>(null);
+  const [selectedEmail, setSelectedEmail] = useState<SentEmailB | null>(null);
   const [fetchingThreadId, setFetchingThreadId] = useState<string | null>(null);
 
   // step 2: States (Recipient)
@@ -82,24 +83,6 @@ const TrackNew = () => {
     "Roadmap",
   ];
 
-  const searchResults = useMemo(() => {
-    if (!activeQuery.trim()) return [];
-    const query = activeQuery.toLowerCase().trim();
-    return sentEmails.filter((email) => {
-      const matchesQuery =
-        email.subject.toLowerCase().includes(query) ||
-        email.snippet.toLowerCase().includes(query) ||
-        email.recipients.some(
-          (r) =>
-            r.name.toLowerCase().includes(query) ||
-            r.email.toLowerCase().includes(query),
-        );
-
-      return matchesQuery;
-    });
-  }, [sentEmails, activeQuery]);
-  console.log(searchResults);
-
   const handleExecuteSearch = (queryToSearch?: string) => {
     const term = queryToSearch !== undefined ? queryToSearch : searchInput;
     if (queryToSearch !== undefined) {
@@ -115,7 +98,7 @@ const TrackNew = () => {
 
     setIsSearching(true);
     setHasSearched(true);
-    // search input will be used as active query
+    // search input will be used as active query, means the user hit the search button
     setActiveQuery(term);
 
     // simulate real backend query delay
@@ -137,7 +120,7 @@ const TrackNew = () => {
   };
 
   // Select an email thread
-  const handleSelectEmail = (email: SentEmail) => {
+  const handleSelectEmail = (email: SentEmailB) => {
     setFetchingThreadId(email.id);
     setSelectedEmail(email);
 
@@ -232,7 +215,7 @@ const TrackNew = () => {
 
       const newTrackedEmail: Omit<TrackedEmail, "id"> = {
         subject: selectedEmail.subject,
-        sentDate: selectedEmail.sentDate,
+        sentDate: selectedEmail.sentdate,
         deadline: `Due ${formatedDeadline}`,
         status: "Pending",
         recipients: trackingRecipients,
@@ -455,7 +438,7 @@ const TrackNew = () => {
                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
                     <input
                       type="text"
-                      placeholder="Type email subject, recipient address, or project keywords..."
+                      placeholder="Type email subject, snippet or project keywords..."
                       value={searchInput}
                       onChange={(e) => setSearchInput(e.target.value)}
                       className="w-full bg-[#f8f9ff] border border-[#c7c4d8]/30 rounded-xl pl-11 pr-10 py-3 text-xs text-[#0b1c30] placeholder-slate-400  focus:outline-none focus:ring-2  focus:ring-[#3525cd]/20 focus:border-[#3525cd] font-sans transition-all shadow-2xs"
@@ -584,7 +567,7 @@ const TrackNew = () => {
               )}
 
               {/* STATE C: no results , empty state */}
-              {hasSearched && !isSearching && searchResults.length === 0 && (
+              {hasSearched && !isSearching && sentEmails.length === 0 && (
                 <div className="p-10 text-center border-2 border-dashed border-slate-200 rounded-2xl bg-slate-50/50 space-y-3">
                   <div className="w-12 h-12 rounded-full bg-amber-50 text-amber-600 flex items-center justify-center mx-auto">
                     <AlertCircle size={22} />
@@ -608,19 +591,18 @@ const TrackNew = () => {
               )}
 
               {/* STATE D: Spacious Full Width Search Results Cards */}
-              {hasSearched && !isSearching && searchResults.length > 0 && (
+              {hasSearched && !isSearching && sentEmails.length > 0 && (
                 <div className="space-y-4">
                   <div className="flex items-center justify-between text-xs text-[#777587] px-1 font-sans">
                     <span className="font-bold text-[#0b1c30]">
-                      Found {searchResults.length} matching sent outbox threads
+                      Found {sentEmails.length} matching sent outbox threads
                     </span>
                     <span className="font-mono text-[11px] bg-slate-100 px-2.5 py-0.5 rounded-md">
                       Query: "{activeQuery}"
                     </span>
                   </div>
 
-                  {searchResults.map((email) => {
-                    console.log(email);
+                  {sentEmails.map((email) => {
                     const isFetchingThis = fetchingThreadId === email.id;
 
                     return (
@@ -646,13 +628,13 @@ const TrackNew = () => {
                             </h4>
                           </div>
                           <span className="font-mono text-[11px] text-[#777587] font-bold bg-slate-100 px-3 py-1 rounded-lg whitespace-nowrap self-start sm:self-auto">
-                            {email.sentDate}
+                            {email.sentdate}
                           </span>
                         </div>
 
                         {/* Body snippet */}
                         <div className="font-sans text-xs text-[#464555] line-clamp-2 leading-relaxed">
-                          {email.snippet || email.preview}
+                          {email.snippet}
                         </div>
 
                         {/* Footer bar */}
@@ -663,7 +645,7 @@ const TrackNew = () => {
                               {email.recipients.length} Recipients
                             </span>
                             <div className="flex -space-x-1.5 overflow-hidden">
-                              {email.recipients.map((r, i) => (
+                              {email.recipients.map((r) => (
                                 <div
                                   title={r.name}
                                   className="w-6 h-6 rounded-full bg-slate-200 border-2 border-white text-[10px] font-bold text-slate-600 flex items-center justify-center font-mono"
@@ -789,12 +771,6 @@ const TrackNew = () => {
                             </p>
                           </div>
                         </div>
-
-                        {recipient.role && (
-                          <span className="text-[10px] font-semibold text-[#777587] bg-slate-100 border border-slate-200/60 px-2 py-0.5 rounded-md shrink-0 hidden sm:inline-block">
-                            {recipient.role}
-                          </span>
-                        )}
                       </div>
                     );
                   })}
@@ -1101,7 +1077,7 @@ const TrackNew = () => {
                     Original Outbox Send
                   </span>
                   <p className="font-semibold text-[#464555] font-mono text-[11px] mt-0.5">
-                    {selectedEmail.sentDate}
+                    {selectedEmail.sentdate}
                   </p>
                 </div>
 

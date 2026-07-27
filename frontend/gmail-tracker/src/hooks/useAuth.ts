@@ -32,8 +32,6 @@ const useAuth = () => {
       ? "authenticated"
       : "unauthenticated";
 
-  console.log(data?.user);
-
   return { status, user: data?.user ?? null, isPending, error };
 };
 

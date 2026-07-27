@@ -261,7 +261,7 @@ class GmailService:
             if body_content:
                 query_parts.append(body_content)
 
-            # Use the unified search approach if search_term is provided
+            # Use the unified (general - body,subject,snippet) search approach if search_term is provided
             if search_term:
                 query_parts.append(f"(subject:{search_term} OR {search_term})")
 
@@ -390,6 +390,43 @@ class GmailService:
             print(f"An error occurred: {error}")
             return ""
 
+    def get_email_sentdate(self, user_id="me", msg_id=""):
+        """Get the sentdate of a specific email message.
+        Args:
+            user_id (str): The user's email address. The special value "me"
+                indicates the authenticated user.
+            msg_id (str): The ID of the email message.
+        Returns:
+            str: The sentdate of the email message.
+        """
+        try:
+            message = self.get_email_details(user_id, msg_id)
+            headers = message["payload"]["headers"]
+            for header in headers:
+                if header["name"].lower() == "date":
+                    return header["value"]
+            return ""
+        except HttpError as error:
+            print(f"An error occurred: {error}")
+            return ""
+
+    def get_email_snippet(self, user_id="me", msg_id=""):
+        """Get the snippet of a specific email message.
+        Args:
+            user_id (str): The user's email address. The special value "me"
+                indicates the authenticated user.
+            msg_id (str): The ID of the email message.
+        Returns:
+                str: The snippet of the email message.
+        """
+        try:
+            message = self.get_email_details(user_id, msg_id)
+            snippet = message["snippet"]
+            return snippet
+        except HttpError as error:
+            print(f"An error occurred: {error}")
+            return ""
+        
     def get_email_recipient(self, user_id="me", msg_id=""):
         """Get the recipient of a specific email message
         when we track new sent email we need to get its recipient, 

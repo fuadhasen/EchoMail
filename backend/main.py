@@ -114,7 +114,7 @@ app = FastAPI(lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["http://localhost:5173"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"]
@@ -247,9 +247,9 @@ async def search_sent_emails_endpoint(
             "id": msg_id,
             "subject": gmail_service.get_email_subject(msg_id=msg_id),
             "sender": gmail_service.get_email_sender(msg_id=msg_id),
-            # recipients should not be included here
             "recipients": gmail_service.get_email_recipient(msg_id=msg_id),
-            "snippet": email.get("snippet", ""),
+            "snippet": gmail_service.get_email_snippet(msg_id=msg_id),
+            "sentdate": gmail_service.get_email_sentdate(msg_id=msg_id),
             "thread_id": email.get("threadId", ""),
         }
         detailed_emails.append(details)
