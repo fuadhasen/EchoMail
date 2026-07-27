@@ -11,6 +11,7 @@ import {
   AlertCircle,
   ArrowLeft,
   ArrowRight,
+  Bell,
   Calendar,
   Check,
   CheckCircle2,
@@ -20,6 +21,7 @@ import {
   Mail,
   RefreshCw,
   Search,
+  ShieldCheck,
   SpaceIcon,
   Tag,
   User,
@@ -837,12 +839,13 @@ const TrackNew = () => {
             </div>
           )}
 
-          {/* step 3: Set Deadline */}
+          {/* step 3: Configure SLA & Deadline  */}
           {step === 3 && selectedEmail && (
-            <div className="bg-white border border-[#c7c4d8]/30 rounded-2xl p-6 shadow-xs space-y-6">
-              <div className="border border-[#c7c4d8]/15 pb-4">
-                <h3 className="font-sans text-base font-black text-[#0b1c30]">
-                  Step 3: Establish Deadline Target
+            <div className="bg-white border border-[#c7c4d8]/30  rounded-2xl p-6 sm:p-8 shadow-xs space-y-6">
+              <div className="border-b border-slate-100 pb-4">
+                <h3 className="font-sans text-lg font-black text-[#0b1c30] flex items-center gap-2">
+                  <Clock size={18} className="text-[#3525cd]" />
+                  Configure Response SLA & Follow-up Rules
                 </h3>
                 <p className="font-sans text-xs text-[#777587] mt-0.5">
                   Set the absolute target window for recipients to reply before
@@ -850,194 +853,218 @@ const TrackNew = () => {
                 </p>
               </div>
 
-              {/* date time picker input */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-[10px] font-extrabold text-[#777587] uppercase tracking-wider mb-2">
-                    Date of Deadline
-                  </label>
-                  <div className="relative">
-                    <Calendar className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#777587] w-4 h-4" />
-                    <input
-                      type="date"
-                      value={deadlineDate}
-                      onChange={(e) => setDeadlineDate(e.target.value)}
-                      min={new Date().toISOString().split("T")[0]}
-                      className="w-full bg-[#f8f9ff] border  border-[#c7c4d8]/30 rounded-xl pl-10 pr-4 py-2.5 text-xs text-[#0b1c30] focus:outline-none focus:ring-1 focus:ring-[#3525cd] font-sans cursor-pointer"
-                    />
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-[10px] font-extrabold text-[#777587] uppercase tracking-wider mb-2">
-                    Time of Deadline
-                  </label>
-                  <div className="relative">
-                    <Clock className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#777587] w-4 h-4" />
-                    <input
-                      type="time"
-                      value={deadlineTime}
-                      onChange={(e) => setDeadlineTime(e.target.value)}
-                      className="w-full bg-[#f8f9ff] border border-[#c7c4d8]/30 rounded-xl pl-10 pr-4 py-2.5 text-xs text-[#0b1c30] focus:outline-none focus:ring-1 focus:ring-[#3525cd] font-sans cursor-pointer"
-                    />
-                  </div>
-                </div>
-              </div>
+              {/* Form Control Grid */}
+              <div className="space-y-6">
+                {/* Target Deadline Picker */}
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-extrabold text-[#777587] uppercase tracking-wider">
+                      1. Target Completion Deadline
+                    </label>
 
-              {/* informative helper card */}
-              <div className="p-4 bg-amber-50/50 border border-amber-200/40 rounded-xl flex items-start gap-3">
-                <AlertCircle
-                  size={15}
-                  className="text-amber-600 mt-0.5 shrink-0"
-                />
-                <div className="text-left text-xs">
-                  <p className="font-sans font-bold text-amber-900">
-                    Calculated Alert Window
-                  </p>
-                  <p className="font-sans text-amber-700/90 mt-0.5 leading-relaxed">
-                    Once the deadline passes on{" "}
-                    <strong className="font-extrabold">
-                      {new Date(
-                        `${deadlineDate}T${deadlineTime}`,
-                      ).toLocaleString("en-US", {
-                        dateStyle: "medium",
-                        timeStyle: "short",
-                      })}
-                    </strong>
-                    , automated reminders will fire at regular intervals and the
-                    overall thread is labeled "Overdue".
-                  </p>
+                    <div className="flex items-center gap-2">
+                      <span className="text-[11px] text-slate-400 font-medium">
+                        Quick presets:
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => handleSetQuickDeadline(1)}
+                        className="text-xs font-bold text-[#3525cd] bg-indigo-50 hover:bg-indigo-100 px-2.5 py-1 rounded-lg transition-all cursor-pointer"
+                      >
+                        +24 Hours
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleSetQuickDeadline(3)}
+                        className="text-xs font-bold text-[#3525cd] bg-indigo-50 hover:bg-indigo-100 px-2.5 py-1 rounded-lg transition-all cursor-pointer"
+                      >
+                        +3 Days
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleSetQuickDeadline(7)}
+                        className="text-xs font-bold text-[#3525cd] bg-indigo-50 hover:bg-indigo-100 px-2.5 py-1 rounded-lg transition-all cursor-pointer"
+                      >
+                        +1 Week
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="relative">
+                      <label className="block text-[10px] font-bold text-slate-400 mb-1">
+                        Target Date
+                      </label>
+                      <div className="relative">
+                        <Calendar className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
+                        <input
+                          type="date"
+                          value={deadlineDate}
+                          onChange={(e) => setDeadlineDate(e.target.value)}
+                          min={new Date().toISOString().split("T")[0]}
+                          className="w-full bg-[#f8f9ff] border  border-[#c7c4d8]/30 rounded-xl pl-10 pr-4 py-3 text-xs text-[#0b1c30] focus:outline-none focus:ring-1 focus:ring-[#3525cd] font-bold font-sans cursor-pointer"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="relative">
+                      <label className="block text-[10px] font-extrabold text-slate-400 mb-1">
+                        Time of Deadline
+                      </label>
+                      <div className="relative">
+                        <Clock className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
+                        <input
+                          type="time"
+                          value={deadlineTime}
+                          onChange={(e) => setDeadlineTime(e.target.value)}
+                          className="w-full bg-[#f8f9ff] border border-[#c7c4d8]/30 rounded-xl pl-10 pr-4 py-3 text-xs text-[#0b1c30] focus:outline-none focus:ring-1 focus:ring-[#3525cd] font-sans cursor-pointer"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Follow-up Reminder Cadence */}
+                <div className="space-y-3">
+                  <label className="block text-xs font-extrabold text-[#777587] uppercase tracking-wider">
+                    2. Automated Reminder Cadence
+                  </label>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+                    <button
+                      type="button"
+                      onClick={() => setReminderInterval("24h")}
+                      className={`p-4 rounded-xl border text-left transition-all cursor-pointer ${
+                        reminderInterval === "24h"
+                          ? "border-[#3525cd] bg-indigo-50/50 ring-2 ring-[#3525cd]/10 shadow-2xs"
+                          : "border-slate-200 bg-white hover:border-slate-300"
+                      }`}
+                    >
+                      <div className="flex items-center justify-between mb-1.5">
+                        <span className="font-sans text-xs font-black text-[#0b1c30]">
+                          Daily Cadence
+                        </span>
+                        <Bell
+                          size={13}
+                          className={
+                            reminderInterval === "24h"
+                              ? "text-[#3525cd]"
+                              : "text-slate-400"
+                          }
+                        />
+                      </div>
+                      <p className="font-sans ">
+                        Nudge unresponsive recipients every 24 hours until all
+                        reply.
+                      </p>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setReminderInterval("48h")}
+                      className={`p-4 rounded-xl border text-left transition-all cursor-pointer ${
+                        reminderInterval === "48h"
+                          ? "border-[#3525cd] bg-indigo-50/50 ring-2 ring-[#3525cd]/10 shadow-2xs"
+                          : "border-slate-200 bg-white hover:border-slate-300"
+                      }`}
+                    >
+                      <div className="flex items-center justify-between mb-1.5">
+                        <span className="font-sans text-xs font-black text-[#0b1c30]">
+                          Standard (48h)
+                        </span>
+                        <Bell
+                          size={13}
+                          className={
+                            reminderInterval === "48h"
+                              ? "text-[#3525cd]"
+                              : "text-slate-400"
+                          }
+                        />
+                      </div>
+                      <p className="font-sans text-[11px] text-[#777587] leading-relaxed">
+                        Nudge every 48 hours for standard non-urgent
+                        deliverables.
+                      </p>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setReminderInterval("12h_before")}
+                      className={`p-4 rounded-xl border text-left transition-all cursor-pointer ${
+                        reminderInterval === "12h_before"
+                          ? "border-[#3525cd] bg-indigo-50/50 ring-2 ring-[#3525cd]/10 shadow-2xs"
+                          : "border-slate-200 bg-white hover:border-slate-300"
+                      }`}
+                    >
+                      <div className="flex items-center justify-between mb-1.5">
+                        <span className="font-sans text-xs font-black text-[#0b1c30]">
+                          Due Warning Only
+                        </span>
+                        <Bell
+                          size={13}
+                          className={
+                            reminderInterval === "12h_before"
+                              ? "text-[#3525cd]"
+                              : "text-slate-400"
+                          }
+                        />
+                      </div>
+                      <p className="font-sans text-[11px] text-[#777587] leading-relaxed">
+                        Send single reminder 12 hours prior to final SLA
+                        expiration.
+                      </p>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Notification setting toggle*/}
+                <div className="pt-2">
+                  <label className="flex items-center gap-3 cursor-pointer p-3.5 bg-slate-50/80 border border-slate-200/80 rounded-xl">
+                    <input
+                      type="checkbox"
+                      checked={notifyOnResponse}
+                      onChange={(e) => setNotifyOnResponse(e.target.checked)}
+                      className="w-4 h-4 rounded text-[#3525cd] focus:ring-[#3525cd]/20 cursor-pointer"
+                    />
+                    <div className="text-left">
+                      <span className="text-xs font-bold text-[#0b1c30] block">
+                        Instant Desktop & Email Notifications
+                      </span>
+                      <span className="text-[11px] text-[#777587] block">
+                        Alert me immediately as each recipient submits their
+                        reply in the thread.
+                      </span>
+                    </div>
+                  </label>
                 </div>
               </div>
 
               {/* bottom action */}
-              <div className="pt-5 border-t border-[#c7c4d8]/10 flex items-center justify-between">
+              <div className="pt-6 border-t border-slate-100 flex items-center justify-between">
                 <button
                   type="button"
                   onClick={() => setStep(2)}
-                  className="bg-white border border-[#c7c4d8]/30 hover:bg-slate-50 text-[#777587] py-2 px-4 rounded-xl text-xs font-bold font-sans cursor-pointer transitiona-all flex items-center gap-1.5"
+                  className="bg-white border border-slate-200 hover:bg-slate-50 text-[#777587] py-2.5 px-5 rounded-xl text-xs font-bold font-sans cursor-pointer transitiona-all flex items-center gap-2"
                 >
-                  <ArrowLeft size={13} className="stroke-2.5" />
-                  Back
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setStep(4)}
-                  className="bg-[#3525cd] text-white hover:bg-[#3525cd]/95 py-2.5 px-5 rounded-xl text-xs font-bold font-sans cursor-pointer transition-all flex items-center gap-1.5 "
-                >
-                  Review Summary
-                  <ArrowRight size={13} className="stroke-2.5" />
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* step4: Review Summary */}
-          {step === 4 && selectedEmail && (
-            <div className="bg-white border border-[#c7c4d8]/30 rounded-2xl p-6 shadow-xs space-y-6">
-              <div className="border-b border-[#c7c4d8]/15 pb-4">
-                <h3 className="font-sans text-base font-black text-[#0b1c30]">
-                  Step 4: Finalize & Launch Response Loop
-                </h3>
-                <p className="font-sans text-xs text-[#777587] mt-0.5">
-                  Ensure all details are accurate before locking this email
-                  thread into the active response monitoring system.
-                </p>
-              </div>
-              <div className="space-y-4">
-                {/* email subject section */}
-                <div className="bg-[#f8f9ff] border border-[#c7c4d8]/20 rounded-xl p-4 text-left">
-                  <span className="block text-[10px] font-bold text-[#777587] uppercase tracking-wider">
-                    Email Subject
-                  </span>
-                  <span className="block text-sm font-extrabold text-[#0b1c30] mt-1 leading-snug">
-                    {selectedEmail.subject}
-                  </span>
-                  <span className="inline-block font-mono text-[9px] text-[#777587] font-semibold bg-white border border-slate-100 px-2 py-0.5 rounded mt-2">
-                    Sent Date: {selectedEmail.sentDate}
-                  </span>
-                </div>
-
-                {/* deadline and tracking settings */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="bg-[#f8f9ff] border border-[#c7c4d8]/20 rounded-xl p-4 text-left">
-                    <span className="block text-[10px] font-bold text-[#777587] uppercase tracking-wider">
-                      Configured Deadline
-                    </span>
-                    <div className="flex items-center gap-2 mt-1.5 text-xs text-amber-700 font-extrabold">
-                      <Calendar size={13} className="text-amber-600" />
-                      <span>
-                        {new Date(
-                          `${deadlineDate}T${deadlineTime}`,
-                        ).toLocaleDateString("en-US", {
-                          weekday: "short",
-                          month: "short",
-                          day: "numeric",
-                          year: "numeric",
-                        })}
-                      </span>
-                      <span className="text-slate-300">|</span>
-                      <span>{deadlineTime}</span>
-                    </div>
-                  </div>
-                  <div className="bg-[#f8f9ff] border border-[#c7c4d8]/20 rounded-xl p-4 text-left ">
-                    <span className="block text-[10px] font-bold text-[#777587] uppercase tracking-wider">
-                      Tracking Recipients
-                    </span>
-                    <div className="flex items-center gap-2 mt-1.5 text-xs text-[#3525cd] font-bold">
-                      <User size={13} />
-                      <span>
-                        {selectedRecipientEmails.length} of{" "}
-                        {selectedEmail.recipients.length} Recipients Tracked
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* recipient breakdown list */}
-                <div className="space-y-2 text-left">
-                  <span className="block text-[10px] font-bold text-[#777587] uppercase tracking-wider px-1">
-                    Selected Respondents
-                  </span>
-                  <div className="border border-[#c7c4d8]/15 rounded-xl divide-y divide-[#c7c4d8]/10 max-h-48 overflow-y-auto custom-scrollbar bg-slate-50/20 scrollbar-none">
-                    {selectedEmail.recipients
-                      .filter((r) => selectedRecipientEmails.includes(r.email))
-                      .map((r) => (
-                        <div
-                          key={r.email}
-                          className="p-3 flex items-center justify-between text-xs"
-                        >
-                          <div className="flex items-center gap-2">
-                            <div className="w-5 h-5 rounded-full bg-[#eff4ff] text-[#3525cd] flex items-center justify-center font-bold text-[10px] font-sans">
-                              {r.name.charAt(0)}
-                            </div>
-                            <span className="font-sans font-bold text-[#0b1c30]">
-                              {r.name}
-                            </span>
-                          </div>
-                          <span className="font-mono text-[10px] text-[#777587]">
-                            {r.email}
-                          </span>
-                        </div>
-                      ))}
-                  </div>
-                </div>
-              </div>
-              <div className="pt-5 border-t border-[#c7c4d8]/10 flex items-center justify-between">
-                <button
-                  type="button"
-                  onClick={() => setStep(3)}
-                  className="bg-white border border-[#c7c4d8]/30 hover:bg-slate-50 text-[#777587] py-2 px-4 rounded-xl text-xs font-bold font-sans cursor-pointer transition-all flex items-center gap-1.5"
-                >
-                  <ArrowLeft size={13} className="stroke-2.5" />
+                  <ArrowLeft size={14} className="stroke-2.5" />
                   Back
                 </button>
                 <button
                   type="button"
                   onClick={handleStartTracking}
-                  className="bg-[#3525cd] text-white hover:bg-[#3525cd]/95 py-2.5 px-6 rounded-xl text-xs font-black font-sans cursor-pointer transition-all flex items-center gap-1.5 shadow-md active:scale-98"
+                  disabled={isSubmitting}
+                  className="bg-[#3525cd] text-white hover:bg-[#3525cd]/90 py-3.5 px-8 rounded-xl text-xs font-black font-sans cursor-pointer transition-all flex items-center gap-1.5 shadow-md disabled:opacity-75"
                 >
-                  <CheckCircle2 size={13} className="stroke-2.5" />
-                  Track Email
+                  {isSubmitting ? (
+                    <>
+                      <RefreshCw size={15} className="animate-spin" />
+                      <span>Registering SLA Tracker...</span>
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircle2 size={16} className="stroke-[2.5]" />
+                      <span>Start Tracking Thread</span>
+                    </>
+                  )}
                 </button>
               </div>
             </div>
@@ -1046,76 +1073,162 @@ const TrackNew = () => {
 
         {/* Right side: side bar with contextual tips */}
         <div className="lg:col-span-4 space-y-6 text-left">
-          <div className="bg-white border border-[#c7c4d8]/30 rounded-2xl p-6 shadow-xs">
-            <h4 className="font-sans text-xs font-bold text-[#0b1c30] uppercase tracking-wider mb-3">
-              Echomail Tracking Engine
-            </h4>
-            <div className="space-y-4 text-xs text-[#464555] leading-relaxed">
-              <div className="border-l-2 border-[#3525cd] pl-3">
-                <p className="font-sans font-bold text-[#0b1c30]">
-                  How response tracking works
-                </p>
-                <p className="font-sans text-[#777587] mt-0.5">
-                  EchoMail connects to your sent outbox. It scans recipient
-                  incoming replies to automatically mark tracking goals as
-                  completed.
-                </p>
+          {/* Thread Summary or workflow guide */}
+          {selectedEmail ? (
+            <div className="bg-white border border-[#c7c4d8]/30 rounded-2xl p-6 shadow-xs space-y-4">
+              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                <span className="text-xs font-black text-[#0b1c30] uppercase tracking-wider flex items-center gap-1.5">
+                  <Mail size={14} className="text-[#3525cd]" />
+                  Thread Overview
+                </span>
+                <span className="font-mono text-[10px] font-bold text-[#3525cd] bg-indigo-50 px-2 py-0.5 rounded">
+                  {selectedEmail.thread_id}
+                </span>
               </div>
-              <div className="border-l-2 border-amber-500 pl-3">
-                <p className="font-sans font-bold text-[#0b1c30]">
-                  The "Must Respond" setting
-                </p>
-                <p className="font-sans text-[#777587] mt-0.5">
-                  Only selected recipients will trigger alerts or reminders.
-                  Unselected contact are kept on the thread but won't block
-                  completion.
-                </p>
-              </div>
-              <div className="border-l-2 border-emerald-500 pl-3">
-                <p className="font-sans font-bold text-[#0b1c30]">
-                  Seamless FastAPI Migration
-                </p>
-                <p className="font-sans text-[#777587] mt-0.5">
-                  The architecture mapped in this workflow utilizes standalone
-                  mail-item parameters that directly trace to future cloud
-                  database models.
-                </p>
-              </div>
-            </div>
-          </div>
-          {selectedEmail && step > 1 && (
-            <div className="bg-slate-50 border border-[#c7c4d8]/20 rounded-2xl p-6 text-left">
-              <h5 className="font-sans text-[11px] font-extrabold text-[#777587] uppercase tracking-wider mb-2">
-                Selected Email Specs
-              </h5>
-              <div className="space-y-2 text-xs font-sans">
+
+              <div className="space-y-3 text-xs font-sans">
                 <div>
-                  <span className="text-[#777587] block text-[10px] uppercase">
+                  <span className="text-[10px] font-extrabold uppercase text-[#777587]  block">
                     Subject
                   </span>
-                  <span className="text-[#0b1c30] font-bold line-clamp-1">
+                  <p className="font-extrabold text-[#0b1c30] text-sm mt-0.5 leading-snug">
                     {selectedEmail.subject}
-                  </span>
+                  </p>
                 </div>
+
                 <div>
-                  <span className="text-[#777587] block text-[10px] uppercase">
-                    Sent Date
+                  <span className="text-[10px] font-extrabold uppercase text-[#777587]  block">
+                    Original Outbox Send
                   </span>
-                  <span className="text-[#0b1c30] font-semibold">
+                  <p className="font-semibold text-[#464555] font-mono text-[11px] mt-0.5">
                     {selectedEmail.sentDate}
-                  </span>
+                  </p>
                 </div>
+
                 <div>
-                  <span className="text-[#777587] block text-[10px] uppercase">
-                    Original Recipients
+                  <span className="text-[10px] font-extrabold uppercase text-[#777587]  block">
+                    Required Respondents
                   </span>
-                  <span className="text-[#0b1c30] font-semibold">
+                  <p className="font-extrabold text-[#3525cd] text-xs mt-0.5">
+                    {selectedRecipientEmails.length} of{" "}
                     {selectedEmail.recipients.length}
+                  </p>
+                </div>
+
+                <div className="pt-2 border-t border-slate-100">
+                  <span className="text-[10px] font-extrabold uppercase text-[#777587] block mb-1.5">
+                    Target SLA Timeline
                   </span>
+                  <div className="p-3 bg-indigo-50/50 border border-indigo-100/80 rounded-xl space-y-1.5 font-mono text-[11px]">
+                    <div className="flex justify-between text-[#0b1c30]">
+                      <span className="text-slate-500">Target Date:</span>
+                      <span className="font-bold">{deadlineDate}</span>
+                    </div>
+                    <div className="flex justify-between text-[#0b1c30]">
+                      <span className="text-slate-500">Target Time:</span>
+                      <span className="font-bold">{deadlineTime}</span>
+                    </div>
+                    <div className="flex justify-between text-[#3525cd]">
+                      <span className="text-slate-500">Cadence</span>
+                      <span className="font-bold uppercase">
+                        {reminderInterval}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ) : (
+            // workflow guide
+            <div className="bg-white border  border-[#c7c4d8]/30 rounded-2xl p-6 shadow-xs space-y-4">
+              <div className="flex items-center gap-2 text-[#0b1c30] ">
+                <ShieldCheck size={18} className="text-[#3525cd]" />
+                <h4 className="font-sans text-xs font-black uppercase tracking-wider">
+                  How Response Tracking Works
+                </h4>
+              </div>
+
+              <div className="space-y-4 text-xs text-[#464555] leading-relaxed font-sans">
+                <div className="flex items-start gap-3">
+                  <div className="w-6 h-6 rounded-lg bg-indigo-50 border border-indigo-100 text-[#3525cd] font-mono font-bold text-xs flex items-center justify-center shrink-0 mt-0.5">
+                    1
+                  </div>
+                  <div>
+                    <p className="font-bold text-[#0b1c30]">
+                      Outbox Thread Audit
+                    </p>
+                    <p className="text-[#777587] text-[11px] mt-0.5">
+                      EchoMail hooks directly into your Gmail outbox to mirror
+                      active outgoing conversations.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3">
+                  <div className="w-6 h-6 rounded-lg bg-indigo-50 border border-indigo-100 text-[#3525cd] font-mono font-bold text-xs flex items-center justify-center shrink-0 mt-0.5">
+                    2
+                  </div>
+                  <div>
+                    <p className="font-bold text-[#0b1c30]">
+                      Selective Respondent Mapping
+                    </p>
+                    <p className="text-[#777587] text-[11px] mt-0.5">
+                      Select specific team members or client contacts whose
+                      explicit reply is required to close the loop.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3">
+                  <div className="w-6 h-6 rounded-lg bg-indigo-50 border border-indigo-100 text-[#3525cd] font-mono font-bold text-xs flex items-center justify-center shrink-0 mt-0.5">
+                    3
+                  </div>
+                  <div>
+                    <p className="font-bold text-[#0b1c30]">
+                      Automated Nudges & Alerts
+                    </p>
+                    <p className="text-[#777587] text-[11px] mt-0.5">
+                      If an SLA deadline passes, automated follow-up reminders
+                      notify delinquent recipients silently.
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
           )}
+
+          {/* Engine Health Panel */}
+          <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-5 space-y-3">
+            <div className="flex items-center justify-between text-[11px] font-bold uppercase tracking-wider text-[#777587]">
+              <span>Tracking Engine Specs</span>
+              <span className="font-mono text-emerald-600 font-extrabold">
+                Active
+              </span>
+            </div>
+
+            <div className="space-y-2 text-xs font-sans">
+              <div className="flex justify-between py-1 border-b border-slate-200/60 text-[11px]">
+                <span className="text-[#777587]">Response Protocol</span>
+                <span className="font-mono font-bold text-[#0b1c30]">
+                  Gmail Webhook v2
+                </span>
+              </div>
+
+              <div className="flex justify-between py-1 border-b border-slate-200/60 text-[11px]">
+                <span className="text-[#777587]">Max Reminders</span>
+                <span className="font-mono font-bold text-[#0b1c30]">
+                  3 per recipient
+                </span>
+              </div>
+
+              <div className="flex justify-between py-1 text-[11px]">
+                <span className="text-[#777587]">Encryption</span>
+                <span className="font-mono font-bold text-[#0b1c30]">
+                  TLS / OAuth 2.0
+                </span>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
