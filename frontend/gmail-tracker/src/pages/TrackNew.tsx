@@ -53,8 +53,9 @@ const TrackNew = () => {
   const [selectedEmail, setSelectedEmail] = useState<SentEmail | null>(null);
   const [fetchingThreadId, setFetchingThreadId] = useState<string | null>(null);
 
-  // step 2: States (Recipient)
+  // step 2: States (Recipient), all recipient can be accessed through selectedemail.recipients
   const [isLoadingRecipients, setIsLoadingRecipients] = useState(false);
+  // must respond
   const [selectedRecipientEmails, setSelectedRecipientEmails] = useState<
     string[]
   >([]);
@@ -138,13 +139,6 @@ const TrackNew = () => {
     } else {
       setSelectedRecipientEmails(selectedEmail.recipients.map((r) => r.email));
     }
-  };
-
-  // Set quick deadline helper (+24h, +3d, +1w)
-  const handleSetQuickDeadline = (daysToAdd: number) => {
-    const d = new Date();
-    d.setDate(d.getDate() + daysToAdd);
-    setDeadlineDate(d.toISOString().split("T")[0]);
   };
 
   // step 3: Final submit tracking
@@ -810,33 +804,6 @@ const TrackNew = () => {
                     <label className="text-xs font-extrabold text-[#777587] uppercase tracking-wider">
                       1. Target Completion Deadline
                     </label>
-
-                    {/* <div className="flex items-center gap-2">
-                      <span className="text-[11px] text-slate-400 font-medium">
-                        Quick presets:
-                      </span>
-                      <button
-                        type="button"
-                        onClick={() => handleSetQuickDeadline(1)}
-                        className="text-xs font-bold text-[#3525cd] bg-indigo-50 hover:bg-indigo-100 px-2.5 py-1 rounded-lg transition-all cursor-pointer"
-                      >
-                        +24 Hours
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleSetQuickDeadline(3)}
-                        className="text-xs font-bold text-[#3525cd] bg-indigo-50 hover:bg-indigo-100 px-2.5 py-1 rounded-lg transition-all cursor-pointer"
-                      >
-                        +3 Days
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleSetQuickDeadline(7)}
-                        className="text-xs font-bold text-[#3525cd] bg-indigo-50 hover:bg-indigo-100 px-2.5 py-1 rounded-lg transition-all cursor-pointer"
-                      >
-                        +1 Week
-                      </button>
-                    </div> */}
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -902,7 +869,7 @@ const TrackNew = () => {
                           }
                         />
                       </div>
-                      <p className="font-sans ">
+                      <p className="font-sans text-[11px] text-[#777587] leading-relaxed">
                         Nudge unresponsive recipients every 24 hours until all
                         reply.
                       </p>

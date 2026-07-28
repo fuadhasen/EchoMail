@@ -24,7 +24,6 @@ export interface SentEmailRecipient {
 export interface SentEmailSender {
   name: string;
   email: string;
-  avatar?: string;
 }
 
 export interface SentEmail {

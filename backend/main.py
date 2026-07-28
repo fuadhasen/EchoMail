@@ -2,6 +2,7 @@ import uvicorn
 import httpx
 import json
 import os
+from email.utils import parsedate_to_datetime
 from urllib.parse import urlencode
 from fastapi import FastAPI, Query, Depends, HTTPException, Body
 from fastapi.responses import RedirectResponse
@@ -326,9 +327,7 @@ async def track_email(
             if header["name"] == "Date":
                 # Simple date parsing - in a real app, you'd want to use a more robust parser
                 try:
-                    sent_date = datetime.strptime(
-                        header["value"], "%a, %d %b %Y %H:%M:%S %z"
-                    )
+                    sent_date = parsedate_to_datetime(header["value"])
                 except ValueError:
                     pass
 
