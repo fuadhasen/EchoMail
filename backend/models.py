@@ -10,6 +10,7 @@ from sqlalchemy import (
 )
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, sessionmaker
+from sqlalchemy.orm import joinedload
 from sqlalchemy.sql import func
 from config import Config
 
@@ -39,6 +40,9 @@ class TrackedEmailRecipient(Base):
     response_id = Column(String(255), nullable=True) # Gmail Message ID of the response
     last_reminder_sent = Column(DateTime, nullable=True)
 
+    # Relationship
+    recipient = relationship("Recipient", back_populates="email_association")
+
 
 class TrackedEmail(Base):
     """Model for emails that need to be tracked for responses."""
@@ -67,9 +71,9 @@ class TrackedEmail(Base):
     def get_pending_recipients(self, db):
         """Get list of recipients who still need to respond."""
 
-        pending = []
         associations = (
             db.query(TrackedEmailRecipient)
+            .options(joinedload(TrackedEmailRecipient.recipient))
             .filter(
                 TrackedEmailRecipient.tracked_email_id == self.id,
                 TrackedEmailRecipient.must_respond,  # Improved boolean syntax
@@ -77,15 +81,7 @@ class TrackedEmail(Base):
             )
             .all()
         )
-
-        for assoc in associations:
-            recipient = (
-                db.query(Recipient).filter(Recipient.id == assoc.recipient_id).first()
-            )
-            if recipient:
-                pending.append(recipient)
-
-        return pending
+        return [assoc.recipient for assoc in associations]
 
     def check_if_done(self, db):
         """Check if all required recipients have responded."""
@@ -121,7 +117,7 @@ class Recipient(Base):
 
     # Relationships
     email_associations = relationship(
-        "TrackedEmailRecipient", backref="recipient", cascade="all, delete-orphan"
+        "TrackedEmailRecipient", back_populates="recipient", cascade="all, delete-orphan"
     )
 
 
