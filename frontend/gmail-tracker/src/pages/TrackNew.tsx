@@ -1,3 +1,4 @@
+import SearchLoadingSkeleton from "@/components/skeletons/SearchLoadingSkeleton";
 import { useToast } from "@/context/ToastContext";
 import {
   addTrackedEmail,
@@ -6,9 +7,10 @@ import {
   type TrackedEmail,
 } from "@/data/mockTrackedEmails";
 import useSentEmails from "@/hooks/useSentEmails";
-import type { SentEmailB } from "@/services/email";
+import type { SentEmail } from "@/type";
 import {
   AlertCircle,
+  AlertTriangle,
   ArrowLeft,
   ArrowRight,
   Bell,
@@ -41,16 +43,14 @@ const TrackNew = () => {
   const [searchInput, setSearchInput] = useState("");
   const [activeQuery, setActiveQuery] = useState("");
   const [hasSearched, setHasSearched] = useState(false);
-  const [isSearching, setIsSearching] = useState(false);
   const [dateFilter, setDateFilter] = useState("");
 
   // Sent Emails master data
-  const { data, isPending, error } = useSentEmails(activeQuery);
-  console.log("real backend data", data?.emails);
+  const { data, isPending, isFetching, error } = useSentEmails(activeQuery);
   const sentEmails = data?.emails ?? [];
 
   // Thread selection state
-  const [selectedEmail, setSelectedEmail] = useState<SentEmailB | null>(null);
+  const [selectedEmail, setSelectedEmail] = useState<SentEmail | null>(null);
   const [fetchingThreadId, setFetchingThreadId] = useState<string | null>(null);
 
   // step 2: States (Recipient)
@@ -73,16 +73,6 @@ const TrackNew = () => {
   const [notifyOnResponse, setNotifyOnResponse] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Suggested quick search terms
-  const suggestedKeywords = [
-    "Project Apollo",
-    "Annual Budget",
-    "Operations",
-    "Dashboard",
-    "Contract",
-    "Roadmap",
-  ];
-
   const handleExecuteSearch = (queryToSearch?: string) => {
     const term = queryToSearch !== undefined ? queryToSearch : searchInput;
     if (queryToSearch !== undefined) {
@@ -96,20 +86,9 @@ const TrackNew = () => {
       );
     }
 
-    setIsSearching(true);
     setHasSearched(true);
     // search input will be used as active query, means the user hit the search button
     setActiveQuery(term);
-
-    // simulate real backend query delay
-    setTimeout(() => {
-      setIsSearching(false);
-    }, 1000);
-  };
-
-  // Quick chip click handler (suggested tag)
-  const handleTagClick = (tag: string) => {
-    handleExecuteSearch(tag);
   };
 
   // clear search
@@ -120,8 +99,8 @@ const TrackNew = () => {
   };
 
   // Select an email thread
-  const handleSelectEmail = (email: SentEmailB) => {
-    setFetchingThreadId(email.id);
+  const handleSelectEmail = (email: SentEmail) => {
+    setFetchingThreadId(email.thread_id);
     setSelectedEmail(email);
 
     // simulate the backend fetching thread recipients
@@ -215,7 +194,7 @@ const TrackNew = () => {
 
       const newTrackedEmail: Omit<TrackedEmail, "id"> = {
         subject: selectedEmail.subject,
-        sentDate: selectedEmail.sentdate,
+        sentDate: selectedEmail.sentDate,
         deadline: `Due ${formatedDeadline}`,
         status: "Pending",
         recipients: trackingRecipients,
@@ -297,7 +276,7 @@ const TrackNew = () => {
       {/* Full width stepper progress bar */}
       <div className="bg-white border border-[#c7c4d8]/30 rounded-2xl p-4 md:p-6  shadow-[0_2px_12px_-4px_rgba(0,0,0,0.03)]">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {steps.map((s, index) => {
+          {steps.map((s) => {
             const isActive = step === s.num;
             const isCompleted = step > s.num;
 
@@ -455,10 +434,10 @@ const TrackNew = () => {
                   </div>
                   <button
                     type="submit"
-                    disabled={isSearching}
+                    disabled={isFetching}
                     className="bg-[#3525cd] hover:bg-[#3525cd]/90 active:scale-[0.98] text-white py-3 px-7 rounded-xl text-xs font-black font-sans cursor-pointer transition-all flex items-center justify-center gap-2 shadow-sm disabled:opacity-75 shrink-0"
                   >
-                    {isSearching ? (
+                    {isFetching ? (
                       <>
                         <RefreshCw size={14} className="animate-spin" />
                         <span>Searching...</span>
@@ -471,34 +450,12 @@ const TrackNew = () => {
                     )}
                   </button>
                 </form>
-
-                {/* Suggested Search Chips */}
-                <div className="flex items-center gap-2 flex-wrap pt-1">
-                  <span className="text-[11px] font-bold text-[#777587] uppercase tracking-wider mr-1 flex items-center gap-1">
-                    <Tag size={11} />
-                    Suggested queries:
-                  </span>
-                  {suggestedKeywords.map((tag) => (
-                    <button
-                      key={tag}
-                      type="button"
-                      onClick={() => handleTagClick(tag)}
-                      className={`text-xs font-semibold px-3 py-1 rounded-lg border transition-all cursor-pointer ${
-                        activeQuery === tag
-                          ? "bg-[#3525cd] text-white border-[#3525cd] shadow-2xs"
-                          : "bg-slate-50 border-slate-200 text-[#464555] hover:border-[#3525cd]/40 hover:bg-indigo-50/40"
-                      }`}
-                    >
-                      {tag}
-                    </button>
-                  ))}
-                </div>
               </div>
 
               {/* SEARCH RESULTS DISPLAY ENGINE */}
 
               {/* STATE A: Initial Empty Search Hero state */}
-              {!hasSearched && !isSearching && (
+              {!hasSearched && (
                 <div className="p-8 md:p-12 border-2 border-dashed border-[#c7c4d8]/30 rounded-2xl bg-[#f8f9ff]/50 text-center space-y-4">
                   <div className="w-14 h-14 rounded-2xl bg-indigo-50 border border-indigo-100 flex items-center justify-center mx-auto text-[#3525cd] shadow-2xs">
                     <Inbox size={26} />
@@ -529,148 +486,164 @@ const TrackNew = () => {
               )}
 
               {/* STATE B: Asynchronus loading skeletons */}
-              {isSearching && (
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between text-xs text-slate-400 font-medium px-1">
-                    <span className="flex items-center gap-2 font-mono">
-                      <RefreshCw
-                        size={12}
-                        className="animate-spin text-[#3525cd]"
-                      />
-                      Querying Gmail Outbox API...
-                    </span>
-                    <span className="font-mono text-[10px] bg-slate-100 px-2 py-0.5 rounded">
-                      200 OK
-                    </span>
+              {hasSearched && isPending && <SearchLoadingSkeleton />}
+
+              {/* STATE ERROR */}
+              {hasSearched && !isPending && error && (
+                <div className="p-10 text-center border-2 border-dashed border-red-200 rounded-2xl bg-red-50/30 space-y-3">
+                  <div className="w-12 h-12 rounded-full  bg-red-100 text-red-600  flex items-center justify-center mx-auto">
+                    <AlertTriangle size={22} />
                   </div>
 
-                  {[1, 2, 3].map((skeletonId) => (
-                    <div
-                      key={skeletonId}
-                      className="p-6  border-slate-200/80 rounded-2xl bg-white space-y-3 relative overflow-hidden animate-pulse shadow-2xs"
-                    >
-                      <div className="flex items-center justify-between">
-                        <div className="h-4 bg-slate-200 rounded-md w-1/2" />
-                        <div className="h-3 bg-slate-200 rounded w-28" />
-                      </div>
-                      <div className="space-y-2">
-                        <div className="h-3 bg-slate-100 rounded-md w-full" />
-                        <div className="h-3 bg-slate-100 rounded-md w-3/4" />
-                      </div>
-                      <div className="flex items-center justify-between pt-2 border-t border-slate-100">
-                        <div className="h-5 bg-indigo-50 rounded-md w-32" />
-                        <div className="h-4 bg-slate-100 rounded-md w-24" />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              {/* STATE C: no results , empty state */}
-              {hasSearched && !isSearching && sentEmails.length === 0 && (
-                <div className="p-10 text-center border-2 border-dashed border-slate-200 rounded-2xl bg-slate-50/50 space-y-3">
-                  <div className="w-12 h-12 rounded-full bg-amber-50 text-amber-600 flex items-center justify-center mx-auto">
-                    <AlertCircle size={22} />
-                  </div>
-                  <h4 className="font-sans text-sm font-bold text-[#0b1c30]">
-                    No outbox threads found matching "{activeQuery}"
+                  <h4 className="font-bold text-[#0b1c30]">
+                    Unable to search Gmail
                   </h4>
 
-                  <p className="font-sans text-xs text-[#777587] max-w-md mx-auto">
-                    Check for typos or try searching by recipient email address
-                    or broader project keywords.
+                  <p className="text-xs text-[#777587]">
+                    Something went wrong while fetching your sent emails. Please
+                    try again
                   </p>
                   <button
-                    type="button"
-                    onClick={handleClearSearch}
-                    className="inline-block text-xs font-bold text-[#3525cd] bg-white border border-[#3525cd]/30 px-4 py-2 rounded-xl hover:bg-indigo-50 transition-all cursor-pointer mt-2"
+                    onClick={() => handleExecuteSearch(activeQuery)}
+                    className="text-xs font-bold  text-white bg-[#3525cd] px-4 py-2 rounded-xl"
                   >
-                    Clear Search Filter
+                    Try Again
                   </button>
                 </div>
               )}
 
+              {/* STATE C: no results , empty state */}
+              {hasSearched &&
+                !isPending &&
+                !isFetching &&
+                !error &&
+                sentEmails.length === 0 && (
+                  <div className="p-10 text-center border-2 border-dashed border-slate-200 rounded-2xl bg-slate-50/50 space-y-3">
+                    <div className="w-12 h-12 rounded-full bg-amber-50 text-amber-600 flex items-center justify-center mx-auto">
+                      <AlertCircle size={22} />
+                    </div>
+                    <h4 className="font-sans text-sm font-bold text-[#0b1c30]">
+                      No outbox threads found matching "{activeQuery}"
+                    </h4>
+
+                    <p className="font-sans text-xs text-[#777587] max-w-md mx-auto">
+                      Check for typos or try searching by recipient email
+                      address or broader project keywords.
+                    </p>
+                    <button
+                      type="button"
+                      onClick={handleClearSearch}
+                      className="inline-block text-xs font-bold text-[#3525cd] bg-white border border-[#3525cd]/30 px-4 py-2 rounded-xl hover:bg-indigo-50 transition-all cursor-pointer mt-2"
+                    >
+                      Clear Search Filter
+                    </button>
+                  </div>
+                )}
+
               {/* STATE D: Spacious Full Width Search Results Cards */}
-              {hasSearched && !isSearching && sentEmails.length > 0 && (
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between text-xs text-[#777587] px-1 font-sans">
-                    <span className="font-bold text-[#0b1c30]">
-                      Found {sentEmails.length} matching sent outbox threads
-                    </span>
-                    <span className="font-mono text-[11px] bg-slate-100 px-2.5 py-0.5 rounded-md">
-                      Query: "{activeQuery}"
-                    </span>
+              {hasSearched &&
+                !isPending &&
+                !isFetching &&
+                !error &&
+                sentEmails.length > 0 && (
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between text-xs text-[#777587] px-1 font-sans">
+                      <span className="font-bold text-[#0b1c30]">
+                        Found {sentEmails.length} matching sent outbox threads
+                      </span>
+                      <span className="font-mono text-[11px] bg-slate-100 px-2.5 py-0.5 rounded-md">
+                        Query: "{activeQuery}"
+                      </span>
+                    </div>
+
+                    {sentEmails.map((email) => {
+                      const isFetchingThis = fetchingThreadId === email.id;
+
+                      return (
+                        <div
+                          key={email.id}
+                          onClick={() =>
+                            !fetchingThreadId && handleSelectEmail(email)
+                          }
+                          className={`group p-6 border rounded-2xl transition-all cursor-pointer text-left space-y-4 relative ${
+                            isFetchingThis
+                              ? "border-[#3525cd] bg-indigo-50/50 shadow-md ring-2 ring-[#3525cd]/10"
+                              : "border-[#c7c4d8]/30 hover:border-[#3525cd]/60 hover:bg-[#f8f9ff]/50 bg-white hover:shadow-xs"
+                          }`}
+                        >
+                          {/* header row */}
+                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100/80 pb-3">
+                            <div className="flex items-center gap-2.5 pr-4">
+                              <span className="font-mono text-[11px] font-extrabold text-[#3525cd] bg-indigo-50 border border-indigo-100 px-2.5 py-1 rounded-md shrink-0">
+                                #{email.thread_id}
+                              </span>
+                              <h4 className="font-sans text-sm sm:text-base font-extrabold text-[#0b1c30] group-hover:text-[#3525cd] transition-colors line-clamp-1">
+                                {email.subject}
+                              </h4>
+                            </div>
+                            <span className="font-mono text-[11px] text-[#777587] font-bold bg-slate-100 px-3 py-1 rounded-lg whitespace-nowrap self-start sm:self-auto">
+                              {email.sentDate}
+                            </span>
+                          </div>
+
+                          {/* Body snippet */}
+                          <div className="font-sans text-xs text-[#464555] line-clamp-2 leading-relaxed">
+                            {email.snippet.substring(0, 129)}
+                          </div>
+
+                          {/* Footer bar */}
+                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1 text-xs">
+                            <div className="flex items-center gap-3">
+                              <span className="inline-flex items-center gap-1.5 font-sans text-[#3525cd] bg-[#eff4ff] px-3 py-1 rounded-lg font-bold text-xs border border-indigo-100/60">
+                                <User size={13} />
+                                {email.recipients.length} Recipients
+                              </span>
+                              <div className="flex -space-x-1.5 overflow-hidden">
+                                {email.recipients.map((r) => (
+                                  <div
+                                    title={r.name}
+                                    className="w-6 h-6 rounded-full bg-slate-200 border-2 border-white text-[10px] font-bold text-slate-600 flex items-center justify-center font-mono"
+                                  >
+                                    {r.name.charAt(0)}
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+
+                            {isFetchingThis ? (
+                              <span className="text-[#3525cd] font-bold inline-flex items-center gap-2 font-mono text-xs">
+                                <RefreshCw size={14} className="animate-spin" />
+                                Loading Thread Metadata...
+                              </span>
+                            ) : (
+                              <span className="text-[#3525cd] font-bold group-hover:translate-x-1 transition-transform inline-flex items-center gap-1.5 bg-indigo-50/60 px-3 py-1.5 rounded-xl border border-indigo-100">
+                                <span>Select & Map Recipients</span>
+                                <ChevronRight
+                                  size={14}
+                                  className="stroke-2.5"
+                                />
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+
+              {isFetching && !isPending && (
+                <div className="flex items-center justify-between px-4 py-2 mb-3 rounded-xl bg-[#f8f9ff] border border-[#c7c4d8]/20">
+                  <div className="flex items-center gap-2 text-xs font-medium text-[#777587]">
+                    <RefreshCw
+                      size={13}
+                      className="animate-spin text-[#3525cd]"
+                    />
+                    Updating Gmail outbox results...
                   </div>
 
-                  {sentEmails.map((email) => {
-                    const isFetchingThis = fetchingThreadId === email.id;
-
-                    return (
-                      <div
-                        key={email.id}
-                        onClick={() =>
-                          !fetchingThreadId && handleSelectEmail(email)
-                        }
-                        className={`group p-6 border rounded-2xl transition-all cursor-pointer text-left space-y-4 relative ${
-                          isFetchingThis
-                            ? "border-[#3525cd] bg-indigo-50/50 shadow-md ring-2 ring-[#3525cd]/10"
-                            : "border-[#c7c4d8]/30 hover:border-[#3525cd]/60 hover:bg-[#f8f9ff]/50 bg-white hover:shadow-xs"
-                        }`}
-                      >
-                        {/* header row */}
-                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100/80 pb-3">
-                          <div className="flex items-center gap-2.5 pr-4">
-                            <span className="font-mono text-[11px] font-extrabold text-[#3525cd] bg-indigo-50 border border-indigo-100 px-2.5 py-1 rounded-md shrink-0">
-                              #{email.thread_id}
-                            </span>
-                            <h4 className="font-sans text-sm sm:text-base font-extrabold text-[#0b1c30] group-hover:text-[#3525cd] transition-colors line-clamp-1">
-                              {email.subject}
-                            </h4>
-                          </div>
-                          <span className="font-mono text-[11px] text-[#777587] font-bold bg-slate-100 px-3 py-1 rounded-lg whitespace-nowrap self-start sm:self-auto">
-                            {email.sentdate}
-                          </span>
-                        </div>
-
-                        {/* Body snippet */}
-                        <div className="font-sans text-xs text-[#464555] line-clamp-2 leading-relaxed">
-                          {email.snippet}
-                        </div>
-
-                        {/* Footer bar */}
-                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1 text-xs">
-                          <div className="flex items-center gap-3">
-                            <span className="inline-flex items-center gap-1.5 font-sans text-[#3525cd] bg-[#eff4ff] px-3 py-1 rounded-lg font-bold text-xs border border-indigo-100/60">
-                              <User size={13} />
-                              {email.recipients.length} Recipients
-                            </span>
-                            <div className="flex -space-x-1.5 overflow-hidden">
-                              {email.recipients.map((r) => (
-                                <div
-                                  title={r.name}
-                                  className="w-6 h-6 rounded-full bg-slate-200 border-2 border-white text-[10px] font-bold text-slate-600 flex items-center justify-center font-mono"
-                                >
-                                  {r.name.charAt(0)}
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-
-                          {isFetchingThis ? (
-                            <span className="text-[#3525cd] font-bold inline-flex items-center gap-2 font-mono text-xs">
-                              <RefreshCw size={14} className="animate-spin" />
-                              Loading Thread Metadata...
-                            </span>
-                          ) : (
-                            <span className="text-[#3525cd] font-bold group-hover:translate-x-1 transition-transform inline-flex items-center gap-1.5 bg-indigo-50/60 px-3 py-1.5 rounded-xl border border-indigo-100">
-                              <span>Select & Map Recipients</span>
-                              <ChevronRight size={14} className="stroke-2.5" />
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })}
+                  <span className="text-[10px] font-mono text-[#3525cd] bg-indigo-50 px-2 py-1 rounded-md">
+                    Syncing
+                  </span>
                 </div>
               )}
             </div>
@@ -838,7 +811,7 @@ const TrackNew = () => {
                       1. Target Completion Deadline
                     </label>
 
-                    <div className="flex items-center gap-2">
+                    {/* <div className="flex items-center gap-2">
                       <span className="text-[11px] text-slate-400 font-medium">
                         Quick presets:
                       </span>
@@ -863,7 +836,7 @@ const TrackNew = () => {
                       >
                         +1 Week
                       </button>
-                    </div>
+                    </div> */}
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -1077,7 +1050,7 @@ const TrackNew = () => {
                     Original Outbox Send
                   </span>
                   <p className="font-semibold text-[#464555] font-mono text-[11px] mt-0.5">
-                    {selectedEmail.sentdate}
+                    {selectedEmail.sentDate}
                   </p>
                 </div>
 

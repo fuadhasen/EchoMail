@@ -1,16 +1,13 @@
+import type { SentEmail } from "@/type";
 import api from "./api";
-
-export interface Recipient {
-  name: string;
-  email: string;
-}
+import { mapSentEmail } from "./emailmapper";
 
 export interface SentEmailB {
   id: string;
   thread_id: string;
   subject: string;
   sender: string;
-  recipients: Recipient[];
+  recipients: string[];
   snippet: string;
   sentdate: string;
 }
@@ -19,9 +16,14 @@ export interface SearchSentEmailResponse {
   emails: SentEmailB[];
 }
 
+// FE interface
+export interface SearchSentEmailResult {
+  emails: SentEmail[];
+}
+
 const searchSentEmails = async (
-  searchTerm: string,
-): Promise<SearchSentEmailResponse> => {
+  searchTerm?: string,
+): Promise<SearchSentEmailResult> => {
   const response = await api.get<SearchSentEmailResponse>(
     "/search-sent-emails",
     {
@@ -31,7 +33,9 @@ const searchSentEmails = async (
     },
   );
 
-  return response.data;
+  return {
+    emails: response.data.emails.map(mapSentEmail),
+  };
 };
 
 export default searchSentEmails;

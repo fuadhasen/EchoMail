@@ -14,3 +14,25 @@ export interface ActivityItems {
   regularText: string;
   timeLabel: string;
 }
+
+// Frontend Interfaces
+export interface SentEmailRecipient {
+  name: string;
+  email: string;
+}
+
+export interface SentEmailSender {
+  name: string;
+  email: string;
+  avatar?: string;
+}
+
+export interface SentEmail {
+  id: string;
+  thread_id: string;
+  sender: SentEmailSender;
+  subject: string;
+  sentDate: string;
+  snippet: string;
+  recipients: SentEmailRecipient[];
+}
