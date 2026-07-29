@@ -1,6 +1,5 @@
 import searchSentEmails from "@/services/email";
 import { useQuery } from "@tanstack/react-query";
-import React from "react";
 
 const useSentEmails = (searchTerm: string) => {
   return useQuery({
@@ -8,7 +7,7 @@ const useSentEmails = (searchTerm: string) => {
     queryFn: () => searchSentEmails(searchTerm),
 
     enabled: !!searchTerm.trim(),
-    staleTime: 5 * 60 * 1000,
+    staleTime: 1000 * 60 * 60,
   });
 };
 

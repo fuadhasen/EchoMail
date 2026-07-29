@@ -1,12 +1,7 @@
 import SearchLoadingSkeleton from "@/components/skeletons/SearchLoadingSkeleton";
 import { useToast } from "@/context/ToastContext";
-import {
-  addTrackedEmail,
-  type ActivityLog,
-  type Recipient,
-  type TrackedEmail,
-} from "@/data/mockTrackedEmails";
 import useSentEmails from "@/hooks/useSentEmails";
+import useTrackNew from "@/hooks/useTrackNew";
 import type { SentEmail } from "@/type";
 import {
   AlertCircle,
@@ -24,7 +19,6 @@ import {
   RefreshCw,
   Search,
   ShieldCheck,
-  Tag,
   User,
   UserCheck,
   X,
@@ -47,6 +41,7 @@ const TrackNew = () => {
 
   // Sent Emails master data
   const { data, isPending, isFetching, error } = useSentEmails(activeQuery);
+  console.log(data);
   const sentEmails = data?.emails ?? [];
 
   // Thread selection state
@@ -72,7 +67,6 @@ const TrackNew = () => {
     "24h" | "48h" | "12h_before"
   >("24h");
   const [notifyOnResponse, setNotifyOnResponse] = useState(true);
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleExecuteSearch = (queryToSearch?: string) => {
     const term = queryToSearch !== undefined ? queryToSearch : searchInput;
@@ -141,6 +135,7 @@ const TrackNew = () => {
     }
   };
 
+  const { mutate, isPending: pending } = useTrackNew();
   // step 3: Final submit tracking
   const handleStartTracking = () => {
     if (!selectedEmail) return;
@@ -149,59 +144,34 @@ const TrackNew = () => {
       return;
     }
 
-    setIsSubmitting(true);
+    mutate(
+      {
+        emailId: selectedEmail.id,
 
-    setTimeout(() => {
-      // format deadline string
-      const dateObj = new Date(`${deadlineDate}T${deadlineTime}`);
-      const formatedDeadline = dateObj.toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-        year: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-      });
+        data: {
+          recipient_emails: selectedEmail.recipients.map((r) => r.email),
+          must_respond_emails: selectedRecipientEmails,
+          deadline: new Date(`${deadlineDate}T${deadlineTime}`).toISOString(),
+        },
+      },
+      {
+        onSuccess: (data) => {
+          triggerToast(
+            `Started tracking "${selectedEmail.subject}"`,
+            "success",
+          );
 
-      // map selected recipients
-      const trackingRecipients: Recipient[] = selectedEmail.recipients
-        .filter((r) => selectedRecipientEmails.includes(r.email))
-        .map((r) => ({
-          name: r.name,
-          email: r.email,
-          responded: false,
-          remindersSent: 0,
-        }));
+          console.log(data);
+          navigate("/tracked");
+        },
 
-      // creating tracking email log
-      const initialLog: ActivityLog = {
-        id: `log-sent-${Date.now()}`,
-        type: "sent",
-        description: `Email response tracking initiated with ${trackingRecipients.length} recipients. Deadline set for ${formatedDeadline}.`,
-        timestamp: new Date().toLocaleDateString("en-US", {
-          month: "short",
-          day: "numeric",
-          year: "numeric",
-          hour: "2-digit",
-          minute: "2-digit",
-        }),
-      };
+        onError: (error) => {
+          triggerToast("Failed to start email tracking", "info");
 
-      const newTrackedEmail: Omit<TrackedEmail, "id"> = {
-        subject: selectedEmail.subject,
-        sentDate: selectedEmail.sentDate,
-        deadline: `Due ${formatedDeadline}`,
-        status: "Pending",
-        recipients: trackingRecipients,
-        activityLogs: [initialLog],
-      };
-
-      addTrackedEmail(newTrackedEmail);
-      triggerToast(
-        `Started tracking response loop for "${selectedEmail.subject}"`,
-        "success",
-      );
-      navigate("/tracked");
-    }, 800);
+          console.error(error);
+        },
+      },
+    );
   };
 
   // helper to format steps title
@@ -967,10 +937,10 @@ const TrackNew = () => {
                 <button
                   type="button"
                   onClick={handleStartTracking}
-                  disabled={isSubmitting}
+                  disabled={pending}
                   className="bg-[#3525cd] text-white hover:bg-[#3525cd]/90 py-3.5 px-8 rounded-xl text-xs font-black font-sans cursor-pointer transition-all flex items-center gap-1.5 shadow-md disabled:opacity-75"
                 >
-                  {isSubmitting ? (
+                  {pending ? (
                     <>
                       <RefreshCw size={15} className="animate-spin" />
                       <span>Registering SLA Tracker...</span>

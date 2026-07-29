@@ -66,6 +66,8 @@ class GmailService:
             else:
                 self.error = "Token file not exist, user is not Authenticated"
 
+        except RefreshError:
+            self.error = "GMAIL_AUTH_EXPIRED"
         except HttpError as e:
             self.error = f"HTTP Error: {e}"
         except Exception as e:

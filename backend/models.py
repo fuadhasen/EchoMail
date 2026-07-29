@@ -41,7 +41,7 @@ class TrackedEmailRecipient(Base):
     last_reminder_sent = Column(DateTime, nullable=True)
 
     # Relationship
-    recipient = relationship("Recipient", back_populates="email_association")
+    recipient = relationship("Recipient", back_populates="email_associations")
 
 
 class TrackedEmail(Base):
@@ -81,6 +81,7 @@ class TrackedEmail(Base):
             )
             .all()
         )
+        
         return [assoc.recipient for assoc in associations]
 
     def check_if_done(self, db):

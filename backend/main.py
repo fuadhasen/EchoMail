@@ -21,6 +21,7 @@ from db_services import EmailTrackerService
 from scheduler import start_scheduler, stop_scheduler, check_email_responses
 from pathlib import Path
 from fastapi.middleware.cors import CORSMiddleware
+from dependencies import get_email_service
 
 
 # Pydantic models for request/response validation
@@ -47,9 +48,7 @@ class TrackEmailRequest(BaseModel):
     # email_id: str
     recipient_emails: List[EmailStr]
     must_respond_emails: List[EmailStr]
-    deadline: Optional[datetime] = Field(
-        default_factory=lambda: datetime.now() + timedelta(days=7)
-    )
+    deadline: datetime
 
 
 class TrackedEmailResponse(BaseModel):
@@ -115,7 +114,7 @@ app = FastAPI(lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],
+    allow_origins=["http://localhost:5173", "*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"]
@@ -221,20 +220,12 @@ async def search_sent_emails_endpoint(
     max_results: int = Query(
         5, ge=1, le=100, description="Maximum number of results to return"
     ),
+    gmail_service: GmailService = Depends(get_email_service)
 ):
     """
     Search for sent emails by a single search term that looks in both subject and body content.
     This simplifies the search interface by using one field instead of separate fields.
     """
-    gmail_service = GmailService()
-
-    # Check if Gmail service is available before proceeding
-    if not gmail_service.is_available():
-        error_message = (
-            gmail_service.get_credentials_error() or "Gmail service not available"
-        )
-        return {"error": error_message, "emails": []}
-
     emails = gmail_service.search_sent_emails(
         search_term=search_term,
         max_results=max_results,
@@ -259,13 +250,7 @@ async def search_sent_emails_endpoint(
 
 
 @app.get("/email_recipients/{msg_id}")
-async def get_email_recipients(msg_id: str):
-    gmail_service = GmailService()
-
-    if not gmail_service.is_available():
-        error_message = (gmail_service.get_credentials_error() or "Gmail service not available")
-        return {"error": error_message}
-
+async def get_email_recipients(msg_id: str, gmail_service: GmailService = Depends(get_email_service)):
     recipients = gmail_service.get_email_recipient(msg_id=msg_id)
     return {"recipients": recipients}
 
@@ -276,19 +261,11 @@ async def get_email_responses(
     max_results: int = Query(
         10, ge=1, le=100, description="Maximum number of results to return"
     ),
+    gmail_service: GmailService = Depends(get_email_service)
 ):
     """
     Get detailed responses to a specific email message.
     """
-    gmail_service = GmailService()
-
-    # Check if Gmail service is available before proceeding
-    if not gmail_service.is_available():
-        error_message = (
-            gmail_service.get_credentials_error() or "Gmail service not available"
-        )
-        return {"error": error_message, "responses": []}
-
     detailed_responses = gmail_service.get_email_responses_with_details(
         msg_id=msg_id, max_results=max_results
     )
@@ -331,7 +308,7 @@ async def track_email(
                 except ValueError:
                     pass
 
-    # Calculate deadline
+    # Calculate deadline , string should be parsed into datetime
     deadline = track_request.deadline
 
     # Track the email
