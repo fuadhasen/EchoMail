@@ -1,5 +1,5 @@
 import type { TrackedEmail } from "@/data/mockTrackedEmails";
-import { Calendar, Hourglass, User } from "lucide-react";
+import { ArrowRight, Calendar, Hourglass, User } from "lucide-react";
 import React from "react";
 import { Link } from "react-router";
 
@@ -85,7 +85,20 @@ const TrackedEmailCard = ({ email }: TrackedEmailCardProps) => {
         </div>
 
         {/* status desktop and link action */}
-        <div>link action</div>
+        <div className="flex items-center justify-between md:justify-end gap-5 shrink-0 pt-3 md:pt-0 border-t md:border-t-0 border-slate-100">
+          <div className="hidden md:block">{getStatusBadge()}</div>
+
+          <Link
+            to={`/tracked/detail/${email.id}`}
+            className="inline-flex items-center gap-1.5  bg-[#f8f9ff] hover:bg-[#3525cd] text-[#3525cd] hover:text-white border border-[#3525cd]/20 hover:border-[#3525cd]  px-3.5 py-2 rounded-xl text-xs font-semibold transition-all shadow-2xs group/btn cursor-pointer"
+          >
+            <span>Open Details</span>
+            <ArrowRight
+              size={14}
+              className="group-hover/btn:translate-x-0.5 transition-transform"
+            />
+          </Link>
+        </div>
       </div>
     </div>
   );
