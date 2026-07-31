@@ -18,7 +18,7 @@ export interface TrackedRecipient {
   last_reminder_sent: string | null;
 }
 
-export interface TrackedEmailResponse {
+export interface TrackedNewResponse {
   tracked_email_id: number;
   email_id: string;
   thread_id: string;
@@ -30,13 +30,40 @@ export interface TrackedEmailResponse {
   required_recipients: TrackedRecipient[];
 }
 
-export const trackEmail = async (
+export interface TrackedEmailB {
+  id: string;
+  email_id: string;
+  thread_id: string;
+  subject: string;
+  sender: string;
+  sentDate: string;
+  deadline: string;
+  isDone: boolean;
+  recipients: TrackedRecipient[];
+  required_recipients: TrackedRecipient[];
+}
+
+export interface TrackedEmailsResponse {
+  tracked_emails: TrackedEmailB[];
+}
+
+export const trackNew = async (
   emailId: string,
   data: TrackEmailRequest,
-): Promise<TrackedEmailResponse> => {
-  const response = await api.post<TrackedEmailResponse>(
+): Promise<TrackedNewResponse> => {
+  const response = await api.post<TrackedNewResponse>(
     `/emails/${emailId}/track`,
     data,
   );
   return response.data;
+};
+
+export const trackedEmails = async (
+  showDone: boolean,
+): Promise<TrackedEmailB[]> => {
+  const response = await api.get<TrackedEmailsResponse>("/tracked-emails", {
+    params: { show_done: showDone },
+  });
+
+  return response.data.tracked_emails;
 };

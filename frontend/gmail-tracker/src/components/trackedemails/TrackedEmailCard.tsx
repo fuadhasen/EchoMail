@@ -1,17 +1,18 @@
-import type { TrackedEmail } from "@/data/mockTrackedEmails";
+import type { TrackedEmailB } from "@/services/trackedEmail";
 import { ArrowRight, Calendar, Hourglass, User } from "lucide-react";
 import React from "react";
 import { Link } from "react-router";
 
 interface TrackedEmailCardProps {
   key?: React.Key;
-  email: TrackedEmail;
+  email: TrackedEmailB;
+  status: "Completed" | "Overdue" | "Waiting";
 }
 
-const TrackedEmailCard = ({ email }: TrackedEmailCardProps) => {
+const TrackedEmailCard = ({ email, status }: TrackedEmailCardProps) => {
   // map Pending to waiting for display status
-  const displayStatus = email.status === "Pending" ? "Waiting" : email.status;
-  const senderName = "Fuad Hassen";
+  const displayStatus = status;
+  console.log(email.sender, " ", email.sentDate, " ", email.deadline);
 
   const getStatusBadge = () => {
     switch (displayStatus) {
@@ -63,14 +64,16 @@ const TrackedEmailCard = ({ email }: TrackedEmailCardProps) => {
             <div className="flex items-center gap-1.5 bg-slate-50 px-2.5 py-1 rounded-lg border border-slate-200/60">
               <User size={13} className="text-slate-400 shrink-0" />
               <span>From:</span>
-              <span className="font-semibold text-slate-800">{senderName}</span>
+              <span className="font-semibold text-slate-800">
+                {email.sender}
+              </span>
             </div>
 
             <div className="flex items-center gap-1.5 bg-slate-50 px-2.5 py-1 rounded-lg border border-slate-200/60">
               <Calendar size={13} className="text-slate-400 shrink-0" />
               <span>Sent:</span>
               <span className="font-semibold text-slate-800">
-                {email.sentDate}
+                {email.sentDate || Date.now()}
               </span>
             </div>
 

@@ -1,20 +1,20 @@
 import {
-  trackEmail,
-  type TrackedEmailResponse,
+  trackNew,
+  type TrackedNewResponse,
   type TrackEmailRequest,
 } from "@/services/trackedEmail";
 import { useMutation } from "@tanstack/react-query";
 
 const useTrackNew = () => {
   return useMutation<
-    TrackedEmailResponse,
+    TrackedNewResponse,
     Error,
     {
       emailId: string;
       data: TrackEmailRequest;
     }
   >({
-    mutationFn: ({ emailId, data }) => trackEmail(emailId, data),
+    mutationFn: ({ emailId, data }) => trackNew(emailId, data),
   });
 };
 

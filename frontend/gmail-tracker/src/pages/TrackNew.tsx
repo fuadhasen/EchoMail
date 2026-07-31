@@ -37,11 +37,9 @@ const TrackNew = () => {
   const [searchInput, setSearchInput] = useState("");
   const [activeQuery, setActiveQuery] = useState("");
   const [hasSearched, setHasSearched] = useState(false);
-  const [dateFilter, setDateFilter] = useState("");
 
   // Sent Emails master data
   const { data, isPending, isFetching, error } = useSentEmails(activeQuery);
-  console.log(data);
   const sentEmails = data?.emails ?? [];
 
   // Thread selection state
@@ -343,7 +341,7 @@ const TrackNew = () => {
       </div>
 
       {/* Main 12 Column Responsive Dashboared Layout*/}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start ">
         {/* left main area */}
         <div className="lg:col-span-8 space-y-6">
           {/* steeper progress bar */}

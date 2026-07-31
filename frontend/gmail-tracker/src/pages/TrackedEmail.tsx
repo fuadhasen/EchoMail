@@ -1,91 +1,62 @@
 import TrackedEmailCard from "@/components/trackedemails/TrackedEmailCard";
 import TrackedEmailEmpty from "@/components/trackedemails/TrackedEmailEmpty";
-import type { StatusFilterTypes } from "@/components/trackedemails/TrackedEmailFilter";
 import TrackedEmailFilter from "@/components/trackedemails/TrackedEmailFilter";
 import TrackedEmailSkeleton from "@/components/trackedemails/TrackedEmailSkeleton";
+import useTrackedEmails from "@/hooks/useTrackedEmails";
+import type { TrackedEmailB } from "@/services/trackedEmail";
+import { getTrackedEmailStatus } from "@/statusFilter";
 import { ArrowRight, Clock, Plus, RefreshCw, Zap } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { Link } from "react-router";
-import { getTrackedEmails, type TrackedEmail } from "../data/mockTrackedEmails";
 
 const TrackedEmails = () => {
-  const [emails, setEmails] = useState<TrackedEmail[]>(() =>
-    getTrackedEmails(),
-  );
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [showDone, setShowDone] = useState(false);
+  const { data: emails = [], isPending, error } = useTrackedEmails(showDone);
+  console.log(emails);
+
   const [isSyncing, setIsSyncing] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState<StatusFilterTypes>("All");
-  const [activeTab, setActiveTab] = useState<"active" | "all">("active");
 
   // compute active vs all
   const activeEmails = useMemo(() => {
-    return emails.filter((e) => !e.isDone && e.status !== "Completed");
+    return emails.filter((e) => {
+      const status = getTrackedEmailStatus(e.isDone, e.deadline);
+      return !e.isDone && status !== "Completed";
+    });
   }, [emails]);
 
   const activeCount = activeEmails.length;
   const allCount = emails.length;
 
   const baseEmails = useMemo(() => {
-    return activeTab === "active" ? activeEmails : emails;
-  }, [activeTab, activeEmails, emails]);
-
-  // load data on mount
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setEmails(getTrackedEmails());
-      setIsLoading(false);
-    }, 250);
-
-    return () => clearTimeout(timer);
-  }, []);
+    return showDone === false ? activeEmails : emails;
+  }, [showDone, activeEmails, emails]);
 
   const handleSyncOutbox = () => {
     setIsSyncing(true);
     setTimeout(() => {
-      setEmails(getTrackedEmails());
       setIsSyncing(false);
     }, 600);
   };
 
-  // compute status count
-  const count = useMemo(() => {
-    const all = emails.length;
-    const waiting = emails.filter((e) => e.status === "Pending").length;
-    const completed = emails.filter((e) => e.status === "Completed").length;
-    const overdue = emails.filter((e) => e.status === "Overdue").length;
-
-    return { all, waiting, completed, overdue };
-  }, [emails]);
-
   // upcoming deadline for the right preview panel
   const pendingDeadline = useMemo(() => {
-    return emails.filter((e) => e.status !== "Completed").slice(0, 4);
+    return emails.filter((e) => e.isDone !== true).slice(0, 4);
   }, [emails]);
 
   // filter logic
-  const filteredEmails: TrackedEmail[] = useMemo(() => {
-    return emails.filter((email) => {
+  const filteredEmails: TrackedEmailB[] = useMemo(() => {
+    return baseEmails.filter((email) => {
       const query = searchTerm.toLowerCase().trim();
       const matchesSearch =
         !query || email.subject.toLowerCase().includes(query);
 
-      let matchesStatus = true;
-      if (statusFilter === "Waiting") {
-        matchesStatus = email.status === "Pending";
-      } else if (statusFilter === "Completed") {
-        matchesStatus = email.status === "Completed";
-      } else if (statusFilter === "Overdue") {
-        matchesStatus = email.status === "Overdue";
-      }
-
-      return matchesSearch && matchesStatus;
+      return matchesSearch;
     });
-  }, [emails, searchTerm, statusFilter]);
+  }, [baseEmails, searchTerm]);
 
   const handleResetFilter = () => {
     setSearchTerm("");
-    setStatusFilter("All");
   };
 
   return (
@@ -125,34 +96,22 @@ const TrackedEmails = () => {
         </div>
       </div>
 
-      {/* modern segmented control */}
-      <div className="flex items-center justify-between mb-5">
-        <div className="inline-flex items-center p-1 bg-slate-100/90 rounded-xl border border-slate-200/70 font-sans text-xs">
-          <button>
-            <span>Active</span>
-            <span>{activeCount}</span>
-          </button>
-          <button>
-            <span>All</span>
-            <span>{allCount}</span>
-          </button>
-        </div>
-      </div>
-
       {/* Responsive Grid Layout */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         {/* main workspace */}
         <div className="lg:col-span-8 xl:col-span-9 space-y-4">
+          {/* Active / All segmented control and search bar */}
           <TrackedEmailFilter
             searchTerm={searchTerm}
             onSearchChange={setSearchTerm}
-            statusFilter={statusFilter}
-            onStatusFilterChange={setStatusFilter}
-            counts={count}
+            showDone={showDone}
+            onTabChange={setShowDone}
+            activeCount={activeCount}
+            allCount={allCount}
           />
 
           {/* List / Loading /Empty States */}
-          {isLoading ? (
+          {isPending ? (
             <TrackedEmailSkeleton />
           ) : emails.length === 0 ? (
             <TrackedEmailEmpty type="empty" />
@@ -163,9 +122,20 @@ const TrackedEmails = () => {
             />
           ) : (
             <div className="space-y-3">
-              {filteredEmails.map((email) => (
-                <TrackedEmailCard key={email.id} email={email} />
-              ))}
+              {filteredEmails.map((email) => {
+                const status = getTrackedEmailStatus(
+                  email.isDone,
+                  email.deadline,
+                );
+
+                return (
+                  <TrackedEmailCard
+                    key={email.id}
+                    email={email}
+                    status={status}
+                  />
+                );
+              })}
             </div>
           )}
         </div>
@@ -187,34 +157,41 @@ const TrackedEmails = () => {
               </p>
             ) : (
               <div className="space-y-2.5">
-                {pendingDeadline.map((item) => (
-                  <Link
-                    to={`/tracked/detail/${item.id}`}
-                    className="block bg-slate-50/60 hover:bg-slate-100/70 border border-slate-200/60 p-2.5 rounded-xl transition-all group/item"
-                  >
-                    <div className="flex items-start justify-between gap-2">
-                      <h4 className="font-sans text-xs font-semibold text-slate-800 group-hover/item:text-[#3525cd] transition-colors line-clamp-1">
-                        {item.subject}
-                      </h4>
-                      {item.status === "Overdue" ? (
-                        <span className="text-[9px] font-medium text-rose-600 bg-rose-50 px-1.5 py-0.2 rounded border border-rose-200/60 shrink-0">
-                          overdue
-                        </span>
-                      ) : (
-                        <span className="text-[9px] font-medium text-amber-700 bg-amber-50 px-1.5 py-0.2 rounded border border-amber-200/60 shrink-0">
-                          Waiting
-                        </span>
-                      )}
-                    </div>
-                    <div className="text-[10px] text-slate-400 mt-1 flex items-center justify-between">
-                      <span>{item.deadline}</span>
-                      <ArrowRight
-                        size={11}
-                        className="group-hover/item:translate-x-0.5 transition-transform text-[#3525cd]"
-                      />
-                    </div>
-                  </Link>
-                ))}
+                {pendingDeadline.map((item) => {
+                  const status = getTrackedEmailStatus(
+                    item.isDone,
+                    item.deadline,
+                  );
+
+                  return (
+                    <Link
+                      to={`/tracked/detail/${item.id}`}
+                      className="block bg-slate-50/60 hover:bg-slate-100/70 border border-slate-200/60 p-2.5 rounded-xl transition-all group/item"
+                    >
+                      <div className="flex items-start justify-between gap-2">
+                        <h4 className="font-sans text-xs font-semibold text-slate-800 group-hover/item:text-[#3525cd] transition-colors line-clamp-1">
+                          {item.subject}
+                        </h4>
+                        {status === "Overdue" ? (
+                          <span className="text-[9px] font-medium text-rose-600 bg-rose-50 px-1.5 py-0.2 rounded border border-rose-200/60 shrink-0">
+                            overdue
+                          </span>
+                        ) : (
+                          <span className="text-[9px] font-medium text-amber-700 bg-amber-50 px-1.5 py-0.2 rounded border border-amber-200/60 shrink-0">
+                            Waiting
+                          </span>
+                        )}
+                      </div>
+                      <div className="text-[10px] text-slate-400 mt-1 flex items-center justify-between">
+                        <span>{item.deadline}</span>
+                        <ArrowRight
+                          size={11}
+                          className="group-hover/item:translate-x-0.5 transition-transform text-[#3525cd]"
+                        />
+                      </div>
+                    </Link>
+                  );
+                })}
               </div>
             )}
           </div>

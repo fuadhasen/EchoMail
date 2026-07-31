@@ -1,35 +1,23 @@
 import { Search, X } from "lucide-react";
 import React from "react";
 
-export type StatusFilterTypes = "All" | "Waiting" | "Completed" | "Overdue";
-
 interface TrackedEmailFilterProps {
   searchTerm: string;
   onSearchChange: (value: string) => void;
-  statusFilter: StatusFilterTypes;
-  onStatusFilterChange: (status: StatusFilterTypes) => void;
-  counts: {
-    all: number;
-    waiting: number;
-    completed: number;
-    overdue: number;
-  };
+  showDone: boolean;
+  onTabChange: (showDone: boolean) => void;
+  activeCount: number;
+  allCount: number;
 }
 
 const TrackedEmailFilter = ({
   searchTerm,
   onSearchChange,
-  statusFilter,
-  onStatusFilterChange,
-  counts,
+  showDone,
+  onTabChange,
+  activeCount,
+  allCount,
 }: TrackedEmailFilterProps) => {
-  const filterOptions: { label: StatusFilterTypes; count: number }[] = [
-    { label: "All", count: counts.all },
-    { label: "Waiting", count: counts.waiting },
-    { label: "Completed", count: counts.completed },
-    { label: "Overdue", count: counts.overdue },
-  ];
-
   return (
     <div className="bg-white border  border-slate-200/80 rounded-2xl p-3.5 mb-6 shadow-2xs flex flex-col md:flex-row gap-3.5 items-center justify-between">
       {/* SearchInput Box */}
@@ -53,35 +41,48 @@ const TrackedEmailFilter = ({
         )}
       </div>
 
-      {/* status filter pills */}
-      <div className="flex items-center gap-1 overflow-x-auto w-full md:w-auto custom-scrollbar">
-        <div className="flex items-center gap-1 bg-slate-100/70 p-1 rounded-xl">
-          {filterOptions.map((option) => {
-            const isActive = statusFilter === option.label;
-            return (
-              <button
-                key={option.label}
-                onClick={() => onStatusFilterChange(option.label)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-semibold font-sans transition-all cursor-pointer flex items-center gap-1.5 whitespace-nowrap ${
-                  isActive
-                    ? "bg-white text-slate-900 shadow-2xs"
-                    : "text-slate-500 hover:text-slate-800 hover:bg-white/40"
-                }`}
-              >
-                <span>{option.label}</span>
-                <span
-                  className={`text-[10px] px-1.5 py-0.2  rounded-md font-mono font-medium ${
-                    isActive
-                      ? "bg-slate-100 text-slate-700"
-                      : "bg-slate-200/60 text-slate-500"
-                  }`}
-                >
-                  {option.count}
-                </span>
-              </button>
-            );
-          })}
-        </div>
+      {/* status filter pills, active or all*/}
+      <div className="inline-flex items-center p-1 bg-slate-100/90 rounded-xl border  border-slate-200/70 font-sans text-xs shrink-0">
+        <button
+          type="button"
+          onClick={() => onTabChange(false)}
+          className={`px-3 py-1.5 rounded-lg font-semibold transition-all duration-150 cursor-pointer flex items-center gap-2 ${
+            showDone === false
+              ? "bg-white text-slate-900 shadow-2xs"
+              : "text-slate-500 hover:text-slate-800"
+          }`}
+        >
+          <span>Active</span>
+          <span
+            className={`px-1.5 py-0.2 text-[10px] font-mono rounded-md font-medium ${
+              showDone === false
+                ? "bg-slate-100 text-slate-700"
+                : "bg-slate-200/70 text-slate-500"
+            }`}
+          >
+            {activeCount}
+          </span>
+        </button>
+        <button
+          type="button"
+          onClick={() => onTabChange(true)}
+          className={`px-3.5 py-1.5 rounded-lg font-semibold transition-all duration-150 cursor-pointer flex items-center gap-2 ${
+            showDone === true
+              ? "bg-white text-slate-900 shadow-2xs"
+              : "text-slate-500 hover:text-slate-800"
+          }`}
+        >
+          <span>All</span>
+          <span
+            className={`px-1.5 py-0.2 text-[10px] font-mono rounded-md font-medium ${
+              showDone === true
+                ? "bg-slate-100 text-slate-700"
+                : "bg-slate-200/70 text-slate-500"
+            }`}
+          >
+            {allCount}
+          </span>
+        </button>
       </div>
     </div>
   );
