@@ -1,4 +1,9 @@
 import type { TrackedEmailB } from "@/services/trackedEmail";
+import {
+  formatDeadline,
+  formatSenderName,
+  formatSentDate,
+} from "@/utils/dateFormatter";
 import { ArrowRight, Calendar, Hourglass, User } from "lucide-react";
 import React from "react";
 import { Link } from "react-router";
@@ -65,7 +70,7 @@ const TrackedEmailCard = ({ email, status }: TrackedEmailCardProps) => {
               <User size={13} className="text-slate-400 shrink-0" />
               <span>From:</span>
               <span className="font-semibold text-slate-800">
-                {email.sender}
+                {formatSenderName(email.sender)}
               </span>
             </div>
 
@@ -73,7 +78,7 @@ const TrackedEmailCard = ({ email, status }: TrackedEmailCardProps) => {
               <Calendar size={13} className="text-slate-400 shrink-0" />
               <span>Sent:</span>
               <span className="font-semibold text-slate-800">
-                {email.sentDate || Date.now()}
+                {formatSentDate(email.sentDate || Date.now())}
               </span>
             </div>
 
@@ -81,7 +86,7 @@ const TrackedEmailCard = ({ email, status }: TrackedEmailCardProps) => {
               <Hourglass size={13} className="text-slate-400 shrink-0" />
               <span>Deadline:</span>
               <span className="font-semibold text-slate-800">
-                {email.deadline}
+                {formatDeadline(email.deadline)}
               </span>
             </div>
           </div>
