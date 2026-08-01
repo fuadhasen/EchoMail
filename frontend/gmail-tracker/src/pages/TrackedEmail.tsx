@@ -5,7 +5,7 @@ import TrackedEmailSkeleton from "@/components/trackedemails/TrackedEmailSkeleto
 import useTrackedEmails from "@/hooks/useTrackedEmails";
 import type { TrackedEmailB } from "@/services/trackedEmail";
 import { getTrackedEmailStatus } from "@/utils/statusFilter";
-import { ArrowRight, Clock, Plus, RefreshCw, Zap } from "lucide-react";
+import { Plus, RefreshCw } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Link } from "react-router";
 
@@ -38,11 +38,6 @@ const TrackedEmails = () => {
       setIsSyncing(false);
     }, 600);
   };
-
-  // upcoming deadline for the right preview panel
-  const pendingDeadline = useMemo(() => {
-    return emails.filter((e) => e.isDone !== true).slice(0, 4);
-  }, [emails]);
 
   // filter logic
   const filteredEmails: TrackedEmailB[] = useMemo(() => {

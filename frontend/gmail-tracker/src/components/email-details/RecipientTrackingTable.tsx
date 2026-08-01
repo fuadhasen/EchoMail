@@ -1,6 +1,7 @@
 import type { Recipient } from "@/data/mockTrackedEmails";
 import { CheckCircle2, Clock, Search, User } from "lucide-react";
 import React, { useState } from "react";
+import RecipientRow from "./RecipientRow";
 
 interface RecipientTrackingTableProps {
   recipients: Recipient[];

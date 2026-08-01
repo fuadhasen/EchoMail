@@ -399,8 +399,8 @@ async def get_tracked_email(tracked_email_id: int, db: Session = Depends(get_db)
         "is_done": email.is_done,
         "created_at": email.created_at,
         "recipients": recipients_info["all_recipients"],
-        "required_recipients": recipients_info["required_recipients"],
-        "responded_recipients": recipients_info["responded_recipients"],
+        # "required_recipients": recipients_info["required_recipients"],
+        # "responded_recipients": recipients_info["responded_recipients"],
         "pending_recipients": recipients_info["pending_recipients"],
     }
 

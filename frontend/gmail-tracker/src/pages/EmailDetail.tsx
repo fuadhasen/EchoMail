@@ -1,6 +1,8 @@
+import ConversationSection from "@/components/email-details/ConversationSection";
 import EmailDetailsSkeleton from "@/components/email-details/EmailDetailsSkeleton";
 import EmailHeader from "@/components/email-details/EmailHeader";
 import RecipientTrackingTable from "@/components/email-details/RecipientTrackingTable";
+import RightPanel from "@/components/email-details/RightPanel";
 import { useToast } from "@/context/ToastContext";
 import {
   getTrackedEmailById,
@@ -8,9 +10,9 @@ import {
   type ThreadMessage,
   type TrackedEmail,
 } from "@/data/mockTrackedEmails";
+import useTrackedDetail from "@/hooks/useTrackedDetail";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-import { AlertTriangle, CheckCircle2, Clock } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 dayjs.extend(relativeTime);
@@ -20,42 +22,27 @@ const EmailDetail = () => {
   const navigate = useNavigate();
   const { triggerToast } = useToast();
 
-  const [email, setEmail] = useState<TrackedEmail | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const { data: email, isPending, error } = useTrackedDetail(id);
+  console.log();
+
   const [isSyncing, setIsSyncing] = useState(false);
 
   useEffect(() => {
-    if (id) {
-      setIsLoading(true);
-      const timer = setTimeout(() => {
-        const found = getTrackedEmailById(id);
-        if (found) {
-          setEmail(found);
-        } else {
-          triggerToast("Tracked email thread not found", "info");
-          navigate("/tracked");
-        }
-
-        setIsLoading(false);
-      }, 250);
-
-      return () => clearTimeout(timer);
+    if (error) {
+      triggerToast("Unable to load tracked email.", "info");
+      navigate("/tracked");
     }
-  }, [id, navigate, triggerToast]);
+  }, [error, navigate, triggerToast]);
 
   const handleSync = () => {
     setIsSyncing(true);
     setTimeout(() => {
-      if (id) {
-        const found = getTrackedEmailById(id);
-        if (found) setEmail(found);
-      }
       setIsSyncing(false);
-      triggerToast("Gmail thread synced successfully.", "info");
-    }, 400);
+    }, 600);
+    triggerToast("Gmail thread synced successfully.", "info");
   };
 
-  if (isLoading || !email) {
+  if (isPending) {
     return (
       <div className="w-full text-left px-4 md:px-8 py-4">
         <EmailDetailsSkeleton />
@@ -63,14 +50,18 @@ const EmailDetail = () => {
     );
   }
 
+  if (!email) {
+    return null;
+  }
+
   const totalRecipients = email.recipients.length;
-  const respondedRecipients = email.recipients.filter((r) => r.responded);
-  const pendingRecipients = email.recipients.filter((r) => !r.responded);
+  const respondedRecipients = email.recipients.filter((r) => r.has_responded);
+  const pendingRecipients = email.recipients.filter((r) => !r.has_responded);
 
   const requiredRecipients = email.recipients.filter(
-    (r) => r.isRequired !== false,
+    (r) => r.must_responded !== false,
   );
-  const requiredResponded = requiredRecipients.filter((r) => r.responded);
+  const requiredResponded = requiredRecipients.filter((r) => r.has_responded);
 
   const completionPercentage =
     totalRecipients > 0
@@ -85,8 +76,8 @@ const EmailDetail = () => {
     }
 
     const updatedRecipients = email.recipients.map((r) => {
-      if (!r.responded) {
-        return { ...r, remindersSent: r.remindersSent + 1 };
+      if (!r.has_responded) {
+        return { ...r, last_reminder_sent: Date.now().toLocaleString() };
       }
 
       return r;
@@ -280,10 +271,23 @@ const EmailDetail = () => {
             onSendReminder={handleSendIndividualReminder}
             onToggleResponse={handleToggleRecipientResponded}
           />
+
+          <ConversationSection
+            messages={email.threadMessages}
+            subject={email.subject}
+            onAddMockReply={handleMockReply}
+          />
         </div>
 
         <div className="lg:col-span-4 space-y-6">
-          contextual action and progresspanel
+          <RightPanel
+            email={email}
+            respondedCount={respondedRecipients.length}
+            totalCount={totalRecipients}
+            requiredCount={requiredRecipients.length}
+            requiredRespondedCount={requiredResponded.length}
+            completionPercentage={completionPercentage}
+          />
         </div>
       </div>
     </div>

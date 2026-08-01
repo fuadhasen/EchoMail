@@ -99,7 +99,7 @@ const RecipientRow = ({
       {/* quick action */}
       <td className="py-3.5 px-4 sm:px-5 align-middle text-right whitespace-nowrap">
         <div className="flex items-center justify-end gap-2">
-          {recipient.responded ? (
+          {!recipient.responded ? (
             <>
               <button
                 onClick={() => onSendReminder(recipient.email)}
@@ -114,7 +114,7 @@ const RecipientRow = ({
                 onClick={() => onToggleResponse(recipient.email)}
                 className="bg-[#3525cd] hover:bg-[#281ca8] text-white py-1 px-2.5 rounded-lg font-sans text-xs font-semibold flex items-center gap-1 shadow-2xs transition-all cursor-pointer"
               >
-                <Check />
+                <Check size={12} className="stroke-2.5" />
                 <span>Mark Responded</span>
               </button>
             </>
@@ -124,7 +124,7 @@ const RecipientRow = ({
               className="bg-white hover:bg-slate-100 text-slate-500 hover:text-slate-800 border border-slate-200/80 py-1 px-2.5 rounded-lg font-sans text-xs font-medium flex items-center gap-1 transition-all cursor-pointer"
               title="Undo response status"
             >
-              <RotateCw />
+              <RotateCw size={11} />
               Undo
             </button>
           )}
