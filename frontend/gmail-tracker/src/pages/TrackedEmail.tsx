@@ -20,13 +20,10 @@ const TrackedEmails = () => {
   // compute active vs all
   const activeEmails = useMemo(() => {
     return emails.filter((e) => {
-      const status = getTrackedEmailStatus(e.isDone, e.deadline);
-      return !e.isDone && status !== "Completed";
+      const status = getTrackedEmailStatus(e.is_done, e.deadline);
+      return !e.is_done && status !== "Completed";
     });
   }, [emails]);
-
-  const activeCount = activeEmails.length;
-  const allCount = emails.length;
 
   const baseEmails = useMemo(() => {
     return showDone === false ? activeEmails : emails;
@@ -101,8 +98,6 @@ const TrackedEmails = () => {
             onSearchChange={setSearchTerm}
             showDone={showDone}
             onTabChange={setShowDone}
-            activeCount={activeCount}
-            allCount={allCount}
           />
 
           {/* List / Loading /Empty States */}
@@ -119,7 +114,7 @@ const TrackedEmails = () => {
             <div className="space-y-3">
               {filteredEmails.map((email) => {
                 const status = getTrackedEmailStatus(
-                  email.isDone,
+                  email.is_done,
                   email.deadline,
                 );
 

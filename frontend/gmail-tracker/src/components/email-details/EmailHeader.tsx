@@ -26,7 +26,7 @@ interface EmailHeaderProps {
   email: TrackedEmailB;
   isSyncing?: boolean;
   onSync?: () => void;
-  onSetStatus: (status: string) => void;
+  onSetStatus: () => void;
 }
 
 const EmailHeader = ({
@@ -36,7 +36,7 @@ const EmailHeader = ({
   onSetStatus,
 }: EmailHeaderProps) => {
   const [isMarkCompleteModalOpen, setIsMarkCompleteModalOpen] = useState(false);
-  const status = getTrackedEmailStatus(email.isDone, email.deadline);
+  const status = getTrackedEmailStatus(email.is_done, email.deadline);
   const displayStatus = status;
 
   const getStatusBadge = () => {
@@ -83,7 +83,7 @@ const EmailHeader = ({
           </Link>
           <span className="text-slate-300">/</span>
           <span className="font-mono text-slate-400 font-medium">
-            Thread #{email.id}
+            Thread #{email.thread_id}
           </span>
         </div>
       </div>
@@ -110,7 +110,7 @@ const EmailHeader = ({
               <Calendar size={13} className="text-slate-400 shrink-0" />
               <span className="text-slate-500">Sent:</span>
               <span className="font-semibold text-slate-800">
-                {formatSentDate(email.sentDate || Date.now())}
+                {formatSentDate(email.sent_date || Date.now())}
               </span>
             </div>
 
@@ -153,7 +153,7 @@ const EmailHeader = ({
             </button>
           ) : (
             <button
-              onClick={() => onSetStatus("Pending")}
+              onClick={() => onSetStatus()}
               className="inline-flex items-center gap-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200/80 px-3.5 py-2 rounded-xl font-sans text-xs font-semibold transition-all cursor-pointer"
             >
               <RotateCcw size={13} className="text-slate-500" />
@@ -167,7 +167,7 @@ const EmailHeader = ({
       <MarkCompleteModal
         isOpen={isMarkCompleteModalOpen}
         onClose={() => setIsMarkCompleteModalOpen(false)}
-        onConfirm={() => onSetStatus("Completed")}
+        onConfirm={() => onSetStatus()}
         email={email}
       />
     </div>

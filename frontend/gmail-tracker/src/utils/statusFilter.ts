@@ -1,7 +1,7 @@
 export type TrackedEmailStatus = "waiting" | "completed" | "overdue";
 
-export const getTrackedEmailStatus = (isDone: boolean, deadline: string) => {
-  if (isDone) {
+export const getTrackedEmailStatus = (is_done: boolean, deadline: string) => {
+  if (is_done) {
     return "Completed";
   }
 

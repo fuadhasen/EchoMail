@@ -396,8 +396,8 @@ const TrackNew = () => {
                   </div>
                   <button
                     type="submit"
-                    disabled={isFetching}
-                    className="bg-[#3525cd] hover:bg-[#3525cd]/90 active:scale-[0.98] text-white py-3 px-7 rounded-xl text-xs font-black font-sans cursor-pointer transition-all flex items-center justify-center gap-2 shadow-sm disabled:opacity-75 shrink-0"
+                    disabled={isFetching || !searchInput}
+                    className="bg-[#3525cd] hover:bg-[#3525cd]/90 active:scale-[0.98] text-white py-3 px-7 rounded-xl text-xs font-black font-sans cursor-pointer transition-all flex items-center justify-center gap-2 shadow-sm disabled:opacity-75 shrink-0 disabled:cursor-not-allowed"
                   >
                     {isFetching ? (
                       <>
@@ -1120,41 +1120,3 @@ const TrackNew = () => {
 };
 
 export default TrackNew;
-
-// const query = useUrlQuery();
-// const id = query.get("id");
-// const navigate = useNavigate();
-
-// // find recipients of this email id
-// const { data: recipients, isPending, error } = useEmailRecipients(id!);
-
-// const [selected, setSelected] = useState<string[]>([]);
-
-// const sumbitHandler = (e: FormEvent) => {
-//   e.preventDefault();
-//   mutation.mutate();
-// };
-
-// const sent_data = {
-//   recipient_emails: recipients,
-//   must_respond_emails: selected,
-// };
-
-// const mutation = useMutation({
-//   mutationFn: () =>
-//     axios.post(`http://localhost:8000/emails/${id}/track`, sent_data),
-//   onSuccess: () => {
-//     navigate("/tracked");
-//   },
-//   onError: (error: any) => {
-//     console.log(error.message);
-//   },
-// });
-
-// if (isPending) return <TrackNewSkeleton />;
-
-// if (error)
-//   return <p className="m-4 p-4 bg-red-100 rounded-md">{error.message}</p>;
-
-// if (mutation.error)
-//   return <p className="m-10 p-4 bg-red-100 rounded-md">{mutation.error}</p>;

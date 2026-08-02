@@ -6,8 +6,6 @@ interface TrackedEmailFilterProps {
   onSearchChange: (value: string) => void;
   showDone: boolean;
   onTabChange: (showDone: boolean) => void;
-  activeCount: number;
-  allCount: number;
 }
 
 const TrackedEmailFilter = ({
@@ -15,8 +13,6 @@ const TrackedEmailFilter = ({
   onSearchChange,
   showDone,
   onTabChange,
-  activeCount,
-  allCount,
 }: TrackedEmailFilterProps) => {
   return (
     <div className="bg-white border  border-slate-200/80 rounded-2xl p-3.5 mb-6 shadow-2xs flex flex-col md:flex-row gap-3.5 items-center justify-between">
@@ -46,42 +42,24 @@ const TrackedEmailFilter = ({
         <button
           type="button"
           onClick={() => onTabChange(false)}
-          className={`px-3 py-1.5 rounded-lg font-semibold transition-all duration-150 cursor-pointer flex items-center gap-2 ${
+          className={`px-10 py-1.5 rounded-lg font-semibold transition-all duration-150 cursor-pointer flex items-center gap-2 ${
             showDone === false
               ? "bg-white text-slate-900 shadow-2xs"
               : "text-slate-500 hover:text-slate-800"
           }`}
         >
           <span>Active</span>
-          <span
-            className={`px-1.5 py-0.2 text-[10px] font-mono rounded-md font-medium ${
-              showDone === false
-                ? "bg-slate-100 text-slate-700"
-                : "bg-slate-200/70 text-slate-500"
-            }`}
-          >
-            {activeCount}
-          </span>
         </button>
         <button
           type="button"
           onClick={() => onTabChange(true)}
-          className={`px-3.5 py-1.5 rounded-lg font-semibold transition-all duration-150 cursor-pointer flex items-center gap-2 ${
+          className={`px-10 py-1.5 rounded-lg font-semibold transition-all duration-150 cursor-pointer flex items-center gap-2 ${
             showDone === true
               ? "bg-white text-slate-900 shadow-2xs"
               : "text-slate-500 hover:text-slate-800"
           }`}
         >
           <span>All</span>
-          <span
-            className={`px-1.5 py-0.2 text-[10px] font-mono rounded-md font-medium ${
-              showDone === true
-                ? "bg-slate-100 text-slate-700"
-                : "bg-slate-200/70 text-slate-500"
-            }`}
-          >
-            {allCount}
-          </span>
         </button>
       </div>
     </div>

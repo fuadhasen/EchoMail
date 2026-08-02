@@ -36,9 +36,9 @@ export interface TrackedEmailB {
   thread_id: string;
   subject: string;
   sender: string;
-  sentDate: string;
+  sent_date: string;
   deadline: string;
-  isDone: boolean;
+  is_done: boolean;
   recipients: TrackedRecipient[];
 }
 
@@ -71,6 +71,13 @@ export const trackedEmailById = async (
   id: string | undefined,
 ): Promise<TrackedEmailB> => {
   const response = await api.get<TrackedEmailB>(`/tracked-emails/${id}`);
+  return response.data;
+};
+
+export const markTrackedEmailDone = async (
+  id: string | undefined,
+): Promise<void> => {
+  const response = await api.post(`/tracked-emails/${id}/mark-done`);
   console.log(response.data);
   return response.data;
 };

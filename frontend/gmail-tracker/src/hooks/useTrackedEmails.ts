@@ -5,7 +5,7 @@ const useTrackedEmails = (showDone: boolean) => {
   return useQuery({
     queryKey: ["tracked-emails", showDone],
     queryFn: () => trackedEmails(showDone),
-    staleTime: 1000 * 60 * 60,
+    staleTime: 1000 * 60 * 1,
   });
 };
 

@@ -11,7 +11,10 @@ import {
   type ThreadMessage,
   type TrackedEmail,
 } from "@/data/mockTrackedEmails";
+import useMarkDone from "@/hooks/useMarkDone";
 import useTrackedDetail from "@/hooks/useTrackedDetail";
+import { getTrackedEmailStatus } from "@/utils/statusFilter";
+import { useQueryClient } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { useEffect, useState } from "react";
@@ -22,11 +25,14 @@ const EmailDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { triggerToast } = useToast();
+  const queryClient = useQueryClient();
 
   const { data: email, isPending, error } = useTrackedDetail(id);
   console.log();
 
   const [isSyncing, setIsSyncing] = useState(false);
+
+  const markDoneMutation = useMarkDone();
 
   useEffect(() => {
     if (error) {
@@ -43,31 +49,19 @@ const EmailDetail = () => {
     triggerToast("Gmail thread synced successfully.", "info");
   };
 
-  if (isPending) {
-    return (
-      <div className="w-full text-left px-4 md:px-8 py-4">
-        <EmailDetailsSkeleton />
-      </div>
-    );
-  }
+  // const totalRecipients = email.recipients.length;
+  // const respondedRecipients = email.recipients.filter((r) => r.has_responded);
+  // // const pendingRecipients = email.recipients.filter((r) => !r.has_responded);
 
-  if (!email) {
-    return null;
-  }
+  // const requiredRecipients = email.recipients.filter(
+  //   (r) => r.must_responded !== false,
+  // );
+  // const requiredResponded = requiredRecipients.filter((r) => r.has_responded);
 
-  const totalRecipients = email.recipients.length;
-  const respondedRecipients = email.recipients.filter((r) => r.has_responded);
-  const pendingRecipients = email.recipients.filter((r) => !r.has_responded);
-
-  const requiredRecipients = email.recipients.filter(
-    (r) => r.must_responded !== false,
-  );
-  const requiredResponded = requiredRecipients.filter((r) => r.has_responded);
-
-  const completionPercentage =
-    totalRecipients > 0
-      ? Math.round((respondedRecipients.length / totalRecipients) * 100)
-      : 0;
+  // const completionPercentage =
+  //   totalRecipients > 0
+  //     ? Math.round((respondedRecipients.length / totalRecipients) * 100)
+  //     : 0;
 
   // const handleSendIndividualReminder = (recipientEmail: string) => {
   //   const updatedRecipients = email.recipients.map((r) => {
@@ -170,15 +164,40 @@ const EmailDetail = () => {
   //   );
   // };
 
-  const handleOverallStatus = (status: string) => {
-    // const updatedEmail: TrackedEmail = {
-    //   ...email,
-    //   status,
-    // };
-    // updateTrackedEmail(updatedEmail);
-    // setEmail(updatedEmail);
-    triggerToast(`Email status updated to ${status}!`, "success");
+  const handleMarkDone = () => {
+    if (!email) return;
+
+    markDoneMutation.mutate(email.id, {
+      onSuccess: async () => {
+        await queryClient.invalidateQueries({
+          queryKey: [`tracked-emails/${id}`, id],
+        });
+
+        await queryClient.invalidateQueries({
+          queryKey: ["tracked-emails"],
+        });
+
+        triggerToast(`Email status updated Successfully`, "success");
+      },
+
+      onError: () => {
+        triggerToast("Failed to mark email as complete.", "info");
+      },
+    });
   };
+
+  if (isPending) {
+    return (
+      <div className="w-full text-left px-4 md:px-8 py-4">
+        <EmailDetailsSkeleton />
+      </div>
+    );
+  }
+
+  // if there is now email with this detail id
+  if (!email) {
+    return null;
+  }
 
   // const handleMockReply = (
   //   senderName: string,
@@ -231,7 +250,7 @@ const EmailDetail = () => {
         email={email}
         isSyncing={isSyncing}
         onSync={handleSync}
-        onSetStatus={handleOverallStatus}
+        onSetStatus={handleMarkDone}
       />
 
       {/* Main Workspace Layout */}

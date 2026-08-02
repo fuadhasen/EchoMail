@@ -9,7 +9,7 @@ export interface SentEmailB {
   sender: string;
   recipients: string[];
   snippet: string;
-  sentdate: string;
+  sent_date: string;
 }
 
 export interface SearchSentEmailResponse {

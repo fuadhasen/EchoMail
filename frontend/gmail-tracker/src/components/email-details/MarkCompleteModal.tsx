@@ -1,6 +1,13 @@
 import type { TrackedEmailB } from "@/services/trackedEmail";
 import { getTrackedEmailStatus } from "@/utils/statusFilter";
-import { CheckCircle, CheckCircle2, Mail, User, X } from "lucide-react";
+import {
+  CheckCircle,
+  CheckCircle2,
+  Loader2,
+  Mail,
+  User,
+  X,
+} from "lucide-react";
 import React, { useEffect, useState } from "react";
 
 interface MarkCompleteModalProps {
@@ -16,7 +23,6 @@ const MarkCompleteModal = ({
   onConfirm,
   email,
 }: MarkCompleteModalProps) => {
-  const status = getTrackedEmailStatus(email.isDone, email.deadline);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Close on Escape key press
@@ -36,8 +42,6 @@ const MarkCompleteModal = ({
   const totalRecipients = email.recipients?.length || 0;
   const respondedRecipients =
     email.recipients?.filter((r) => r.has_responded).length || 0;
-
-  const dispalyStatus = status;
 
   const handleConfirm = () => {
     setIsSubmitting(true);
@@ -68,12 +72,14 @@ const MarkCompleteModal = ({
               <CheckCircle2 size={20} className="stroke-[2.2]" />
             </div>
 
-            <h3 className="font-sans text-lg font-bold text-slate-900 leading-snug">
-              Mark email as complete ?
-            </h3>
-            <p className="font-sans text-xs text-slate-500 mt-0.5">
-              Stop active tracking for this thread
-            </p>
+            <div>
+              <h3 className="font-sans text-lg font-bold text-slate-900 leading-snug">
+                Mark email as complete ?
+              </h3>
+              <p className="font-sans text-xs text-slate-500 mt-0.5">
+                Stop active tracking for this thread
+              </p>
+            </div>
           </div>
 
           <button
@@ -87,36 +93,69 @@ const MarkCompleteModal = ({
         </div>
 
         <div className="p-5 space-y-4">
-          <div className="flex items-start gap-2">
-            <Mail size={14} className="text-slate-400 shrink-0 mt-0.5" />
-            <span className="font-sans text-xs font-bold text-slate-800 line-clamp-2 leading-snug">
-              {email.subject}
-            </span>
-          </div>
+          <p className="font-sans text-xs text-slate-600 leading-relaxed">
+            This will stop active tracking for this email. You can still view
+            the email and its response history later.
+          </p>
 
-          <div className="pt-2 border-t border-slate-200/60 flex flex-wrap items-center justify-between gap-2 text-xs font-sans">
-            <div className="flex items-center gap-1.5 text-slate-500">
-              <User size={13} className="text-slate-400" />
-              <span>
-                <strong className="text-slate-700">{totalRecipients}</strong>{" "}
-                recipient
-                {totalRecipients !== 1 ? "s" : ""}
+          <div className="bg-slate-50/90 border border-slate-200/80 rounded-xl p-3.5 space-y-2.5">
+            <div className="flex items-start gap-2">
+              <Mail size={14} className="text-slate-400 shrink-0 mt-0.5" />
+              <span className="font-sans text-xs font-bold text-slate-800 line-clamp-2 leading-snug">
+                {email.subject}
               </span>
             </div>
-
-            <div className="flex items-center gap-1.5 text-slate-600 font-medium">
-              <CheckCircle2 size={13} className="text-emerald-500" />
-              <span>
-                <strong className="text-emerald-700">
-                  {respondedRecipients}
-                </strong>
-                of {totalRecipients} responded
-              </span>
+            <div className="pt-2 border-t border-slate-200/60 flex flex-wrap items-center justify-between gap-2 text-xs font-sans">
+              <div className="flex items-center gap-1.5 text-slate-500">
+                <User size={13} className="text-slate-400" />
+                <span>
+                  <strong className="text-slate-700">{totalRecipients}</strong>{" "}
+                  recipient
+                  {totalRecipients !== 1 ? "s" : ""}
+                </span>
+              </div>
+              <div className="flex items-center gap-1.5 text-slate-600 font-medium">
+                <CheckCircle2 size={13} className="text-emerald-500" />
+                <span>
+                  <strong className="text-emerald-700">
+                    {respondedRecipients}{" "}
+                  </strong>
+                  of {totalRecipients} responded
+                </span>
+              </div>
             </div>
           </div>
         </div>
 
-        <div>modal action footer</div>
+        <div className="p-4 bg-slate-50/60 border-t border-slate-100 flex items-center justify-end gap-2.5">
+          <button
+            type="button"
+            onClick={onClose}
+            disabled={isSubmitting}
+            className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-700 bg-white border border-slate-200/90 hover:bg-slate-50 hover:border-slate-300 transition-all cursor-pointer shadow-2xs disabled:opacity-50"
+          >
+            Cancel
+          </button>
+
+          <button
+            type="button"
+            onClick={handleConfirm}
+            disabled={isSubmitting}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 transition-all cursor-pointer shadow-2xs disabled:opacity-80"
+          >
+            {isSubmitting ? (
+              <>
+                <Loader2 size={14} className="animate-spin text-emerald-100" />
+                <span>Marking as complete...</span>
+              </>
+            ) : (
+              <>
+                <CheckCircle2 size={14} className="text-emerald-100" />
+                <span>Mark as Complete</span>
+              </>
+            )}
+          </button>
+        </div>
       </div>
     </div>
   );

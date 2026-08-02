@@ -17,7 +17,7 @@ interface TrackedEmailCardProps {
 const TrackedEmailCard = ({ email, status }: TrackedEmailCardProps) => {
   // map Pending to waiting for display status
   const displayStatus = status;
-  console.log(email.sender, " ", email.sentDate, " ", email.deadline);
+  console.log(email.sender, " ", email.sent_date, " ", email.deadline);
 
   const getStatusBadge = () => {
     switch (displayStatus) {
@@ -78,7 +78,7 @@ const TrackedEmailCard = ({ email, status }: TrackedEmailCardProps) => {
               <Calendar size={13} className="text-slate-400 shrink-0" />
               <span>Sent:</span>
               <span className="font-semibold text-slate-800">
-                {formatSentDate(email.sentDate || Date.now())}
+                {formatSentDate(email.sent_date || Date.now())}
               </span>
             </div>
 
