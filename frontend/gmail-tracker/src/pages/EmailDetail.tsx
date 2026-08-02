@@ -6,6 +6,7 @@ import RightPanel from "@/components/email-details/RightPanel";
 import { useToast } from "@/context/ToastContext";
 import {
   getTrackedEmailById,
+  getTrackedEmails,
   updateTrackedEmail,
   type ThreadMessage,
   type TrackedEmail,
@@ -68,204 +69,174 @@ const EmailDetail = () => {
       ? Math.round((respondedRecipients.length / totalRecipients) * 100)
       : 0;
 
-  // Actions
-  const handleSendBulkReminder = () => {
-    if (pendingRecipients.length == 0) {
-      triggerToast("All recipients have already responded!", "info");
-      return;
-    }
+  // const handleSendIndividualReminder = (recipientEmail: string) => {
+  //   const updatedRecipients = email.recipients.map((r) => {
+  //     if (r.email === recipientEmail) {
+  //       return { ...r, remindersSent: r.remindersSent + 1 };
+  //     }
+  //     return r;
+  //   });
 
-    const updatedRecipients = email.recipients.map((r) => {
-      if (!r.has_responded) {
-        return { ...r, last_reminder_sent: Date.now().toLocaleString() };
-      }
+  //   const recipient = email.recipients.find((r) => r.email === recipientEmail);
+  //   const updatedEmail: TrackedEmail = {
+  //     ...email,
+  //     recipients: updatedRecipients,
+  //   };
 
-      return r;
-    });
+  //   updateTrackedEmail(updatedEmail);
+  //   setEmail(updatedEmail);
+  //   triggerToast(
+  //     `Reminder sent to ${recipient?.name || recipientEmail}!`,
+  //     "success",
+  //   );
+  // };
 
-    const updatedEmail: TrackedEmail = {
-      ...email,
-      recipients: updatedRecipients,
-    };
+  // const handleToggleRecipientResponded = (recipientEmail: string) => {
+  //   const targetRecipient = email.recipients.find(
+  //     (r) => r.email === recipientEmail,
+  //   );
+  //   if (!targetRecipient) return;
 
-    updateTrackedEmail(updatedEmail);
-    setEmail(updatedEmail);
-    triggerToast(
-      `Sent reminders to ${pendingRecipients.length} recipients!`,
-      "success",
-    );
-  };
+  //   const newStatus = !targetRecipient.responded;
+  //   const nowFormatted = new Date().toLocaleString([], {
+  //     dateStyle: "short",
+  //     timeStyle: "short",
+  //   });
 
-  const handleSendIndividualReminder = (recipientEmail: string) => {
-    const updatedRecipients = email.recipients.map((r) => {
-      if (r.email === recipientEmail) {
-        return { ...r, remindersSent: r.remindersSent + 1 };
-      }
-      return r;
-    });
+  //   const updatedRecipients = email.recipients.map((r) => {
+  //     if (r.email === recipientEmail) {
+  //       return {
+  //         ...r,
+  //         responded: newStatus,
+  //         respondedAt: newStatus ? nowFormatted : undefined,
+  //       };
+  //     }
+  //     return r;
+  //   });
 
-    const recipient = email.recipients.find((r) => r.email === recipientEmail);
-    const updatedEmail: TrackedEmail = {
-      ...email,
-      recipients: updatedRecipients,
-    };
+  //   // check if thread messages need updating
+  //   let existingMessages = email.threadMessages
+  //     ? [...email.threadMessages]
+  //     : [];
+  //   if (newStatus) {
+  //     // if marking as responded and no message exists from this email (not sent yet but user want to make it responded), create a mock message
+  //     const hasMessage = existingMessages.some(
+  //       (m) => m.senderEmail.toLowerCase() === recipientEmail.toLowerCase(),
+  //     );
+  //     if (!hasMessage) {
+  //       const newMessage: ThreadMessage = {
+  //         id: `msg-${Date.now()}`,
+  //         senderName: targetRecipient.name,
+  //         senderEmail: targetRecipient.email,
+  //         timestamp: nowFormatted,
+  //         content: `Thanks, I've reviewed the email and confirmed my approval.`,
+  //       };
+  //       // this recipient also responded with this message for this thread
+  //       existingMessages.push(newMessage);
+  //     }
+  //   } else {
+  //     // remove reply if toggling back to unresponded
+  //     existingMessages = existingMessages.filter(
+  //       (m) =>
+  //         m.senderEmail.toLowerCase() !== recipientEmail.toLowerCase() ||
+  //         m.isOutbound,
+  //     );
+  //   }
 
-    updateTrackedEmail(updatedEmail);
-    setEmail(updatedEmail);
-    triggerToast(
-      `Reminder sent to ${recipient?.name || recipientEmail}!`,
-      "success",
-    );
-  };
+  //   // check if required recipients are all done(true or false)
+  //   const requiredDone = updatedRecipients
+  //     .filter((r) => r.isRequired !== false)
+  //     .every((r) => r.responded);
 
-  const handleToggleRecipientResponded = (recipientEmail: string) => {
-    const targetRecipient = email.recipients.find(
-      (r) => r.email === recipientEmail,
-    );
-    if (!targetRecipient) return;
+  //   const updatedOverallStatus = requiredDone
+  //     ? "Completed"
+  //     : email.status === "Completed"
+  //       ? "Pending"
+  //       : email.status;
 
-    const newStatus = !targetRecipient.responded;
-    const nowFormatted = new Date().toLocaleString([], {
-      dateStyle: "short",
-      timeStyle: "short",
-    });
+  //   const updatedEmail: TrackedEmail = {
+  //     ...email,
+  //     recipients: updatedRecipients,
+  //     status: updatedOverallStatus,
+  //     threadMessages: existingMessages,
+  //   };
+  //   updateTrackedEmail(updatedEmail);
+  //   setEmail(updatedEmail);
+  //   triggerToast(
+  //     newStatus
+  //       ? `Logged response from ${targetRecipient.name}`
+  //       : `Removed response log for ${targetRecipient.name}`,
+  //     "success",
+  //   );
+  // };
 
-    const updatedRecipients = email.recipients.map((r) => {
-      if (r.email === recipientEmail) {
-        return {
-          ...r,
-          responded: newStatus,
-          respondedAt: newStatus ? nowFormatted : undefined,
-        };
-      }
-      return r;
-    });
-
-    // check if thread messages need updating
-    let existingMessages = email.threadMessages
-      ? [...email.threadMessages]
-      : [];
-    if (newStatus) {
-      // if marking as responded and no message exists from this email (not sent yet but user want to make it responded), create a mock message
-      const hasMessage = existingMessages.some(
-        (m) => m.senderEmail.toLowerCase() === recipientEmail.toLowerCase(),
-      );
-      if (!hasMessage) {
-        const newMessage: ThreadMessage = {
-          id: `msg-${Date.now()}`,
-          senderName: targetRecipient.name,
-          senderEmail: targetRecipient.email,
-          timestamp: nowFormatted,
-          content: `Thanks, I've reviewed the email and confirmed my approval.`,
-        };
-        // this recipient also responded with this message for this thread
-        existingMessages.push(newMessage);
-      }
-    } else {
-      // remove reply if toggling back to unresponded
-      existingMessages = existingMessages.filter(
-        (m) =>
-          m.senderEmail.toLowerCase() !== recipientEmail.toLowerCase() ||
-          m.isOutbound,
-      );
-    }
-
-    // check if required recipients are all done(true or false)
-    const requiredDone = updatedRecipients
-      .filter((r) => r.isRequired !== false)
-      .every((r) => r.responded);
-
-    const updatedOverallStatus = requiredDone
-      ? "Completed"
-      : email.status === "Completed"
-        ? "Pending"
-        : email.status;
-
-    const updatedEmail: TrackedEmail = {
-      ...email,
-      recipients: updatedRecipients,
-      status: updatedOverallStatus,
-      threadMessages: existingMessages,
-    };
-    updateTrackedEmail(updatedEmail);
-    setEmail(updatedEmail);
-    triggerToast(
-      newStatus
-        ? `Logged response from ${targetRecipient.name}`
-        : `Removed response log for ${targetRecipient.name}`,
-      "success",
-    );
-  };
-
-  const handleOverallStatus = (status: TrackedEmail["status"]) => {
-    const updatedEmail: TrackedEmail = {
-      ...email,
-      status,
-    };
-    updateTrackedEmail(updatedEmail);
-    setEmail(updatedEmail);
+  const handleOverallStatus = (status: string) => {
+    // const updatedEmail: TrackedEmail = {
+    //   ...email,
+    //   status,
+    // };
+    // updateTrackedEmail(updatedEmail);
+    // setEmail(updatedEmail);
     triggerToast(`Email status updated to ${status}!`, "success");
   };
 
-  const handleMockReply = (
-    senderName: string,
-    senderEmail: string,
-    content: string,
-  ) => {
-    const nowFormatted = new Date().toLocaleString([], {
-      dateStyle: "short",
-      timeStyle: "short",
-    });
+  // const handleMockReply = (
+  //   senderName: string,
+  //   senderEmail: string,
+  //   content: string,
+  // ) => {
+  //   const nowFormatted = new Date().toLocaleString([], {
+  //     dateStyle: "short",
+  //     timeStyle: "short",
+  //   });
 
-    const newMsg: ThreadMessage = {
-      id: `msg-${Date.now()}`,
-      senderName,
-      senderEmail,
-      timestamp: nowFormatted,
-      content,
-    };
-    const existingMessages = email.threadMessages
-      ? [...email.threadMessages]
-      : [];
-    existingMessages.push(newMsg);
+  //   const newMsg: ThreadMessage = {
+  //     id: `msg-${Date.now()}`,
+  //     senderName,
+  //     senderEmail,
+  //     timestamp: nowFormatted,
+  //     content,
+  //   };
+  //   const existingMessages = email.threadMessages
+  //     ? [...email.threadMessages]
+  //     : [];
+  //   existingMessages.push(newMsg);
 
-    // mark recipient as responded if they exist in the recipient list
-    const updatedRecipients = email.recipients.map((r) => {
-      if (r.email.toLowerCase() === senderEmail.toLowerCase()) {
-        return {
-          ...r,
-          responded: true,
-          respondedAt: nowFormatted,
-        };
-      }
-      return r;
-    });
+  //   // mark recipient as responded if they exist in the recipient list
+  //   const updatedRecipients = email.recipients.map((r) => {
+  //     if (r.email.toLowerCase() === senderEmail.toLowerCase()) {
+  //       return {
+  //         ...r,
+  //         responded: true,
+  //         respondedAt: nowFormatted,
+  //       };
+  //     }
+  //     return r;
+  //   });
 
-    const updatedEmail: TrackedEmail = {
-      ...email,
-      recipients: updatedRecipients,
-      threadMessages: existingMessages,
-    };
+  //   const updatedEmail: TrackedEmail = {
+  //     ...email,
+  //     recipients: updatedRecipients,
+  //     threadMessages: existingMessages,
+  //   };
 
-    updateTrackedEmail(updatedEmail);
-    setEmail(updatedEmail);
-    triggerToast(`Added reply from ${senderName} to Gmail thread.`, "success");
-  };
+  //   updateTrackedEmail(updatedEmail);
+  //   setEmail(updatedEmail);
+  //   triggerToast(`Added reply from ${senderName} to Gmail thread.`, "success");
+  // };
 
   return (
     <div className="w-full text-left px-4 md:px-8 py-4 space-y-6">
       <EmailHeader
         email={email}
-        pendingCount={pendingRecipients.length}
-        onSendBulkReminder={handleSendBulkReminder}
-        onSetStatus={handleOverallStatus}
         isSyncing={isSyncing}
         onSync={handleSync}
+        onSetStatus={handleOverallStatus}
       />
 
       {/* Main Workspace Layout */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-        <div className="lg:col-span-8 space-y-6">
+        {/* <div className="lg:col-span-8 space-y-6">
           <RecipientTrackingTable
             recipients={email.recipients}
             onSendReminder={handleSendIndividualReminder}
@@ -288,7 +259,7 @@ const EmailDetail = () => {
             requiredRespondedCount={requiredResponded.length}
             completionPercentage={completionPercentage}
           />
-        </div>
+        </div> */}
       </div>
     </div>
   );
