@@ -24,6 +24,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from dependencies import get_email_service
 
 
+
 # Pydantic models for request/response validation
 class SentEmailSearchCriteria(BaseModel):
     subject: Optional[str] = None
@@ -468,7 +469,7 @@ async def send_reminders(
     tracked_email_id: int, request: SendReminderRequest, db: Session = Depends(get_db)
 ):
     """
-    Send reminders to specific recipients manually.
+    Send reminders to specific recipients manually, 24 hour cooldown should be respected.
     """
     email = EmailTrackerService.get_tracked_email_by_id(db, tracked_email_id)
     if not email:

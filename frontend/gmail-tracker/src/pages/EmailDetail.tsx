@@ -12,7 +12,9 @@ import {
   type TrackedEmail,
 } from "@/data/mockTrackedEmails";
 import useMarkDone from "@/hooks/useMarkDone";
+import useSendReminder from "@/hooks/useSendReminder";
 import useTrackedDetail from "@/hooks/useTrackedDetail";
+import type { TrackedRecipient } from "@/services/trackedEmail";
 import { getTrackedEmailStatus } from "@/utils/statusFilter";
 import { useQueryClient } from "@tanstack/react-query";
 import dayjs from "dayjs";
@@ -63,13 +65,31 @@ const EmailDetail = () => {
   //     ? Math.round((respondedRecipients.length / totalRecipients) * 100)
   //     : 0;
 
-  // const handleSendIndividualReminder = (recipientEmail: string) => {
-  //   const updatedRecipients = email.recipients.map((r) => {
-  //     if (r.email === recipientEmail) {
-  //       return { ...r, remindersSent: r.remindersSent + 1 };
-  //     }
-  //     return r;
-  //   });
+  const sendReminderMutation = useSendReminder();
+  const handleSendIndividualReminder = (recipientEmail: string) => {
+    if (!email) return;
+
+    sendReminderMutation.mutate(
+      {
+        trackedEmailId: email.id,
+        recipientEmail: recipientEmail,
+      },
+      {
+        onSuccess: async () => {
+          await queryClient.invalidateQueries({
+            queryKey: ["tracked-email", id],
+          });
+
+          triggerToast("Reminder recorded successfully.", "success");
+        },
+
+        // need further modification
+        onError: () => {
+          triggerToast("Unable to send reminder.", "info");
+        },
+      },
+    );
+  };
 
   //   const recipient = email.recipients.find((r) => r.email === recipientEmail);
   //   const updatedEmail: TrackedEmail = {
@@ -164,13 +184,17 @@ const EmailDetail = () => {
   //   );
   // };
 
+  const handleToggleRecipientResponded = () => {
+    triggerToast("recipient status toggled function is executed", "info");
+  };
+
   const handleMarkDone = () => {
     if (!email) return;
 
     markDoneMutation.mutate(email.id, {
       onSuccess: async () => {
         await queryClient.invalidateQueries({
-          queryKey: [`tracked-emails/${id}`, id],
+          queryKey: [`tracked-emails`, id],
         });
 
         await queryClient.invalidateQueries({
@@ -255,21 +279,20 @@ const EmailDetail = () => {
 
       {/* Main Workspace Layout */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-        {/* <div className="lg:col-span-8 space-y-6">
+        <div className="lg:col-span-8 space-y-6">
           <RecipientTrackingTable
             recipients={email.recipients}
             onSendReminder={handleSendIndividualReminder}
             onToggleResponse={handleToggleRecipientResponded}
           />
 
-          <ConversationSection
+          {/* <ConversationSection
             messages={email.threadMessages}
             subject={email.subject}
             onAddMockReply={handleMockReply}
-          />
+          /> */}
         </div>
-
-        <div className="lg:col-span-4 space-y-6">
+        {/*<div className="lg:col-span-4 space-y-6">
           <RightPanel
             email={email}
             respondedCount={respondedRecipients.length}

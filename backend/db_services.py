@@ -1,8 +1,13 @@
 from sqlalchemy.orm import Session
 from datetime import datetime, timedelta
 from typing import List, Optional, Dict, Any
+from datetime import datetime, timedelta, timezone
+from fastapi import HTTPException
+
 
 from models import TrackedEmail, TrackedEmailRecipient, Recipient, Reminder
+
+COOLDOWN = timedelta(hours=24)
 
 
 class EmailTrackerService:
@@ -209,16 +214,7 @@ class EmailTrackerService:
         if not recipient:
             return None
 
-        reminder = Reminder(
-            tracked_email_id=tracked_email_id,
-            recipient_id=recipient.id,
-            content=content,
-            sent_at=datetime.now(),
-        )
-        db.add(reminder)
-
-        # Update last reminder sent in association
-        association = (
+        assoc = (
             db.query(TrackedEmailRecipient)
             .filter(
                 TrackedEmailRecipient.tracked_email_id == tracked_email_id,
@@ -227,9 +223,31 @@ class EmailTrackerService:
             .first()
         )
 
-        if association:
-            association.last_reminder_sent = datetime.now()
-            db.add(association)
+        if not assoc:
+            return None
+        
+        # COOLDOWN Restriction
+        if assoc.last_reminder_sent:
+            elapsed = datetime.now() - assoc.last_reminder_sent
+
+            if elapsed < COOLDOWN:
+                raise HTTPException(
+                status_code=429,
+                detail="Reminder can only be sent once every 24 hours.",
+            )
+        
+
+        reminder = Reminder(
+            tracked_email_id=tracked_email_id,
+            recipient_id=recipient.id,
+            content=content,
+            sent_at=datetime.now(),
+        )
+        db.add(reminder)
+
+        if assoc:
+            assoc.last_reminder_sent = datetime.now()
+            db.add(assoc)
 
         db.commit()
         db.refresh(reminder)

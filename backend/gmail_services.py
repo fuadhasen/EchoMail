@@ -8,6 +8,7 @@ from config import Config
 from pathlib import Path
 from typing import List, Dict, Any, Optional, Union
 from config import USER_PATH
+from fastapi import HTTPException
 
 
 from google.auth.transport.requests import Request

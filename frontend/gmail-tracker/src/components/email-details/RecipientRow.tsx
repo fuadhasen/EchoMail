@@ -1,11 +1,12 @@
-import type { Recipient } from "@/data/mockTrackedEmails";
+import type { TrackedRecipient } from "@/services/trackedEmail";
+import { getCooldownInfo } from "@/utils/reminderService";
 import { Check, RotateCw, Send, User } from "lucide-react";
-import React from "react";
+import { useState } from "react";
 
 interface RecipientRowProps {
   key?: string;
-  recipient: Recipient;
-  onSendReminder: (email: string) => void;
+  recipient: TrackedRecipient;
+  onSendReminder: (email: string) => Promise<void> | void;
   onToggleResponse: (email: string) => void;
 }
 
@@ -14,14 +15,31 @@ const RecipientRow = ({
   onSendReminder,
   onToggleResponse,
 }: RecipientRowProps) => {
+  const [isSending, setIsSending] = useState(false);
   const initials = recipient.name
-    .split("")
-    .map((n) => n[0])
-    .join("")
-    .substring(0, 2)
-    .toUpperCase();
+    ? recipient.name
+        .split(" ")
+        .map((n) => n[0])
+        .join("")
+        .substring(0, 2)
+        .toUpperCase()
+    : recipient.email.split("@")[0].substring(0, 2).toUpperCase();
 
-  const isRequired = recipient.isRequired !== false; //default to true if undefined
+  const isRequired = recipient.must_responded !== false; //default to true if undefined
+  // check this recipient need reminder or not
+  const cooldown = getCooldownInfo(recipient.last_reminder_sent);
+
+  const handleSendReminderClick = async () => {
+    if (isSending || !cooldown.isEligible) return;
+    setIsSending(true);
+    try {
+      await onSendReminder(recipient.email);
+    } catch {
+      //error handled by parent service
+    } finally {
+      setIsSending(false);
+    }
+  };
 
   return (
     <tr className="hover:bg-slate-50/70 transition-colors group">
@@ -30,7 +48,7 @@ const RecipientRow = ({
         <div className="flex items-center gap-3 min-w-0">
           <div
             className={`w-8 h-8 rounded-lg  flex items-center justify-center font-sans font-bold text-xs shrink-0 border ${
-              recipient.responded
+              recipient.has_responded
                 ? "bg-emerald-50 text-emerald-700 border-emerald-200/80"
                 : "bg-amber-50 text-amber-800 border-amber-200/80"
             }`}
@@ -41,7 +59,7 @@ const RecipientRow = ({
           <div className="min-w-0">
             <h4
               className={`font-sans text-xs sm:text-sm font-semibold truncate ${
-                recipient.responded ? "text-slate-600" : "text-slate-900"
+                recipient.has_responded ? "text-slate-600" : "text-slate-900"
               }`}
             >
               {recipient.name}
@@ -66,15 +84,15 @@ const RecipientRow = ({
       </td>
       {/* Response status */}
       <td className="py-3.5 px-4 sm:px-5 align-middle whitespace-nowrap">
-        {recipient.responded ? (
+        {recipient.has_responded ? (
           <div className="space-y-0.5">
             <span className="inline-flex items-center gap-1  text-[11px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200/80 px-2.5 py-0.5 rounded-full">
               <Check size={11} className="stroke-2.5" />
               Responded
             </span>
-            {recipient.respondedAt && (
+            {recipient.response_id && (
               <p className="text-[10px] font-mono text-slate-400">
-                {recipient.respondedAt}
+                {recipient.response_id}
               </p>
             )}
           </div>
@@ -87,19 +105,19 @@ const RecipientRow = ({
       </td>
       {/* Reminder Sent */}
       <td className="py-3.5 px-4 sm:px-5 align-middle whitespace-nowrap font-mono text-xs text-slate-600">
-        {recipient.remindersSent > 0 ? (
+        {recipient.last_reminder_sent ? (
           <span className="font-semibold text-slate-800">
-            {recipient.remindersSent} sent
+            {new Date(recipient.last_reminder_sent).toLocaleString()} sent
           </span>
         ) : (
-          <span className="text-slate-400">0 sent</span>
+          <span className="text-slate-400">Not sent</span>
         )}
       </td>
 
       {/* quick action */}
       <td className="py-3.5 px-4 sm:px-5 align-middle text-right whitespace-nowrap">
         <div className="flex items-center justify-end gap-2">
-          {!recipient.responded ? (
+          {!recipient.has_responded ? (
             <>
               <button
                 onClick={() => onSendReminder(recipient.email)}

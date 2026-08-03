@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 
 const useTrackedDetail = (id: string | undefined) => {
   return useQuery({
-    queryKey: [`tracked-emails/${id}`, id],
+    queryKey: [`tracked-emails`, id],
     queryFn: () => trackedEmailById(id),
   });
 };

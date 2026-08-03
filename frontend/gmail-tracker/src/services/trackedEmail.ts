@@ -81,3 +81,12 @@ export const markTrackedEmailDone = async (
   console.log(response.data);
   return response.data;
 };
+
+export const sendReminder = async (
+  trackedEmailId: string,
+  recipientEmail: string,
+): Promise<void> => {
+  await api.post(`/tracked-emails/${trackedEmailId}/send-reminders`, {
+    recipient_emails: [recipientEmail],
+  });
+};
