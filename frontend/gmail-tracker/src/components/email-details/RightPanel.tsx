@@ -1,8 +1,9 @@
-import type { TrackedEmail } from "@/data/mockTrackedEmails";
+import type { TrackedEmailB } from "@/services/trackedEmail";
+import { getTrackedEmailStatus } from "@/utils/statusFilter";
 import { ShieldCheck } from "lucide-react";
 
 interface RightPanelProps {
-  email: TrackedEmail;
+  email: TrackedEmailB;
   respondedCount: number;
   totalCount: number;
   requiredCount: number;
@@ -18,8 +19,9 @@ const RightPanel = ({
   requiredRespondedCount,
   completionPercentage,
 }: RightPanelProps) => {
-  const isOverdue = email.status === "Overdue";
-  const isCompleted = email.status === "Completed";
+  const status = getTrackedEmailStatus(email.is_done, email.deadline);
+  const isOverdue = status === "Overdue";
+  const isCompleted = status === "Completed";
 
   return (
     <div className="space-y-4">
@@ -86,7 +88,7 @@ const RightPanel = ({
         <div className="space-y-2 text-xs font-sans">
           <div className="flex items-center justify-between text-slate-600 py-1 border-b border-slate-100">
             <span className="text-slate-500">Tracking Status</span>
-            <span className="font-semibold text-slate-800">{email.status}</span>
+            <span className="font-semibold text-slate-800">{status}</span>
           </div>
 
           <div className="flex items-center justify-between text-slate-600 py-1 border-b border-slate-100">
@@ -99,7 +101,7 @@ const RightPanel = ({
           <div className="flex items-center justify-between text-slate-600 py-1 border-b border-slate-100">
             <span className="text-slate-500">Sent Timestamp</span>
             <span className="font-mono text-[11px] text-slate-700">
-              {email.sentDate}
+              {email.sent_date}
             </span>
           </div>
 

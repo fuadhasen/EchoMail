@@ -19,6 +19,7 @@ import { getTrackedEmailStatus } from "@/utils/statusFilter";
 import { useQueryClient } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
+import { MessageSquare, Users } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 dayjs.extend(relativeTime);
@@ -33,6 +34,9 @@ const EmailDetail = () => {
   console.log();
 
   const [isSyncing, setIsSyncing] = useState(false);
+  const [activeTab, setActiveTab] = useState<"recipients" | "conversation">(
+    "recipients",
+  );
 
   const markDoneMutation = useMarkDone();
 
@@ -51,23 +55,12 @@ const EmailDetail = () => {
     triggerToast("Gmail thread synced successfully.", "info");
   };
 
-  // const totalRecipients = email.recipients.length;
-  // const respondedRecipients = email.recipients.filter((r) => r.has_responded);
-  // // const pendingRecipients = email.recipients.filter((r) => !r.has_responded);
-
-  // const requiredRecipients = email.recipients.filter(
-  //   (r) => r.must_responded !== false,
-  // );
-  // const requiredResponded = requiredRecipients.filter((r) => r.has_responded);
-
-  // const completionPercentage =
-  //   totalRecipients > 0
-  //     ? Math.round((respondedRecipients.length / totalRecipients) * 100)
-  //     : 0;
-
   const sendReminderMutation = useSendReminder();
+  const [sendingRecipient, setSendingRecipient] = useState<string | null>(null);
   const handleSendIndividualReminder = (recipientEmail: string) => {
     if (!email) return;
+
+    setSendingRecipient(recipientEmail);
 
     sendReminderMutation.mutate(
       {
@@ -77,7 +70,7 @@ const EmailDetail = () => {
       {
         onSuccess: async () => {
           await queryClient.invalidateQueries({
-            queryKey: ["tracked-email", id],
+            queryKey: ["tracked-emails", id],
           });
 
           triggerToast("Reminder recorded successfully.", "success");
@@ -86,6 +79,10 @@ const EmailDetail = () => {
         // need further modification
         onError: () => {
           triggerToast("Unable to send reminder.", "info");
+        },
+
+        onSettled: () => {
+          setSendingRecipient(null);
         },
       },
     );
@@ -223,6 +220,20 @@ const EmailDetail = () => {
     return null;
   }
 
+  const totalRecipients = email.recipients.length;
+  const respondedRecipients = email.recipients.filter((r) => r.has_responded);
+  // const pendingRecipients = email.recipients.filter((r) => !r.has_responded);
+
+  const requiredRecipients = email?.recipients.filter(
+    (r) => r.must_responded !== false,
+  );
+  const requiredResponded = requiredRecipients?.filter((r) => r.has_responded);
+
+  const completionPercentage =
+    totalRecipients > 0
+      ? Math.round((respondedRecipients.length / totalRecipients) * 100)
+      : 0;
+
   // const handleMockReply = (
   //   senderName: string,
   //   senderEmail: string,
@@ -277,32 +288,114 @@ const EmailDetail = () => {
         onSetStatus={handleMarkDone}
       />
 
-      {/* Main Workspace Layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-        <div className="lg:col-span-8 space-y-6">
-          <RecipientTrackingTable
-            recipients={email.recipients}
-            onSendReminder={handleSendIndividualReminder}
-            onToggleResponse={handleToggleRecipientResponded}
-          />
-
-          {/* <ConversationSection
-            messages={email.threadMessages}
-            subject={email.subject}
-            onAddMockReply={handleMockReply}
-          /> */}
+      {/* Work space View Mode Controller */}
+      <div className="flex  flex-wrap items-center justify-between gap-3 bg-white p-1.5 rounded-2xl border border-slate-200/80 shadow-2xs">
+        <div className="flex flex-wrap items-center gap-1">
+          <button
+            type="button"
+            onClick={() => setActiveTab("recipients")}
+            className={`px-3.5 py-1.5 rounded-xl font-sans text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
+              activeTab === "recipients"
+                ? "bg-[#3525cd] text-white shadow-2xs"
+                : "text-slate-600 hover:text-slate-900 hover:bg-slate-100/80"
+            }`}
+          >
+            <Users size={14} />
+            <span>Recipient Progress</span>
+            <span
+              className={`text-[10px] font-mono px-1.5 py-0.2 rounded-md ${
+                activeTab === "recipients"
+                  ? "bg-white/20 text-white"
+                  : "bg-slate-100 text-slate-600"
+              }`}
+            >
+              {totalRecipients}
+            </span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab("conversation")}
+            className={`px-3.5 py-1.5 rounded-xl font-sans text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
+              activeTab === "conversation"
+                ? "bg-[#3525cd] text-white shadow-2xs"
+                : "text-slate-600 hover:text-slate-900 hover:bg-slate-100/80"
+            }`}
+          >
+            <MessageSquare size={14} />
+            <span>Conversation Thread</span>
+            <span
+              className={`text-[10px] font-mono px-1.5 py-0.2 rounded-md ${
+                activeTab === "conversation"
+                  ? "bg-white/20 text-white"
+                  : "bg-slate-100 text-slate-600"
+              }`}
+            >
+              {0} hard coded
+            </span>
+          </button>
         </div>
-        {/*<div className="lg:col-span-4 space-y-6">
-          <RightPanel
-            email={email}
-            respondedCount={respondedRecipients.length}
-            totalCount={totalRecipients}
-            requiredCount={requiredRecipients.length}
-            requiredRespondedCount={requiredResponded.length}
-            completionPercentage={completionPercentage}
-          />
-        </div> */}
+
+        <div className="hidden sm:flex items-center gap-3 pr-2 text-xs font-mono">
+          <span className="text-slate-500">
+            Completion:{" "}
+            <strong className="text-slate-900">{completionPercentage}%</strong>
+          </span>
+          <span className="text-slate-300">•</span>
+          <span className="text-slate-500">
+            Replies:{" "}
+            <strong className="text-emerald-600">
+              {respondedRecipients.length}/{totalRecipients}
+            </strong>
+          </span>
+        </div>
       </div>
+
+      {/* Dynamic View Mode Workspace */}
+      {activeTab === "recipients" && (
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+          <div className="lg:col-span-8 space-y-6">
+            <RecipientTrackingTable
+              recipients={email.recipients}
+              onSendReminder={handleSendIndividualReminder}
+              onToggleResponse={handleToggleRecipientResponded}
+              isSending={sendingRecipient}
+            />
+          </div>
+
+          <div className="lg:col-span-4 space-y-6">
+            <RightPanel
+              email={email}
+              respondedCount={respondedRecipients.length}
+              totalCount={totalRecipients}
+              requiredCount={requiredRecipients.length}
+              requiredRespondedCount={requiredResponded.length}
+              completionPercentage={completionPercentage}
+            />
+          </div>
+        </div>
+      )}
+
+      {activeTab === "conversation" && (
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+          <div className="lg:col-span-8 space-y-6">
+            <ConversationSection
+              messages={email.threadMessages}
+              subject={email.subject}
+              onAddMockReply={handleMockReply}
+            />
+          </div>
+          <div className="lg:col-span-4 space-y-6">right panel</div>
+        </div>
+      )}
+
+      {/* <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start"> */}
+      {/* <div className="lg:col-span-8 space-y-6"> */}
+      {/* 
+      {/* </div> */}
+      {/*<div className="lg:col-span-4 space-y-6">
+         
+        </div> */}
+      {/* // </div> */}
     </div>
   );
 };

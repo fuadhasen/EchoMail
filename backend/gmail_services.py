@@ -8,7 +8,6 @@ from config import Config
 from pathlib import Path
 from typing import List, Dict, Any, Optional, Union
 from config import USER_PATH
-from fastapi import HTTPException
 
 
 from google.auth.transport.requests import Request
@@ -527,7 +526,7 @@ class GmailService:
             if not thread_id:
                 return []
 
-            # Get all messages in the same thread
+            # Get all messages in the same thread with their details
             results = (
                 self.service.users()
                 .threads()
@@ -559,6 +558,7 @@ class GmailService:
             List[Dict[str, Any]]: A list of email messages with details that are responses to the original.
         """
         responses = self.get_email_responses(user_id, msg_id, max_results)
+        print('thread messag responses' + responses)
         detailed_responses = []
 
         for response in responses:
@@ -567,7 +567,7 @@ class GmailService:
                 # Extract headers and format them properly as a dictionary
                 header_dict = {}
 
-                # Get the full message details to access proper headers
+                # Get the full message details to access proper headers, 1+N problem
                 msg_details = self.get_email_details(user_id, response_id)
                 if (
                     msg_details
