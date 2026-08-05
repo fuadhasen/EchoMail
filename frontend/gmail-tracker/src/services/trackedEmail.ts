@@ -11,7 +11,7 @@ export interface TrackedRecipient {
   email: string;
   name: string | null;
 
-  must_responded: boolean;
+  must_respond: boolean;
   has_responded: boolean;
 
   response_id: string | null;

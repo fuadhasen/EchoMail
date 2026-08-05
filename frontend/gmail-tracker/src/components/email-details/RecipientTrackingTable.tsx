@@ -23,7 +23,7 @@ const RecipientTrackingTable = ({
 
   const pendingList = recipients.filter((r) => !r.has_responded);
   const respondedList = recipients.filter((r) => r.has_responded);
-  const requiredList = recipients.filter((r) => r.must_responded !== false);
+  const requiredList = recipients.filter((r) => r.must_respond);
 
   const filteredRecipients = recipients.filter((r) => {
     const q = searchQuery.toLowerCase().trim();
@@ -35,7 +35,7 @@ const RecipientTrackingTable = ({
     if (activeFilter === "pending") return matchesQuery && !r.has_responded;
     if (activeFilter === "responded") return matchesQuery && r.has_responded;
     if (activeFilter === "required")
-      return matchesQuery && r.must_responded !== false;
+      return matchesQuery && r.must_respond !== false;
     return matchesQuery;
   });
 

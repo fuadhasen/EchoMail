@@ -1,7 +1,14 @@
 export const formatSenderName = (sender: string): string => {
+  if (!sender) return "";
   const match = sender.match(/^(.+?)\s*<.*>$/);
 
   return match ? match[1].trim() : sender;
+};
+
+export const formatEmail = (sender: string): string => {
+  if (!sender) return "";
+  const match = sender.match(/^(.+?)\s*<(.+)>$/);
+  return match ? match[2].trim() : sender;
 };
 
 export const formatSentDate = (date: string | number): string => {

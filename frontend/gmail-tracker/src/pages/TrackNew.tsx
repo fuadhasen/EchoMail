@@ -4,6 +4,11 @@ import useSentEmails from "@/hooks/useSentEmails";
 import useTrackNew from "@/hooks/useTrackNew";
 import type { SentEmail } from "@/type";
 import {
+  QueryClient,
+  QueryClientContext,
+  useQueryClient,
+} from "@tanstack/react-query";
+import {
   AlertCircle,
   AlertTriangle,
   ArrowLeft,
@@ -29,6 +34,7 @@ import { Link, useNavigate } from "react-router";
 const TrackNew = () => {
   const navigate = useNavigate();
   const { triggerToast } = useToast();
+  const queryClient = useQueryClient();
 
   // workflow step state (1 to 4)
   const [step, setStep] = useState<1 | 2 | 3>(1);
@@ -111,7 +117,7 @@ const TrackNew = () => {
     }, 400);
   };
 
-  // step 2: Toggle a recipient
+  // step 2: Toggle a recipient, must_respond recipients
   const handleToggleRecipient = (emailStr: string) => {
     setSelectedRecipientEmails((prev) => {
       // if its exist remove it , if not add it
@@ -153,7 +159,12 @@ const TrackNew = () => {
         },
       },
       {
-        onSuccess: (data) => {
+        onSuccess: async (data) => {
+          // invalidate trackedemail query
+          await queryClient.invalidateQueries({
+            queryKey: ["tracked-emails"],
+          });
+
           triggerToast(
             `Started tracking "${selectedEmail.subject}"`,
             "success",

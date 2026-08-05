@@ -11,6 +11,7 @@ import {
   type ThreadMessage,
   type TrackedEmail,
 } from "@/data/mockTrackedEmails";
+import useEmailReply from "@/hooks/useEmailReply";
 import useMarkDone from "@/hooks/useMarkDone";
 import useSendReminder from "@/hooks/useSendReminder";
 import useTrackedDetail from "@/hooks/useTrackedDetail";
@@ -31,7 +32,12 @@ const EmailDetail = () => {
   const queryClient = useQueryClient();
 
   const { data: email, isPending, error } = useTrackedDetail(id);
-  console.log();
+  const {
+    data: replyMessages,
+    isPending: isReplyPending,
+    error: replyError,
+  } = useEmailReply(email?.email_id);
+  console.log(replyMessages);
 
   const [isSyncing, setIsSyncing] = useState(false);
   const [activeTab, setActiveTab] = useState<"recipients" | "conversation">(
@@ -46,6 +52,12 @@ const EmailDetail = () => {
       navigate("/tracked");
     }
   }, [error, navigate, triggerToast]);
+
+  useEffect(() => {
+    if (replyError) {
+      triggerToast("Unable to load conversation.", "info");
+    }
+  }, [replyError, triggerToast]);
 
   const handleSync = () => {
     setIsSyncing(true);
@@ -225,7 +237,7 @@ const EmailDetail = () => {
   // const pendingRecipients = email.recipients.filter((r) => !r.has_responded);
 
   const requiredRecipients = email?.recipients.filter(
-    (r) => r.must_responded !== false,
+    (r) => r.must_respond !== false,
   );
   const requiredResponded = requiredRecipients?.filter((r) => r.has_responded);
 
@@ -330,7 +342,10 @@ const EmailDetail = () => {
                   : "bg-slate-100 text-slate-600"
               }`}
             >
-              {0} hard coded
+              {replyMessages &&
+                (replyMessages.responses.length > 0
+                  ? replyMessages.responses.length + " replies"
+                  : replyMessages.responses.length + " reply")}
             </span>
           </button>
         </div>
@@ -379,12 +394,21 @@ const EmailDetail = () => {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
           <div className="lg:col-span-8 space-y-6">
             <ConversationSection
-              messages={email.threadMessages}
-              subject={email.subject}
-              onAddMockReply={handleMockReply}
+              messages={replyMessages?.responses ?? []}
+              email={email}
+              isPending={isReplyPending}
             />
           </div>
-          <div className="lg:col-span-4 space-y-6">right panel</div>
+          <div className="lg:col-span-4 space-y-6">
+            <RightPanel
+              email={email}
+              respondedCount={respondedRecipients.length}
+              totalCount={totalRecipients}
+              requiredCount={requiredRecipients.length}
+              requiredRespondedCount={requiredResponded.length}
+              completionPercentage={completionPercentage}
+            />
+          </div>
         </div>
       )}
 

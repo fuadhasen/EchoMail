@@ -1,30 +1,70 @@
-import type { ThreadMessage } from "@/data/mockTrackedEmails";
-import { MessageSquare } from "lucide-react";
+import type { EmailReply } from "@/services/emailReply";
+import { Clock, MessageSquare } from "lucide-react";
 import ConversationMessage from "./ConversationMessage";
+import { useState } from "react";
+import ConversationSkeleton from "./ConversationSkeleton";
+import type { TrackedEmailB } from "@/services/trackedEmail";
+import { formatSentDate } from "@/utils/dateFormatter";
 
 interface ConversationSectionProps {
-  messages?: ThreadMessage[];
-  subject: string;
-  onAddMockReply?: (
-    senderName: string,
-    senderEmail: string,
-    content: string,
-  ) => void;
+  messages?: EmailReply[];
+  email: TrackedEmailB;
+  isPending: boolean;
 }
 
-const ConversationSection = ({ messages = [] }: ConversationSectionProps) => {
+const ConversationSection = ({
+  messages = [],
+  email,
+  isPending,
+}: ConversationSectionProps) => {
+  if (isPending) {
+    return <ConversationSkeleton />;
+  }
+  const latestReply = messages.length - 1;
+
+  const replyCount = messages.length;
+
   return (
-    <div className="bg-white border border-slate-200/80 rounded-2xl p-5 shadow-2xs space-y-4">
-      {/* Header */}
-      <div className="flex items-center justify-between pb-3.5 border-b border-slate-100">
-        <div className="flex items-center gap-2">
-          <MessageSquare size={16} className="text-[#3525cd]" />
-          <h3 className="font-sans text-sm font-bold text-slate-900 tracking-tight">
-            Gmail Thread Conversation
-          </h3>
-          <span className="text-xs font-mono font-medium text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full border border-slate-200/60">
-            {messages.length} message{messages.length === 1 ? "" : "s"}
-          </span>
+    <div className="bg-white border border-slate-200/80 rounded-2xl p-4 sm:p-5 shadow-2xs space-y-4">
+      {/* top header and subject */}
+      <div className="pb-3 border-b border-slate-100 space-y-2">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div className="flex items-center gap-2">
+            <div className="w-7 h-7 rounded-lg  bg-[#eff4ff] text-[#3525cd] flex items-center justify-center border border-[#3525cd]/15">
+              <MessageSquare size={14} />
+            </div>
+            <div>
+              <h3 className="font-sans text-xs font-bold text-slate-900 uppercase">
+                Conversation Thread
+              </h3>
+            </div>
+
+            <span className="text-[11px] font-mono font-medium text-slate-600 bg-slate-100 px-2.5 py-0.5 rounded-full border border-slate-200/60">
+              {messages.length} {messages.length === 1 ? "message" : "messages"}
+              {replyCount > 0 &&
+                ` (${replyCount} ${replyCount === 1 ? "reply" : "replies"})`}
+            </span>
+          </div>
+        </div>
+
+        {/* email subject line and sub-metadata */}
+        <div className="pt-2 flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 bg-slate-50/70 p-2.5 rounded-xl border border-slate-200/50">
+          <div className="min-w-0 flex-1">
+            <span className="text-[10px] font-mono font-semibold text-slate-400 block uppercase">
+              Subject
+            </span>
+            <p className="font-sans text-xs sm:text-sm font-semibold text-slate-900 truncate">
+              {email.subject}
+            </p>
+          </div>
+
+          {email.sent_date && (
+            <div className="flex items-center gap-2 text-[11px] font-mono text-slate-500 shrink-0">
+              <span className="flex items-center gap-1">
+                <Clock size={11} /> {formatSentDate(email.sent_date)}
+              </span>
+            </div>
+          )}
         </div>
       </div>
 
@@ -35,8 +75,12 @@ const ConversationSection = ({ messages = [] }: ConversationSectionProps) => {
         </div>
       ) : (
         <div className="space-y-3">
-          {messages.map((msg) => (
-            <ConversationMessage key={msg.id} message={msg} />
+          {messages.map((msg, idx) => (
+            <ConversationMessage
+              key={msg.response_id}
+              message={msg}
+              isLatestReply={idx === latestReply}
+            />
           ))}
         </div>
       )}
