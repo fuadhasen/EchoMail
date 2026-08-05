@@ -429,7 +429,7 @@ const TrackNew = () => {
 
               {/* STATE A: Initial Empty Search Hero state */}
               {!hasSearched && (
-                <div className="p-8 md:p-12 border-2 border-dashed border-[#c7c4d8]/30 rounded-2xl bg-[#f8f9ff]/50 text-center space-y-4">
+                <div className="h-96 p-8 md:p-12 border-2 border-dashed border-[#c7c4d8]/30 rounded-2xl bg-[#f8f9ff]/50 text-center space-y-4">
                   <div className="w-14 h-14 rounded-2xl bg-indigo-50 border border-indigo-100 flex items-center justify-center mx-auto text-[#3525cd] shadow-2xs">
                     <Inbox size={26} />
                   </div>
@@ -463,7 +463,7 @@ const TrackNew = () => {
 
               {/* STATE ERROR */}
               {hasSearched && !isPending && error && (
-                <div className="p-10 text-center border-2 border-dashed border-red-200 rounded-2xl bg-red-50/30 space-y-3">
+                <div className="h-96 p-10 text-center border-2 border-dashed border-red-200 rounded-2xl bg-red-50/30 space-y-3">
                   <div className="w-12 h-12 rounded-full  bg-red-100 text-red-600  flex items-center justify-center mx-auto">
                     <AlertTriangle size={22} />
                   </div>

@@ -16,14 +16,18 @@ interface RecipientRowProps {
   recipient: TrackedRecipient;
   onSendReminder: (email: string) => Promise<void> | void;
   onToggleResponse: (email: string) => void;
+  onUndoResponded: (email: string) => void;
   isSending: boolean;
+  isMarking: boolean;
 }
 
 const RecipientRow = ({
   recipient,
   onSendReminder,
   onToggleResponse,
+  onUndoResponded,
   isSending,
+  isMarking,
 }: RecipientRowProps) => {
   const initials = recipient.name
     ? recipient.name
@@ -179,21 +183,39 @@ const RecipientRow = ({
                 type="button"
                 onClick={() => onToggleResponse(recipient.email)}
                 className="bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200/80 py-1.5 px-2.5 rounded-lg font-sans text-xs font-semibold flex items-center gap-1 transition-all cursor-pointer"
-                title="Mark manually as responded"
+                title="Manually mark as responded if you received a response outside this email thread."
               >
-                <Check size={13} className="stroke-2.5" />
-                <span className="hidden sm:inline">Mark Responded</span>
+                {isMarking ? (
+                  <>
+                    <Loader2 size={12} className="animate-spin text-white" />
+                    <span>Marking...</span>
+                  </>
+                ) : (
+                  <>
+                    <Check size={13} className="stroke-2.5" />
+                    <span className="hidden sm:inline">Mark Responded</span>
+                  </>
+                )}
               </button>
             </>
           ) : (
             <button
               type="button"
-              onClick={() => onToggleResponse(recipient.email)}
+              onClick={() => onUndoResponded(recipient.email)}
               className="bg-slate-50 hover:bg-slate-100 text-slate-600 hover:text-slate-900 border border-slate-200/80 py-1.5 px-3 rounded-lg font-sans text-xs font-medium flex items-center gap-1.5 transition-all cursor-pointer"
               title="Undo response status"
             >
-              <RotateCcw size={12} />
-              <span>Undo</span>
+              {isMarking ? (
+                <>
+                  <Loader2 size={12} className="animate-spin" />
+                  <span>Undoing...</span>
+                </>
+              ) : (
+                <>
+                  <RotateCcw size={12} />
+                  <span>Undo</span>
+                </>
+              )}
             </button>
           )}
         </div>

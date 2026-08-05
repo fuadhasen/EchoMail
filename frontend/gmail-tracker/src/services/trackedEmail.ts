@@ -90,3 +90,21 @@ export const sendReminder = async (
     recipient_emails: [recipientEmail],
   });
 };
+
+export const markResponded = async (
+  trackedEmailId: string,
+  recipientEmail: string,
+): Promise<void> => {
+  await api.post(`/tracked-emails/${trackedEmailId}/mark-responded`, {
+    recipient_email: recipientEmail,
+  });
+};
+
+export const markUnResponded = async (
+  trackedEmailId: string,
+  recipientEmail: string,
+): Promise<void> => {
+  await api.post(`/tracked-emails/${trackedEmailId}/mark-unresponded`, {
+    recipient_email: recipientEmail,
+  });
+};

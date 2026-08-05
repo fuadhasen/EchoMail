@@ -2,12 +2,14 @@
 This module provides a set of functions to communicate with Gmail API
 """
 
+import re
 import base64
 import json
 from config import Config
 from pathlib import Path
 from typing import List, Dict, Any, Optional, Union
 from config import USER_PATH
+from datetime import datetime, timezone
 
 
 from google.auth.transport.requests import Request
@@ -508,7 +510,7 @@ class GmailService:
         Args:
             user_id (str): The user's email address. The special value "me"
                 indicates the authenticated user.
-            msg_id (str): The ID of the original email message.
+            msg_id (str): The ID of the original email message(email_id) .
             max_results (int): Maximum number of results to return.
 
         Returns:
@@ -538,6 +540,11 @@ class GmailService:
             messages = results.get("messages", [])
             responses = [msg for msg in messages if msg.get("id") != msg_id]
 
+            # sort the array chronogically here: oldest -> newest
+            responses.sort(
+                key=lambda message: int(message.get('internalDate', 0))
+            )
+
             return responses[:max_results]
         except HttpError as error:
             print(f"An error occurred: {error}")
@@ -558,44 +565,66 @@ class GmailService:
             List[Dict[str, Any]]: A list of email messages with details that are responses to the original.
         """
         responses = self.get_email_responses(user_id, msg_id, max_results)
-        print('thread messag responses' + responses)
         detailed_responses = []
 
         for response in responses:
-            response_id = response.get("id")
-            if response_id:
+            msg_id = response.get("id")
+            if msg_id:
                 # Extract headers and format them properly as a dictionary
                 header_dict = {}
 
                 # Get the full message details to access proper headers, 1+N problem
-                msg_details = self.get_email_details(user_id, response_id)
                 if (
-                    msg_details
-                    and "payload" in msg_details
-                    and "headers" in msg_details["payload"]
+                     "payload" in response
+                    and "headers" in response["payload"]
                 ):
-                    for header in msg_details["payload"]["headers"]:
+                    for header in response["payload"]["headers"]:
                         if header["name"] in ["Subject", "From", "To", "Date"]:
                             header_dict[header["name"].lower()] = header["value"]
 
+                # sent_at convertion
+                sent_at = datetime.fromtimestamp(int(response["internalDate"]) / 1000, tz=timezone.utc)
+                raw_body = self.get_email_body(user_id, msg_id)
+                clean_body = self.clean_email_body(raw_body)
+
                 # Format the response with proper types for serialization
                 details = {
-                    "id": response_id,
-                    "subject": self.get_email_subject(user_id, response_id),
-                    "sender": self.get_email_sender(user_id, response_id),
-                    "recipients": self.get_email_recipient(
-                        user_id, response_id
-                    ),  # Now returns a list
-                    "snippet": response.get("snippet", ""),
-                    "labelIds": ",".join(
-                        response.get("labelIds", [])
-                    ),  # Convert list to string
-                    "headers": str(header_dict),  # Convert dict to string
+                    "response_id": msg_id,
+                    "sender": self.get_email_sender(user_id, msg_id),
+                    "snippet": clean_body,
                     "threadId": response.get("threadId", ""),
+                    "sent_at": sent_at
                 }
                 detailed_responses.append(details)
 
         return detailed_responses
+
+
+    def clean_email_body(self, body: str) -> str:
+        """Helper function to extract the exact response from the email body
+        """
+        if not body:
+            return ""
+
+        body = body.replace("\r\n", "\n").replace("\r", "\n")
+        reply_separator = re.search(
+            r"\nOn .+? wrote:\s*\n",
+            body,
+            flags=re.IGNORECASE | re.DOTALL,
+        )
+
+        if reply_separator:
+            body = body[:reply_separator.start()]
+
+        # Remove lines beginning with ">"
+        lines = body.splitlines()
+        lines = [line for line in lines if not line.strip().startswith(">")]
+
+        # Remove excessive blank lines
+        body = "\n".join(lines)
+        body = re.sub(r"\n{3,}", "\n\n", body)
+
+        return body.strip()
 
 
 def _get_body_content(payload: Dict[str, Any]) -> str:

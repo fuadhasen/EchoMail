@@ -5,20 +5,31 @@ import { useState } from "react";
 import ConversationSkeleton from "./ConversationSkeleton";
 import type { TrackedEmailB } from "@/services/trackedEmail";
 import { formatSentDate } from "@/utils/dateFormatter";
+import ConversationError from "./ConversationError";
 
 interface ConversationSectionProps {
   messages?: EmailReply[];
   email: TrackedEmailB;
   isPending: boolean;
+  isError: Error | null;
+  isRetrying: boolean;
+  onRetry?: () => Promise<unknown>;
 }
 
 const ConversationSection = ({
   messages = [],
   email,
   isPending,
+  isError,
+  onRetry,
+  isRetrying,
 }: ConversationSectionProps) => {
   if (isPending) {
     return <ConversationSkeleton />;
+  }
+
+  if (isError) {
+    return <ConversationError onRetry={onRetry} isRetrying={isRetrying} />;
   }
   const latestReply = messages.length - 1;
 

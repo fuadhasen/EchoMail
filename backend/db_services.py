@@ -113,7 +113,7 @@ class EmailTrackerService:
 
     @staticmethod
     def mark_recipient_responded(
-        db: Session, tracked_email_id: int, recipient_email: str, response_id: str
+        db: Session, tracked_email_id: int, recipient_email: str, response_id: str | None = None
     ) -> bool:
         """
         Mark a recipient as having responded to a tracked email (log response).
@@ -149,7 +149,7 @@ class EmailTrackerService:
 
         # Update association
         association.has_responded = True
-        association.response_id = response_id
+        association.response_id = response_id 
         db.add(association)
 
         # Check if tracked email is now done and update its status
@@ -158,6 +158,52 @@ class EmailTrackerService:
         )
         if tracked_email:
             tracked_email.update_status(db)
+
+        return True
+
+    @staticmethod
+    def mark_recipient_unresponded(
+        db: Session, tracked_email_id: int, recipient_email: str
+    ) -> bool:
+        """
+        Mark a recipient as having un-responded to a tracked email (log response).
+
+        Args:
+            db: Database session
+            tracked_email_id: Database ID of the tracked email
+            recipient_email: Email of the recipient who responded
+            response_id: Gmail message ID of the response
+
+        Returns:
+            True if successful, False otherwise
+        """
+        # Get recipient
+        recipient = (
+            db.query(Recipient).filter(Recipient.email == recipient_email).first()
+        )
+        if not recipient:
+            return False
+
+        # Get association
+        association = (
+            db.query(TrackedEmailRecipient)
+            .filter(
+                TrackedEmailRecipient.tracked_email_id == tracked_email_id,
+                TrackedEmailRecipient.recipient_id == recipient.id,
+            )
+            .first()
+        )
+
+        if not association:
+            return False
+
+        # Update association
+        association.has_responded = False
+        association.response_id = None
+
+        db.add(association)
+        db.commit()
+        db.refresh(association)
 
         return True
 

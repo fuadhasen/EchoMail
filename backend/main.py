@@ -71,7 +71,11 @@ class TrackedEmailResponse(BaseModel):
 
 class MarkRespondedRequest(BaseModel):
     recipient_email: EmailStr
-    response_id: str
+    response_id: str | None = None
+
+
+class MarkUnRespondedRequest(BaseModel):
+    recipient_email: EmailStr
 
 
 class SendReminderRequest(BaseModel):
@@ -431,6 +435,35 @@ async def mark_recipient_responded(
 
     # Check if email is now complete
     email = EmailTrackerService.get_tracked_email_by_id(db, tracked_email_id)
+
+    return {
+        "success": True,
+        "tracked_email_id": tracked_email_id,
+        "recipient_email": request.recipient_email,
+        "is_email_done": email.is_done,
+    }
+
+@app.post("/tracked-emails/{tracked_email_id}/mark-unresponded")
+async def mark_recipient_unresponded(
+    tracked_email_id: int, request: MarkUnRespondedRequest, db: Session = Depends(get_db)
+):
+    """
+    Mark a recipient as having unresponded to a tracked email.
+    """
+    email = EmailTrackerService.get_tracked_email_by_id(db, tracked_email_id)
+    if not email:
+        raise HTTPException(status_code=404, detail="Tracked email not found")
+
+    success = EmailTrackerService.mark_recipient_unresponded(
+        db=db,
+        tracked_email_id=tracked_email_id,
+        recipient_email=request.recipient_email,
+    )
+
+    if not success:
+        raise HTTPException(
+            status_code=400, detail="Failed to mark recipient as unresponded"
+        )
 
     return {
         "success": True,

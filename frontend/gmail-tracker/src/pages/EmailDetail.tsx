@@ -13,6 +13,8 @@ import {
 } from "@/data/mockTrackedEmails";
 import useEmailReply from "@/hooks/useEmailReply";
 import useMarkDone from "@/hooks/useMarkDone";
+import useMarkResponded from "@/hooks/useMarkResponded";
+import useMarkUnResponded from "@/hooks/useMarkUnResponded";
 import useSendReminder from "@/hooks/useSendReminder";
 import useTrackedDetail from "@/hooks/useTrackedDetail";
 import type { TrackedRecipient } from "@/services/trackedEmail";
@@ -36,8 +38,9 @@ const EmailDetail = () => {
     data: replyMessages,
     isPending: isReplyPending,
     error: replyError,
+    refetch: refetchReplies,
+    isFetching: isFetchingReplies,
   } = useEmailReply(email?.email_id);
-  console.log(replyMessages);
 
   const [isSyncing, setIsSyncing] = useState(false);
   const [activeTab, setActiveTab] = useState<"recipients" | "conversation">(
@@ -193,8 +196,69 @@ const EmailDetail = () => {
   //   );
   // };
 
-  const handleToggleRecipientResponded = () => {
-    triggerToast("recipient status toggled function is executed", "info");
+  const markRespondedMutation = useMarkResponded();
+  const [processingRecipient, setProcessingRecipient] = useState<string | null>(
+    null,
+  );
+  const handleToggleRecipientResponded = (recipientEmail: string) => {
+    if (!email) return;
+
+    setProcessingRecipient(recipientEmail);
+
+    markRespondedMutation.mutate(
+      {
+        trackedEmailId: email.id,
+        recipientEmail: recipientEmail,
+      },
+      {
+        onSuccess: async () => {
+          await queryClient.invalidateQueries({
+            queryKey: ["tracked-emails", id],
+          });
+
+          triggerToast("Mark recipient responded successfully.", "success");
+        },
+
+        onError: () => {
+          triggerToast("Unable to mark responded.", "info");
+        },
+
+        onSettled: () => {
+          setProcessingRecipient(null);
+        },
+      },
+    );
+  };
+
+  const markUnRespondedMutation = useMarkUnResponded();
+  const handleUndoResponded = (recipientEmail: string) => {
+    if (!email) return;
+
+    setProcessingRecipient(recipientEmail);
+
+    markUnRespondedMutation.mutate(
+      {
+        trackedEmailId: email.id,
+        recipientEmail,
+      },
+      {
+        onSuccess: async () => {
+          await queryClient.invalidateQueries({
+            queryKey: ["tracked-emails", id],
+          });
+
+          triggerToast("Recipient response status undone.", "success");
+        },
+
+        onError: () => {
+          triggerToast("Unable to undo response status.", "info");
+        },
+
+        onSettled: () => {
+          setProcessingRecipient(null);
+        },
+      },
+    );
   };
 
   const handleMarkDone = () => {
@@ -373,7 +437,9 @@ const EmailDetail = () => {
               recipients={email.recipients}
               onSendReminder={handleSendIndividualReminder}
               onToggleResponse={handleToggleRecipientResponded}
+              onUndoResponded={handleUndoResponded}
               isSending={sendingRecipient}
+              processingRecipient={processingRecipient}
             />
           </div>
 
@@ -397,6 +463,9 @@ const EmailDetail = () => {
               messages={replyMessages?.responses ?? []}
               email={email}
               isPending={isReplyPending}
+              isError={replyError}
+              onRetry={refetchReplies}
+              isRetrying={isFetchingReplies}
             />
           </div>
           <div className="lg:col-span-4 space-y-6">

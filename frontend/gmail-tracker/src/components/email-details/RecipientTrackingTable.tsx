@@ -7,14 +7,18 @@ interface RecipientTrackingTableProps {
   recipients: TrackedRecipient[];
   onSendReminder: (email: string) => void;
   onToggleResponse: (email: string) => void;
+  onUndoResponded: (email: string) => void;
   isSending: string | null;
+  processingRecipient: string | null;
 }
 
 const RecipientTrackingTable = ({
   recipients,
   onSendReminder,
   onToggleResponse,
+  onUndoResponded,
   isSending,
+  processingRecipient,
 }: RecipientTrackingTableProps) => {
   const [activeFilter, setActiveFilter] = useState<
     "all" | "pending" | "responded" | "required"
@@ -146,7 +150,9 @@ const RecipientTrackingTable = ({
                 recipient={recipient}
                 onSendReminder={onSendReminder}
                 onToggleResponse={onToggleResponse}
+                onUndoResponded={onUndoResponded}
                 isSending={isSending === recipient.email}
+                isMarking={processingRecipient === recipient.email}
               />
             ))}
           </div>
