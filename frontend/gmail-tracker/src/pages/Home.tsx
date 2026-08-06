@@ -1,3 +1,4 @@
+import { getTrackedEmails } from "@/data/mockTrackedEmails";
 import AnalyticsPreview from "../components/dashboard/AnalyticsPreview";
 import NeedsAttention from "../components/dashboard/NeedsAttention";
 import RecentActivity from "../components/dashboard/RecentActivity";
@@ -63,6 +64,8 @@ const Home = () => {
   // const url = "http://localhost:8000/tracked-emails?show_done=true";
   // const { res, error, isPending } = useTrackedEmails(url);
 
+  const emails = getTrackedEmails();
+
   return (
     <div className="space-y-8">
       {/* {welcom section} */}
@@ -92,13 +95,13 @@ const Home = () => {
         {/* left column section */}
         <div className="col-span-12 lg:col-span-8 space-y-8 flex flex-col justify-start">
           <NeedsAttention items={initialAttentionItems} />
-          <AnalyticsPreview />
+          <AnalyticsPreview emails={emails} />
         </div>
 
         {/* right column section */}
         <div className="col-span-12 lg:col-span-4 space-y-8 flex flex-col justify-start">
           <UpcomingDeadlines />
-          <RecentActivity initialItems={initialActivities} />
+          <RecentActivity initialItems={[]} />
         </div>
       </div>
 

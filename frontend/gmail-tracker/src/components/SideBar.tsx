@@ -24,8 +24,9 @@ const SideBar = () => {
     { name: "Tracked Emails", icon: Mail, path: "/tracked" },
     { name: "Track New", icon: Plus, path: "/track_new" },
     { name: "Analytics", icon: BarChart3, path: "/analytics" },
-    { name: "Settings", icon: Settings, path: "/settings" },
   ];
+
+  const settingsItem = { name: "Settings", icon: Settings, path: "/settings" };
 
   return (
     <>
@@ -89,41 +90,73 @@ const SideBar = () => {
               </button>
             </div>
 
-            {/* Navigation Items */}
+            {/* Navigation links */}
             <nav className="flex-1 space-y-1 overflow-y-auto">
-              {navItems.map((item) => {
-                const Icon = item.icon;
+              <div className="space-y-1">
+                {navItems.map((item) => {
+                  const Icon = item.icon;
 
-                return (
-                  <NavLink
-                    key={item.name}
-                    to={item.path}
-                    end={item.path === "/"}
-                    onClick={() => setIsMobileDrawerOpen(false)}
-                    className={({ isActive }) =>
-                      `group w-full flex items-center justify-between px-3 py-2 rounded-lg font-sans text-xs font-semibold tracking-wide transition-all duration-150 cursor-pointer border ${
+                  return (
+                    <NavLink
+                      key={item.name}
+                      to={item.path}
+                      end={item.path === "/"}
+                      onClick={() => setIsMobileDrawerOpen(false)}
+                      className={({ isActive }) =>
+                        `group w-full flex items-center justify-between px-3 py-2 rounded-lg font-sans text-xs font-semibold tracking-wide transition-all duration-150 cursor-pointer border ${
+                          isActive
+                            ? "bg-white border-zinc-200/80 text-zinc-900 shadow-[0_1px_2px_rgba(0,0,0,0.03)] font-bold"
+                            : "bg-transparent border-transparent text-zinc-500 hover:bg-zinc-200/30 hover:text-zinc-950"
+                        }`
+                      }
+                    >
+                      {({ isActive }) => (
+                        <div className="flex items-center gap-2.5 w-full">
+                          <Icon
+                            size={14}
+                            className={`transition-all duration-150 shrink-0 ${
+                              isActive
+                                ? "text-zinc-900 stroke-[2.2]"
+                                : "text-zinc-400 group-hover:text-zinc-600"
+                            }`}
+                          />
+                          <span>{item.name}</span>
+                        </div>
+                      )}
+                    </NavLink>
+                  );
+                })}
+              </div>
+
+              {/* Subtle Horizontal Separator */}
+              <div className="my-2.5 h-px bg-zinc-200/70 mx-1" />
+
+              {/* Settings Navigation Item */}
+              <NavLink
+                to={settingsItem.path}
+                onClick={() => setIsMobileDrawerOpen(false)}
+                className={({ isActive }) =>
+                  `group w-full flex items-center justify-between px-3 py-2 rounded-lg font-sans text-xs font-semibold tracking-wide transition-all duration-150 cursor-pointer border ${
+                    isActive
+                      ? "bg-white border-zinc-200/80 text-zinc-900 shadow-[0_1px_2px_rgba(0,0,0,0.03)] font-bold"
+                      : "bg-transparent border-transparent text-zinc-500 hover:bg-zinc-200/30 hover:text-zinc-950"
+                  }`
+                }
+              >
+                {({ isActive }) => (
+                  <div className="flex items-center gap-2.5 w-full">
+                    <Settings
+                      size={14}
+                      className={`transition-all duration-150 shrink-0 ${
                         isActive
-                          ? "bg-white border-zinc-200/80 text-zinc-900 shadow-[0_1px_2px_rgba(0,0,0,0.03)] font-bold"
-                          : "bg-transparent border-transparent text-zinc-500 hover:bg-zinc-200/30 hover:text-zinc-950"
-                      }`
-                    }
-                  >
-                    {({ isActive }) => (
-                      <div className="flex items-center gap-2.5 w-full">
-                        <Icon
-                          size={14}
-                          className={`transition-all duration-150 shrink-0 ${
-                            isActive
-                              ? "text-zinc-900 stroke-[2.2]"
-                              : "text-zinc-400 group-hover:text-zinc-600"
-                          }`}
-                        />
-                        <span>{item.name}</span>
-                      </div>
-                    )}
-                  </NavLink>
-                );
-              })}
+                          ? "text-zinc-900 stroke-[2.2]"
+                          : "text-zinc-400 group-hover:text-zinc-600"
+                      }`}
+                    />
+                    <span>{settingsItem.name}</span>
+                  </div>
+                )}
+              </NavLink>
             </nav>
 
             {/* mobile profile section */}
@@ -215,43 +248,73 @@ const SideBar = () => {
           </div>
         </Link>
 
-        {/* Navigation Items */}
-        <nav className="flex-1 space-y-1.5 overflow-y-auto custom-scrollbar pr-1 -mr-1">
-          {navItems.map((item) => {
-            const Icon = item.icon;
+        {/* Navigation links */}
+        <nav className="flex-1 space-y-1 overflow-y-auto">
+          <div className="space-y-1">
+            {navItems.map((item) => {
+              const Icon = item.icon;
 
-            return (
-              <NavLink
-                key={item.name}
-                to={item.path}
-                end={item.path === "/"}
-                className={({ isActive }) =>
-                  `group w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl font-sans text-xs font-semibold tracking-wide transition-all duration-200 cursor-pointer border ${
+              return (
+                <NavLink
+                  key={item.name}
+                  to={item.path}
+                  end={item.path === "/"}
+                  onClick={() => setIsMobileDrawerOpen(false)}
+                  className={({ isActive }) =>
+                    `group w-full flex items-center justify-between px-3 py-2 rounded-lg font-sans text-xs font-semibold tracking-wide transition-all duration-150 cursor-pointer border ${
+                      isActive
+                        ? "bg-white border-zinc-200/80 text-zinc-900 shadow-[0_1px_2px_rgba(0,0,0,0.03)] font-bold"
+                        : "bg-transparent border-transparent text-zinc-500 hover:bg-zinc-200/30 hover:text-zinc-950"
+                    }`
+                  }
+                >
+                  {({ isActive }) => (
+                    <div className="flex items-center gap-2.5 w-full">
+                      <Icon
+                        size={14}
+                        className={`transition-all duration-150 shrink-0 ${
+                          isActive
+                            ? "text-zinc-900 stroke-[2.2]"
+                            : "text-zinc-400 group-hover:text-zinc-600"
+                        }`}
+                      />
+                      <span>{item.name}</span>
+                    </div>
+                  )}
+                </NavLink>
+              );
+            })}
+          </div>
+
+          {/* Subtle Horizontal Separator */}
+          <div className="my-2.5 h-px bg-zinc-200/70 mx-1" />
+
+          {/* Settings Navigation Item */}
+          <NavLink
+            to={settingsItem.path}
+            onClick={() => setIsMobileDrawerOpen(false)}
+            className={({ isActive }) =>
+              `group w-full flex items-center justify-between px-3 py-2 rounded-lg font-sans text-xs font-semibold tracking-wide transition-all duration-150 cursor-pointer border ${
+                isActive
+                  ? "bg-white border-zinc-200/80 text-zinc-900 shadow-[0_1px_2px_rgba(0,0,0,0.03)] font-bold"
+                  : "bg-transparent border-transparent text-zinc-500 hover:bg-zinc-200/30 hover:text-zinc-950"
+              }`
+            }
+          >
+            {({ isActive }) => (
+              <div className="flex items-center gap-2.5 w-full">
+                <Settings
+                  size={14}
+                  className={`transition-all duration-150 shrink-0 ${
                     isActive
-                      ? "bg-white border-zinc-200/60 text-[#3525cd] shadow-[0_1.5px_4px_rgba(0,0,0,0.03)]"
-                      : "bg-transparent border-transparent text-zinc-500 hover:bg-zinc-100/60 hover:text-zinc-900"
-                  }`
-                }
-                id={`sidebar-nav-${item.name.toLowerCase().replace(/\s+/g, "-")}`}
-              >
-                {({ isActive }) => (
-                  <div className="flex items-center gap-3 w-full">
-                    <Icon
-                      size={15}
-                      className={`transition-all duration-200 shrink-0 ${
-                        isActive
-                          ? "text-[#3525cd] stroke-[2.2] scale-105"
-                          : "text-zinc-400 group-hover:text-zinc-700 group-hover:scale-105 group-hover:translate-x-0.5"
-                      }`}
-                    />
-                    <span className="transition-colors duration-200">
-                      {item.name}
-                    </span>
-                  </div>
-                )}
-              </NavLink>
-            );
-          })}
+                      ? "text-zinc-900 stroke-[2.2]"
+                      : "text-zinc-400 group-hover:text-zinc-600"
+                  }`}
+                />
+                <span>{settingsItem.name}</span>
+              </div>
+            )}
+          </NavLink>
         </nav>
 
         <div className="relative mt-auto pt-4 border-t border-[#c7c4d8]/15 text-left">

@@ -1,201 +1,219 @@
-import { Award, HelpCircle, TrendingUp, Zap } from "lucide-react";
-import { useState } from "react";
-import { motion, AnimatePresence } from "motion/react";
+import type { TrackedEmail } from "@/data/mockTrackedEmails";
+import { ArrowUpRight, CheckCircle2, PieChart, Target } from "lucide-react";
+import {
+  Cell,
+  Pie,
+  PieChart as RePieChart,
+  ResponsiveContainer,
+  Tooltip,
+} from "recharts";
 
-const AnalyticsPreview = () => {
-  const [hoveredBar, setHoveredBar] = useState<number | null>(null);
-  const [showScoreDetail, setShowScoreDetail] = useState(false);
+interface AnalyticsPreviewProps {
+  emails: TrackedEmail[];
+}
 
-  const velocityData = [
-    {
-      day: "Mon",
-      height: "h-[30%]",
-      val: "4.2h",
-      label: "Monday",
-      colorClass: "bg-[#3525cd]/10 group-hover:bg-[#3525cd]/25",
-    },
-    {
-      day: "Tue",
-      height: "h-[45%]",
-      val: "6.1h",
-      label: "Tuesday",
-      colorClass: "bg-[#3525cd]/15 group-hover:bg-[#3525cd]/30",
-    },
-    {
-      day: "Wed",
-      height: "h-[60%]",
-      val: "8.5h",
-      label: "Wednesday",
-      colorClass: "bg-[#3525cd]/20 group-hover:bg-[#3525cd]/35",
-    },
-    {
-      day: "Thu",
-      height: "h-[85%]",
-      val: "12.0h",
-      label: "Thursday",
-      colorClass: "bg-[#3525cd]/40 group-hover:bg-[#3525cd]/55",
-    },
-    {
-      day: "Fri",
-      height: "h-[70%]",
-      val: "10.2h",
-      label: "Friday",
-      colorClass: "bg-[#3525cd] shadow-sm",
-    },
-    {
-      day: "Sat",
-      height: "h-[40%]",
-      val: "5.4h",
-      label: "Saturday",
-      colorClass: "bg-[#3525cd]/25 group-hover:bg-[#3525cd]/40",
-    },
-    {
-      day: "Sun",
-      height: "h-[25%]",
-      val: "3.1h",
-      label: "Sunday",
-      colorClass: "bg-[#3525cd]/10 group-hover:bg-[#3525cd]/25",
-    },
+// 2 widgets
+const AnalyticsPreview = ({ emails }: AnalyticsPreviewProps) => {
+  // compute metrics from tracked emails
+  let totalRecipients = 0;
+  let respondedRecipients = 0;
+  let awaitingRecipients = 0;
+  let recipientsWithReminder = 0;
+  let respondedWithReminder = 0;
+
+  emails.forEach((email) => {
+    email.recipients.forEach((r) => {
+      totalRecipients++;
+      if (r.responded) {
+        respondedRecipients++;
+      } else {
+        awaitingRecipients++;
+      }
+      if (r.last_reminder_sent) {
+        recipientsWithReminder++;
+        if (r.responded) {
+          respondedWithReminder++;
+        }
+      }
+    });
+  });
+
+  const responseRate =
+    totalRecipients > 0
+      ? Math.round((respondedRecipients / totalRecipients) * 100)
+      : 100;
+
+  // // follow-up efficiency: percentage of recipients with last_reminder_sent who respond
+  // const followUpEfficiency =
+  //   recipientsWithReminder > 0
+  //     ? Math.round((respondedWithReminder / recipientsWithReminder) * 100)
+  //     : 88;
+
+  const donutData = [
+    { name: "Responded", value: respondedRecipients, color: "#3525cd" },
+    { name: "Awaiting", value: awaitingRecipients, color: "#f59e0b" },
   ];
 
-  const scoreDetails = [
-    {
-      name: "Resolution Speed",
-      score: 96,
-      desc: "Average response under 8 mins",
-    },
-    {
-      name: "Follow-up Rate",
-      score: 91,
-      desc: "91% thread closure within 24h",
-    },
-    {
-      name: "SLA Compliance",
-      score: 95,
-      desc: "Exceeded enterprise benchmarks",
-    },
-  ];
+  // radial progress calculation
+  const radius = 38;
+  const circumference = 2 * Math.PI * radius;
+  const responseStrokeDashoffset =
+    circumference - (responseRate / 100) * circumference;
 
   return (
-    <section className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-6">
-      {/* Velocity Card */}
-      <div className="bg-white border border-[#c7c4d8]/30 rounded-2xl p-6 flex flex-col justify-between shadow-sm relative">
-        <div>
-          <div className="flex justify-between items-start mb-1">
-            <h3 className="font-sans text-[#0b1c30] text-base font-bold leading-tight">
-              Response Velocity
-            </h3>
-            <span className="text-xs text-[#777587] font-sans flex items-center gap-1">
-              <TrendingUp size={12} className="text-[#3525cd]" />
-              Tracked hourly
+    <div className="space-y mt-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        {/* Widget 1 */}
+        <div className="h-80 bg-white border  border-slate-200/80 rounded-2xl p-4 sm:p-5 shadow-2xs flex flex-col justify-between space-y-3">
+          <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
+            <span className="font-sans font-bold text-xs text-slate-900 flex items-center gap-1.5">
+              <PieChart size={14} className="text-[#3525cd]" />
+              Response Destribution
+            </span>
+            <span className="text-[10px] font-mono font-semibold text-slate-600 bg-slate-50 px-2 py-0.5 rounded border border-slate-200">
+              {totalRecipients} Total
             </span>
           </div>
-          <p className="font-sans text-xs text-[#777587] mb-8">
-            Average response intervals
-          </p>
-        </div>
 
-        {/* Bar Chart */}
-        <div className="flex h-44 items-end gap-3 px-2 relative mb-2">
-          {velocityData.map((d, index) => (
-            <div
-              key={d.day}
-              onMouseEnter={() => setHoveredBar(index)}
-              onMouseLeave={() => setHoveredBar(null)}
-              className="flex-1 flex flex-col justify-end h-full group relative cursor-pointer"
-            >
-              <AnimatePresence>
-                {hoveredBar == index && (
-                  <motion.div
-                    initial={{ opacity: 0, y: -5, scale: 0.95 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: -5, scale: 0.95 }}
-                    transition={{ duration: 0.15 }}
-                    className="absolute -top-12 left-1/2 -translate-x-1/2 bg-[#213145] text-[#eaf1ff] text-[10px] px-2.5 py-1.5 rounded-md shadow-md z-20 whitespace-nowrap text-center outline-none border border-[#777587]/20  font-sans"
-                  >
-                    <div>{d.label}</div>
-                    <div>{d.val} avg</div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-
-              {/* Bar Filled elements */}
-              <div
-                className={`w-full rounded-t transition-all duration-300 ${d.colorClass} ${d.height}`}
-                style={{ transitionDelay: `${index * 15}ms` }}
-              ></div>
-            </div>
-          ))}
-        </div>
-
-        {/* labels Bar */}
-        <div className="flex justify-between mt-2 pt-2 border-t border-[#c7c4d8]/10  text-[#777587]  font-semibold text-[11px] font-sans tracking-wide">
-          <span>Mon</span>
-          <span>Wed</span>
-          <span>Sun</span>
-        </div>
-      </div>
-
-      {/* Effciency Score Card */}
-      <motion.div
-        whileHover={{ scale: 1.005 }}
-        onClick={() => setShowScoreDetail(!showScoreDetail)}
-        className="bg-[#3525cd] p-6 rounded-2xl text-white flex flex-col justify-between relative overflow-hidden group shadow-lg cursor-pointer"
-      >
-        {/* Ambient glow decoration backdrops */}
-        <div className="absolute -right-12 -bottom-12 w-44 h-44 bg-white/5 rounded-full blur-2xl group-hover:bg-white/10 transitions-colors duration-500" />
-        <div className="absolute -left-12 top-12  w-28 h-28 bg-[#4f46e5]/40 rounded blur-xl" />
-
-        <div className="relative z-10 flex justify-between items-start">
           <div>
-            <div className="flex items-center gap-1.5">
-              <h3 className="font-sans text-base font-bold text-white tracking-tight">
-                Efficiency Score
-              </h3>
-              <HelpCircle size={14} className="opacity-60 cursor-help" />
-            </div>
-            <p className="font-sans text-xs text-[#dad7ff] opacity-85 mt-1">
-              You are responding 15% faster than last month.
-            </p>
-          </div>
-          <div className="p-2 bg-white/10 rounded-lg text-white">
-            <Award size={18} />
-          </div>
-        </div>
+            <ResponsiveContainer width="100%" height="100%">
+              <RePieChart>
+                <Pie
+                  data={donutData}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={38}
+                  outerRadius={54}
+                  paddingAngle={4}
+                  dataKey="value"
+                  stroke="none"
+                >
+                  {donutData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.color} />
+                  ))}
+                </Pie>
+                <Tooltip
+                  formatter={(val: number, name: string) => [
+                    `${val} recipients`,
+                    name,
+                  ]}
+                  contentStyle={{
+                    backgroundColor: "#0f172a",
+                    borderRadius: "10px",
+                    color: "#fff",
+                    fontSize: "11px",
+                    border: "none",
+                    padding: "6px 10px",
+                  }}
+                  itemStyle={{ color: "#fff" }}
+                />
+              </RePieChart>
+            </ResponsiveContainer>
 
-        {/* footer */}
-        <div className="relative z-10 mt-6">
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.2 }}
-          >
-            <div className="text-5xl font-black tracking-tight flex items-baseline gap-1">
-              94
-              <span className="text-2xl font-normal text-[#dad7ff] opacity-70">
-                /100
+            {/* center label */}
+            <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+              <span className="text-lg font-bold font-mono text-slate-900 leading-none">
+                {totalRecipients}
+              </span>
+              <span className="text-[10px] font-sans font-medium text-slate-500 mt-0.5">
+                Recipients
               </span>
             </div>
-            <div className="mt-5">
-              <div className="h-1.5 w-full bg-white/20 rounded-full overflow-hidden">
-                <motion.div
-                  initial={{ width: 0 }}
-                  animate={{ width: "94%" }}
-                  transition={{ duration: 0.8, delay: 0.2 }}
-                  className="h-full bg-white rounded-full"
+          </div>
+
+          {/* Legend */}
+          <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-100 text-[11px] font-mono">
+            <div className="flex items-center gap-1.5 bg-indigo-50/60 p-2 rounded-xl border border-indigo-100/60">
+              <span className="w-2 h-2 rounded-full bg-[#3525cd]" />
+              <span className="text-slate-700 font-medium">Responded:</span>
+              <span className="font-bold text-[#3525cd] ml-auto">
+                {respondedRecipients}
+              </span>
+            </div>
+
+            <div className="flex items-center gap-1.5 bg-amber-50/60 p-2 rounded-xl border border-amber-100/60">
+              <span className="w-2 h-2 rounded-full bg-amber-500" />
+              <span className="text-slate-700 font-medium">Awaiting:</span>
+              <span className="font-bold text-amber-800 ml-auto">
+                {awaitingRecipients}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* widget 2 */}
+        <div className="bg-white border border-slate-200/80 rounded-2xl p-4 sm:p-5 shadow-2xs flex flex-col justify-between space-y-3">
+          <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
+            <span className="font-sans font-bold text-xs text-slate-900 flex items-center gap-1.5">
+              <Target size={14} className="text-[#3525cd]" />
+              Response Rate
+            </span>
+            <span className="text-[10px] font-mono text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200 flex items-center gap-0.5 font-bold">
+              <ArrowUpRight size={10} /> +3.2%
+            </span>
+          </div>
+
+          <div className="flex items-center gap-4 my-auto">
+            {/* circular progress ring */}
+            <div className="relative w-24 h-24 shrink-0 flex items-center justify-center">
+              <svg
+                className="w-full h-full transform -rotate-90"
+                viewBox="0 0 100 100"
+              >
+                <circle
+                  cx="50"
+                  cy="50"
+                  r={radius}
+                  className="text-slate-100"
+                  strokeWidth="8"
+                  stroke="currentColor"
+                  fill="transparent"
                 />
+                <circle
+                  cx="50"
+                  cy="50"
+                  r={radius}
+                  className="text-[#3525cd] transition-all duration-700 ease-out"
+                  strokeWidth="8"
+                  strokeDasharray={circumference}
+                  strokeDashoffset={responseStrokeDashoffset}
+                  strokeLinecap="round"
+                  stroke="currentColor"
+                  fill="transparent"
+                />
+              </svg>
+              <div className="absolute inset-0 flex flex-col items-center justify-center">
+                <span className="text-xl font-bold font-mono text-slate-900 leading-none">
+                  {responseRate}%
+                </span>
               </div>
             </div>
-            <p className="text-[10px] text-[#dad7ff]/80 uppercase tracking-widest mt-3.5 flex items-center gap-1">
-              <Zap size={10} className="fill-white" />
-              Top 2% of Global Workspaces
-            </p>
-          </motion.div>
+
+            <div className="space-y-1">
+              <h4 className="font-sans text-xs font-bold text-slate-900">
+                Overall Response Rate
+              </h4>
+              <p className="font-sans text-[11px] text-slate-500 leading-relaxed">
+                {" "}
+                <strong className="text-slate-800 font-semibold">
+                  {respondedRecipients} of {totalRecipients}
+                </strong>{" "}
+                recipients have responded across active threads.
+              </p>
+
+              <div className="inline-flex items-center gap-1 text-[10px] font-mono text-emerald-700 pt-1 font-semibold">
+                <CheckCircle2 size={11} /> High Engagement
+              </div>
+            </div>
+          </div>
+
+          <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] font-mono text-slate-500">
+            <span>Target: 80%</span>
+            <span className="text-slate-800 font-bold">Status: Optimal</span>
+          </div>
         </div>
-      </motion.div>
-    </section>
+      </div>
+    </div>
   );
 };
-
 export default AnalyticsPreview;

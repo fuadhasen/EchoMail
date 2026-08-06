@@ -1,4 +1,6 @@
 import { AlertTriangle, Clock, Mail, Radio } from "lucide-react";
+import { motion } from "motion/react";
+import { MdSlowMotionVideo } from "react-icons/md";
 
 interface MetricCardProps {
   totalTracked: number;
@@ -39,7 +41,7 @@ const SummaryCards = ({
     },
     {
       id: "responses-received",
-      title: "Responses Received",
+      title: "Completed Threads",
       value: responsesReceived.toLocaleString(),
       badge: "89% rate",
       badgeType: "info",
@@ -50,7 +52,7 @@ const SummaryCards = ({
     },
     {
       id: "needs-attention",
-      title: "Needs Attention",
+      title: "Reminders Sent",
       value: needsAttention.toString().padStart(2, "0"),
       badge: null,
       icon: AlertTriangle,
@@ -61,12 +63,15 @@ const SummaryCards = ({
   ];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
-      {metrics.map((m) => {
+    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-10">
+      {metrics.map((m, idx) => {
         const Icon = m.icon;
         return (
-          <div
+          <motion.div
             key={m.id}
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, delay: idx * 0.05 }}
             className={`bg-white p-6 rounded-xl border border-[#c7c4d8]/30 transition-all cursor-default ${m.hoverBorder} group relative flex flex-col justify-between`}
           >
             <div className="flex justify-between items-start mb-4">
@@ -93,7 +98,7 @@ const SummaryCards = ({
                 {m.value}
               </h3>
             </div>
-          </div>
+          </motion.div>
         );
       })}
     </div>

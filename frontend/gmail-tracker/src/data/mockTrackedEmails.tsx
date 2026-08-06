@@ -4,6 +4,7 @@ export interface Recipient {
   responded: boolean;
   respondedAt?: string;
   remindersSent: number;
+  last_reminder_sent?: string | null;
   isRequired?: boolean;
 }
 
@@ -52,6 +53,7 @@ const defaultEmails: TrackedEmail[] = [
         responded: true,
         respondedAt: "Jun 21, 2026, 2:30 PM",
         remindersSent: 0,
+        last_reminder_sent: null,
         isRequired: true,
       },
       {
@@ -60,6 +62,7 @@ const defaultEmails: TrackedEmail[] = [
         responded: true,
         respondedAt: "Jun 21, 2026, 4:15 PM",
         remindersSent: 0,
+        last_reminder_sent: null,
         isRequired: true,
       },
       {
@@ -68,6 +71,7 @@ const defaultEmails: TrackedEmail[] = [
         responded: true,
         respondedAt: "Jun 22, 2026, 9:05 AM",
         remindersSent: 0,
+        last_reminder_sent: null,
         isRequired: true,
       },
       {
@@ -75,13 +79,17 @@ const defaultEmails: TrackedEmail[] = [
         name: "David Kim",
         responded: false,
         remindersSent: 1,
+        last_reminder_sent: new Date(
+          Date.now() - 6 * 3600 * 1000,
+        ).toISOString(),
         isRequired: true,
       },
       {
         email: "elena.r@organization.com",
         name: "Elena Rostova",
         responded: false,
-        remindersSent: 1,
+        remindersSent: 0,
+        last_reminder_sent: null,
         isRequired: false,
       },
     ],
@@ -169,6 +177,7 @@ const defaultEmails: TrackedEmail[] = [
         responded: true,
         respondedAt: "Jun 16, 2026, 11:30 AM",
         remindersSent: 0,
+        last_reminder_sent: null,
         isRequired: true,
       },
       {
@@ -177,6 +186,9 @@ const defaultEmails: TrackedEmail[] = [
         responded: true,
         respondedAt: "Jun 17, 2026, 3:20 PM",
         remindersSent: 1,
+        last_reminder_sent: new Date(
+          Date.now() - 48 * 3600 * 1000,
+        ).toISOString(),
         isRequired: true,
       },
       {
@@ -185,6 +197,9 @@ const defaultEmails: TrackedEmail[] = [
         responded: true,
         respondedAt: "Jun 18, 2026, 10:45 AM",
         remindersSent: 1,
+        last_reminder_sent: new Date(
+          Date.now() - 36 * 3600 * 1000,
+        ).toISOString(),
         isRequired: true,
       },
       {
@@ -192,6 +207,9 @@ const defaultEmails: TrackedEmail[] = [
         name: "Bruce Banner",
         responded: false,
         remindersSent: 2,
+        last_reminder_sent: new Date(
+          Date.now() - 26 * 3600 * 1000,
+        ).toISOString(),
         isRequired: true,
       },
       {
@@ -199,6 +217,9 @@ const defaultEmails: TrackedEmail[] = [
         name: "Tony Stark",
         responded: false,
         remindersSent: 2,
+        last_reminder_sent: new Date(
+          Date.now() - 2 * 3600 * 1000,
+        ).toISOString(),
         isRequired: false,
       },
     ],
@@ -501,7 +522,6 @@ const defaultEmails: TrackedEmail[] = [
     ],
   },
 ];
-
 const LOCAL_STORAGE_KEY = "echomail_tracked_emails";
 
 export function getTrackedEmails(): TrackedEmail[] {
