@@ -8,6 +8,7 @@ import Settings from "./pages/Settings";
 import TrackedEmails from "./pages/TrackedEmail";
 import TrackNew from "./pages/TrackNew";
 import AuthGuard from "./guards/AuthGuard";
+import ReminderList from "./pages/ReminderList";
 
 const App = () => {
   return (
@@ -26,7 +27,7 @@ const App = () => {
         <Route path="tracked" element={<TrackedEmails />} />
         <Route path="track_new" element={<TrackNew />} />
         <Route path="settings" element={<Settings />} />
-        <Route path="analytics" element={<Analytics />} />
+        <Route path="reminders" element={<ReminderList />} />
 
         {/* Fallback route: redirect back to Dashboared / Home */}
         <Route path="*" element={<Navigate to="/" replace />} />

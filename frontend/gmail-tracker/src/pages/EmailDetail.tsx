@@ -480,15 +480,6 @@ const EmailDetail = () => {
           </div>
         </div>
       )}
-
-      {/* <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start"> */}
-      {/* <div className="lg:col-span-8 space-y-6"> */}
-      {/* 
-      {/* </div> */}
-      {/*<div className="lg:col-span-4 space-y-6">
-         
-        </div> */}
-      {/* // </div> */}
     </div>
   );
 };

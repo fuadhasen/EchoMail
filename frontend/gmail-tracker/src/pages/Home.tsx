@@ -1,9 +1,11 @@
-import { getTrackedEmails } from "@/data/mockTrackedEmails";
+import { getTrackedEmails, type TrackedEmail } from "@/data/mockTrackedEmails";
 import AnalyticsPreview from "../components/dashboard/AnalyticsPreview";
 import NeedsAttention from "../components/dashboard/NeedsAttention";
 import RecentActivity from "../components/dashboard/RecentActivity";
 import SummaryCards from "../components/dashboard/SummaryCards";
 import UpcomingDeadlines from "@/components/dashboard/UpcomingDeadlines";
+import { useNavigate } from "react-router";
+import { useEffect, useMemo, useState } from "react";
 
 const initialAttentionItems = [
   {
@@ -61,10 +63,51 @@ const initialActivities = [
 ];
 
 const Home = () => {
-  // const url = "http://localhost:8000/tracked-emails?show_done=true";
-  // const { res, error, isPending } = useTrackedEmails(url);
+  const navigate = useNavigate();
+  const [emails, setEmails] = useState<TrackedEmail[]>([]);
 
-  const emails = getTrackedEmails();
+  // load tracked emails
+  useEffect(() => {
+    const loaded = getTrackedEmails();
+    setEmails(loaded);
+  }, []);
+
+  const totalTracked = emails.length;
+
+  // awaiting responses count for all tracked emails
+  const awaitingResponsesCount = useMemo(() => {
+    return emails.filter((e) => {
+      const pendingCount = e.recipients.filter((e) => !e.responded).length;
+      return pendingCount > 0;
+    }).length;
+  }, [emails]);
+
+  const completedThreadsCount = useMemo(() => {
+    return emails.filter((e) => {
+      return e.status === "Completed" || e.recipients.every((r) => r.responded);
+    }).length;
+  }, [emails]);
+
+  const reminderDispatchedCount = useMemo(() => {
+    let count = 0;
+    emails.forEach((e) => {
+      e.recipients.forEach((r) => {
+        if (r.last_reminder_sent) {
+          count++;
+        }
+      });
+    });
+    return count;
+  }, [emails]);
+
+  // Needs Attention list
+  const needsAttentionEmails = useMemo(() => {
+    return emails.filter((e) => {
+      if (e.status === "Completed") return false;
+      const pendingCount = e.recipients.filter((r) => !r.responded).length;
+      return pendingCount > 0;
+    });
+  }, [emails]);
 
   return (
     <div className="space-y-8">
@@ -101,7 +144,7 @@ const Home = () => {
         {/* right column section */}
         <div className="col-span-12 lg:col-span-4 space-y-8 flex flex-col justify-start">
           <UpcomingDeadlines />
-          <RecentActivity initialItems={[]} />
+          <RecentActivity emails={emails} />
         </div>
       </div>
 

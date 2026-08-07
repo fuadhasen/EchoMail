@@ -1,6 +1,7 @@
 import useAuth from "@/hooks/useAuth";
 import {
   BarChart3,
+  Bell,
   ChevronsUpDown,
   Grid,
   LogOut,
@@ -23,7 +24,7 @@ const SideBar = () => {
     { name: "Dashboard", icon: Grid, path: "/" },
     { name: "Tracked Emails", icon: Mail, path: "/tracked" },
     { name: "Track New", icon: Plus, path: "/track_new" },
-    { name: "Analytics", icon: BarChart3, path: "/analytics" },
+    { name: "Reminder List", icon: Bell, path: "/reminders" },
   ];
 
   const settingsItem = { name: "Settings", icon: Settings, path: "/settings" };
@@ -250,7 +251,7 @@ const SideBar = () => {
 
         {/* Navigation links */}
         <nav className="flex-1 space-y-1 overflow-y-auto">
-          <div className="space-y-1">
+          <div className="space-y-2">
             {navItems.map((item) => {
               const Icon = item.icon;
 

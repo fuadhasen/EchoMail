@@ -131,35 +131,35 @@ const RecipientTrackingTable = ({
             </div>
           </div>
         </div>
-      </div>
 
-      {/* recipient workspace */}
-      <div className="bg-white border border-slate-200/80 rounded-2xl shadow-2xs overflow-hidden">
-        <div className="p-4 sm:p-5 bg-slate-50/40">
-          {filteredRecipients.length === 0 ? (
-            <div className="p-8 text-center bg-white border border-slate-200/80 rounded-xl space-y-2">
-              <p className="text-slate-500 text-xs font-semibold">
-                No recipients found
-              </p>
-              <p className="text-slate-400 text-xs">
-                No recipients match your current search or filter criteria.
-              </p>
-            </div>
-          ) : (
-            <div className="space-y-2.5">
-              {filteredRecipients.map((recipient) => (
-                <RecipientRow
-                  key={recipient.email}
-                  recipient={recipient}
-                  onSendReminder={onSendReminder}
-                  onToggleResponse={onToggleResponse}
-                  onUndoResponded={onUndoResponded}
-                  isSending={isSending === recipient.email}
-                  isMarking={processingRecipient === recipient.email}
-                />
-              ))}
-            </div>
-          )}
+        {/* recipient workspace */}
+        <div className="bg-white border border-slate-200/80 shadow-2xs overflow-hidden">
+          <div className="p-4 sm:p-5 bg-slate-50/40">
+            {filteredRecipients.length === 0 ? (
+              <div className="p-8 text-center bg-white border border-slate-200/80 rounded-xl space-y-2">
+                <p className="text-slate-500 text-xs font-semibold">
+                  No recipients found
+                </p>
+                <p className="text-slate-400 text-xs">
+                  No recipients match your current search or filter criteria.
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-2.5">
+                {filteredRecipients.map((recipient) => (
+                  <RecipientRow
+                    key={recipient.email}
+                    recipient={recipient}
+                    onSendReminder={onSendReminder}
+                    onToggleResponse={onToggleResponse}
+                    onUndoResponded={onUndoResponded}
+                    isSending={isSending === recipient.email}
+                    isMarking={processingRecipient === recipient.email}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </>
