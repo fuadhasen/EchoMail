@@ -1,12 +1,19 @@
-import { AlertTriangle, Clock, Mail, Radio } from "lucide-react";
+import {
+  AlertTriangle,
+  BellRing,
+  CheckCircle2,
+  Clock,
+  Mail,
+  Radio,
+} from "lucide-react";
 import { motion } from "motion/react";
 import { MdSlowMotionVideo } from "react-icons/md";
 
 interface MetricCardProps {
   totalTracked: number;
   awaitingResponses: number;
-  responsesReceived: number;
-  needsAttention: number;
+  completedThreads: number;
+  remindersDispatched: number;
 }
 
 // create array of objects for the cards
@@ -14,56 +21,62 @@ interface MetricCardProps {
 const SummaryCards = ({
   totalTracked,
   awaitingResponses,
-  responsesReceived,
-  needsAttention,
+  completedThreads,
+  remindersDispatched,
 }: MetricCardProps) => {
   const metrics = [
     {
       id: "total-tracked",
       title: "Total Tracked",
       value: totalTracked.toLocaleString(),
-      badge: "+12%",
-      badgeType: "success",
-      icon: Radio,
-      iconClass: "bg-[#3525cd]/5 text-[#3525cd]",
-      colorClass: "text-[#0b1c30]",
+      badge: "Active System",
+      badgeType: "neutral",
+      icon: Mail,
+      iconBg: "bg-[#eff4ff] text-[#3525cd]",
+      valueColor: "text-slate-900",
       hoverBorder: "hover:border-[#3525cd]/30",
     },
     {
       id: "awaiting-responses",
       title: "Awaiting Responses",
       value: awaitingResponses.toLocaleString(),
-      badge: null,
+      badge:
+        awaitingResponses > 0 ? `${awaitingResponses} pending` : "All clear",
+      badgeType: awaitingResponses > 0 ? "warning" : "success",
       icon: Clock,
-      iconClass: "bg-[#ffb695]/10 text-[#7e3000]",
-      colorClass: "text-[#0b1c30]",
-      hoverBorder: "hover:border-[#7e3000]/30",
+      iconBg: "bg-amber-50 text-amber-700 border border-amber-200/50",
+      valueColor: "text-slate-900",
+      hoverBorder: "hover:border-amber-300",
     },
     {
-      id: "responses-received",
+      id: "completed-threads",
       title: "Completed Threads",
-      value: responsesReceived.toLocaleString(),
-      badge: "89% rate",
-      badgeType: "info",
-      icon: Mail,
-      iconClass: "bg-emerald-500/5 text-emerald-600",
-      colorClass: "text-[#0b1c30]",
-      hoverBorder: "hover:border-emerald-500/30",
+      value: completedThreads.toLocaleString(),
+      badge:
+        totalTracked > 0
+          ? `${Math.round((completedThreads / Math.max(totalTracked, 1)) * 100)}% done`
+          : "100% rate",
+      badgeType: "success",
+      icon: CheckCircle2,
+      iconBg: "bg-emerald-50 text-emerald-600 border border-emerald-200/50",
+      valueColor: "text-slate-900",
+      hoverBorder: "hover:border-emerald-300",
     },
     {
-      id: "needs-attention",
-      title: "Reminders Sent",
-      value: needsAttention.toString().padStart(2, "0"),
-      badge: null,
-      icon: AlertTriangle,
-      iconClass: "bg-[#ffdad6] text-[#ba1a1a]",
-      colorClass: "text-[#ba1a1a]",
-      hoverBorder: "hover:border-[#ba1a1a]/30",
+      id: "reminders-dispatched",
+      title: "Reminders Dispatched",
+      value: remindersDispatched.toLocaleString(),
+      badge: "Active Follow-ups",
+      badgeType: "info",
+      icon: BellRing,
+      iconBg: "bg-purple-50 text-purple-600 border border-purple-200/50",
+      valueColor: "text-slate-900",
+      hoverBorder: "hover:border-purple-300",
     },
   ];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-10">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
       {metrics.map((m, idx) => {
         const Icon = m.icon;
         return (
@@ -71,32 +84,41 @@ const SummaryCards = ({
             key={m.id}
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, delay: idx * 0.05 }}
-            className={`bg-white p-6 rounded-xl border border-[#c7c4d8]/30 transition-all cursor-default ${m.hoverBorder} group relative flex flex-col justify-between`}
+            transition={{ duration: 0.25, delay: idx * 0.05 }}
+            className={`bg-white p-6 rounded-2xl border border-slate-200/80 transition-all duration-200 shadow-2xs cursor-default ${m.hoverBorder} group relative flex flex-col justify-between`}
           >
-            <div className="flex justify-between items-start mb-4">
+            <div className="flex justify-between items-center mb-4">
+              <span className="font-sans font-bold text-[11px] uppercase tracking-wider text-slate-600">
+                {m.title}
+              </span>
               <div
-                className={`p-2 rounded-lg ${m.iconClass} transition-transform duration-300 group-hover:scale-105`}
+                className={`p-2 rounded-xl ${m.iconBg} transition-transform duration-200 group-hover:scale-105 shrink-0`}
               >
-                <Icon size={20} className="stroke-[2.2]" />
+                <Icon size={16} className="stroke-2.2" />
               </div>
+            </div>
+
+            <div className="flex items-baseline justify-between mt-1">
+              <h3
+                className={`font-sans text-2xl sm:text-3xl font-bold tracking-tight ${m.valueColor}`}
+              >
+                {m.value}
+              </h3>
               {m.badge && (
                 <span
-                  className={`text-xs font-bold px-2 py-0.5 rounded-full ${m.badgeType === "success" ? "text-[#3525cd] bg-[#3525cd]/10 animate-pulse" : "text-emerald-600 bg-emerald-500/10"}`}
+                  className={`text-[10px] font-mono font-semibold px-2 py-0.5 rounded-full border ${
+                    m.badgeType === "warning"
+                      ? "text-amber-800 bg-amber-50 border-amber-200"
+                      : m.badgeType === "succes"
+                        ? "text-emerald-700 bg-emerald-50 border-emerald-200"
+                        : m.badgeType === "info"
+                          ? "text-[#3525cd] bg-[#eff4ff] border-[#3525cd]/15"
+                          : "text-slate-700 bg-slate-50 border-slate-200"
+                  }`}
                 >
                   {m.badge}
                 </span>
               )}
-            </div>
-            <div>
-              <p className="text-[#777587] font-sans font-medium text-xs uppercase tracking-wider">
-                {m.title}
-              </p>
-              <h3
-                className={`font-sans text-3xl font-bold mt-1 ${m.colorClass} tracking-tight`}
-              >
-                {m.value}
-              </h3>
             </div>
           </motion.div>
         );

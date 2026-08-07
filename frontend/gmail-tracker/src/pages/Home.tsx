@@ -103,6 +103,7 @@ const Home = () => {
   // Needs Attention list
   const needsAttentionEmails = useMemo(() => {
     return emails.filter((e) => {
+      // if e.is_done ? for later
       if (e.status === "Completed") return false;
       const pendingCount = e.recipients.filter((r) => !r.responded).length;
       return pendingCount > 0;
@@ -125,10 +126,10 @@ const Home = () => {
       <section>
         <div>
           <SummaryCards
-            totalTracked={1284}
-            awaitingResponses={42}
-            responsesReceived={1140}
-            needsAttention={130}
+            totalTracked={totalTracked}
+            awaitingResponses={awaitingResponsesCount}
+            completedThreads={completedThreadsCount}
+            remindersDispatched={reminderDispatchedCount}
           />
         </div>
       </section>
@@ -137,7 +138,7 @@ const Home = () => {
       <div className="grid grid-cols-12 gap-5">
         {/* left column section */}
         <div className="col-span-12 lg:col-span-8 space-y-8 flex flex-col justify-start">
-          <NeedsAttention items={initialAttentionItems} />
+          <NeedsAttention emails={needsAttentionEmails} />
           <AnalyticsPreview emails={emails} />
         </div>
 
