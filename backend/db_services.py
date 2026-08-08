@@ -150,14 +150,21 @@ class EmailTrackerService:
         # Update association
         association.has_responded = True
         association.response_id = response_id 
-        db.add(association)
+        db.commit()
 
         # Check if tracked email is now done and update its status
         tracked_email = (
             db.query(TrackedEmail).filter(TrackedEmail.id == tracked_email_id).first()
         )
-        if tracked_email:
-            tracked_email.update_status(db)
+        if not tracked_email:
+            return False
+
+        # recalculate the email status
+        print(tracked_email.is_done)
+        tracked_email.update_status(db)
+        print(tracked_email.is_done)
+
+        db.commit()
 
         return True
 
@@ -182,6 +189,7 @@ class EmailTrackerService:
             db.query(Recipient).filter(Recipient.email == recipient_email).first()
         )
         if not recipient:
+            print("Recipient not found:", recipient_email)
             return False
 
         # Get association
@@ -195,16 +203,29 @@ class EmailTrackerService:
         )
 
         if not association:
+            print(
+                "Association not found:",
+                tracked_email_id,
+                recipient.id,
+            )
             return False
 
         # Update association
         association.has_responded = False
         association.response_id = None
-
-        db.add(association)
         db.commit()
-        db.refresh(association)
 
+        # check if tracked_emails and make is_done = False
+        tracked_email = (
+            db.query(TrackedEmail).filter(TrackedEmail.id == tracked_email_id).first()
+        )        
+        if not tracked_email:
+            return False
+        
+        tracked_email.update_status(db)
+
+        db.commit()
+     
         return True
 
     @staticmethod

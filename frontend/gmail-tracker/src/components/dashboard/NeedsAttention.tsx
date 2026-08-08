@@ -1,62 +1,25 @@
 import type { TrackedEmail } from "@/data/mockTrackedEmails";
-import {
-  AlertCircle,
-  Calendar,
-  CheckCircle,
-  CheckCircle2,
-  HelpCircle,
-  UserCheck,
-} from "lucide-react";
+import { baseMenuContentPropDefs } from "@radix-ui/themes/components/_internal/base-menu.props";
+import { CheckCircle2, ChevronRight, Clock, HelpCircle } from "lucide-react";
 import { useNavigate } from "react-router";
 
 interface NeedsAttentionProps {
   emails: TrackedEmail[];
 }
 
-const getStatusStyle = (status: string) => {
-  switch (status.toLowerCase()) {
-    case "overdue":
-      return {
-        badge: "bg-[#ffdad6] text-[#ba1a1a] border-[#ffdad6]/50",
-        icon: <AlertCircle className="w-3.5 h-3.5 text-[#ba1a1a]" />,
-      };
-    case "due tomorrow":
-      return {
-        badge: "bg-[#ffdbcc] text-[#7e3000] border-[#ffdbcc]/50",
-        icon: <Calendar className="w-3.5 h-3.5 text-[#7e3000]" />,
-      };
-    case "reminder needed":
-    default:
-      return {
-        badge: "bg-[#e2dfff] text-[#3525cd] border-[#e2dfff]/50",
-        icon: <UserCheck className="w-3.5 h-3.5 text-[#3525cd]" />,
-      };
-  }
-};
-
 const NeedsAttention = ({ emails }: NeedsAttentionProps) => {
   const navigate = useNavigate();
 
-  // prioritize emails by urgency: overdue first, then closest deadline
+  // sorted using action urgency
   const sortedEmails = [...emails].sort((a, b) => {
-    const aOverdue =
-      a.status === "Overdue" || a.deadline.toLowerCase().includes("overdue");
-    const bOverdue =
-      b.status === "Overdue" || b.deadline.toLowerCase().includes("overdue");
+    const aUnrespondedRecipient = a.recipients.filter(
+      (r) => !r.responded,
+    ).length;
+    const bUnrespondedRecipient = b.recipients.filter(
+      (r) => !r.responded,
+    ).length;
 
-    if (aOverdue && !bOverdue) return -1;
-    if (!aOverdue && bOverdue) return 1;
-
-    const aDueSoon =
-      a.deadline.toLowerCase().includes("tomorrow") ||
-      a.deadline.toLowerCase().includes("1 day");
-    const bDueSoon =
-      b.deadline.toLowerCase().includes("tomorrow") ||
-      b.deadline.toLowerCase().includes("1 day");
-
-    if (aDueSoon && !bDueSoon) return -1;
-    if (!aDueSoon && bDueSoon) return 1;
-
+    if (aUnrespondedRecipient < bUnrespondedRecipient) return -1;
     return 0;
   });
 
@@ -102,45 +65,82 @@ const NeedsAttention = ({ emails }: NeedsAttentionProps) => {
 
             const isDueTomorrow = d.includes("tomorrow") || d.includes("1 day");
 
-            let daysLeftText = email.deadline;/
-            if (d.includes('due in')) {
-              daysLeftText = email.deadline.replace(/Due in /i, '') + 'left'
+            let daysLeftText = email.deadline;
+            if (d.includes("due in")) {
+              daysLeftText = email.deadline.replace(/Due in /i, "") + "left";
+            } else if (d.includes("overdue by ")) {
+              daysLeftText =
+                email.deadline.replace(/Overdue by /i, "") + " overdue";
             }
+
+            let statusTag = "Reminder Needed";
+            let tagStyle = "bg-amber-50 text-amber-800 border-amber-200/80";
+
+            if (isOverdue) {
+              statusTag = "Overdue";
+              tagStyle = "bg-rose-50 text-rose-700 border-rose-200/80";
+            } else if (isDueTomorrow) {
+              statusTag = "Due Tomorrow";
+              tagStyle = "bg-amber-50 text-amber-800 border-amber-200/80";
+            } else {
+              statusTag = "Reminder Needed";
+              tagStyle = "bg-indigo-50 text-[#3525cd] border-indigo-200/80";
+            }
+
+            const respondedRecipient = email.recipients.filter(
+              (r) => r.responded,
+            ).length;
 
             return (
               <div
-                key={item.id}
-                className="p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-[#eff4ff]/10 transition-colors"
+                key={email.id}
+                onClick={() => navigate(`tracked/detail/${email.id}`)}
+                className="p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-all cursor-pointer duration-150 group"
               >
                 {/* Subject and sub details */}
                 <div className="flex-1 min-w-0">
-                  <h4 className="font-sans text-sm font-bold text-[#0b1c30] truncate hover:text-[#3525cd] transition-colors">
-                    {item.subject}
+                  <h4 className="font-sans text-sm font-bold text-[#0b1c30] truncate group-hover:text-[#3525cd]  transition-colors">
+                    {email.subject}
                   </h4>
                   <p className="font-sans text-xs text-[#777587] mt-1.5 flex items-center gap-1.5">
+                    {respondedRecipient}
                     <span className="inline-flex h-1.5 w-1.5 rounded-full bg-[#c7c4d8]" />
-                    <span>
-                      {item.pendingRecipients} pending{" "}
-                      {item.pendingRecipients == 1 ? "recipient" : "recipients"}
-                    </span>
-                    <span className="text-[#c7c4d8">•</span>
-                    <span className="font-mono text-[11px] text-[#777587] bg-[#f8f9ff] px-1.5 py-0.5 rounded border border-[#c7c4d8]/20">
-                      {item.daysLeft}
+                    <span>{totalRecipients} Responded</span>
+                    <span className="font-mono text-[11px] text-[#777587] bg-[#f8f9ff] px-1.5 py-0.5 rounded border border-[#c7c4d8]/20 inline-flex items-center gap-1.5">
+                      <Clock size={11} className="text-slate-400" />
+                      {daysLeftText}
                     </span>
                   </p>
                 </div>
-   
+
                 {/* Status Badge */}
                 <div className="flex items-center gap-2.5 shrink-0">
                   <span
-                    className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold border ${style.badge}`}
+                    className={`text-[10px] font-mono font-semibold px-2 py-0.5 rounded-md border ${tagStyle}`}
                   >
-                    {style.icon} {item.status}
+                    {statusTag}
                   </span>
+
+                  <ChevronRight
+                    size={14}
+                    className="text-slate-400 group-hover:text-[#3525cd] group-hover:translate-x-0.5 transition-all"
+                  />
                 </div>
               </div>
             );
           })}
+        </div>
+      )}
+
+      {emails.length > 3 && (
+        <div className="p-3  bg-slate-50/50 border-t border-slate-100 text-center">
+          <button
+            type="button"
+            onClick={() => navigate("tracked")}
+            className="text-xs font-sans font-semibold text-[#3525cd] hover:text-[#281ca8] transition-colors"
+          >
+            view all {emails.length} attention items →
+          </button>
         </div>
       )}
     </section>

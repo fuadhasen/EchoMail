@@ -45,7 +45,7 @@ const RecipientTrackingTable = ({
 
   return (
     <>
-      <div className="bg-white border border-slate-200/80 rounded-2xl shadow-2xs overflow-hidden">
+      <div className="bg-white border border-slate-200/80 shadow-2xs overflow-hidden rounded-2xl">
         {/* header with title, search & filter tabs */}
         <div className="p-4 sm:p-5 border-b border-slate-200/80 space-y-4">
           <div className="flex items-center gap-2">
@@ -132,7 +132,6 @@ const RecipientTrackingTable = ({
           </div>
         </div>
 
-        {/* recipient workspace */}
         <div className="bg-white border border-slate-200/80 shadow-2xs overflow-hidden">
           <div className="p-4 sm:p-5 bg-slate-50/40">
             {filteredRecipients.length === 0 ? (
@@ -145,7 +144,7 @@ const RecipientTrackingTable = ({
                 </p>
               </div>
             ) : (
-              <div className="space-y-2.5">
+              <div className="space-y-2.5 -p-10">
                 {filteredRecipients.map((recipient) => (
                   <RecipientRow
                     key={recipient.email}

@@ -86,25 +86,23 @@ class TrackedEmail(Base):
 
     def check_if_done(self, db):
         """Check if all required recipients have responded."""
-
         # Check if there are any required recipients who haven't responded
         pending_count = (
             db.query(TrackedEmailRecipient)
             .filter(
                 TrackedEmailRecipient.tracked_email_id == self.id,
-                TrackedEmailRecipient.must_respond,  # Improved boolean syntax
-                ~TrackedEmailRecipient.has_responded,  # Using SQLAlchemy's negate operator
+                TrackedEmailRecipient.must_respond == True,  # Improved boolean syntax
+                TrackedEmailRecipient.has_responded == False,  # Using SQLAlchemy's negate operator
             )
             .count()
         )
+        print(pending_count)
 
         return pending_count == 0
 
     def update_status(self, db):
         """Update the is_done status based on recipient responses."""
         self.is_done = self.check_if_done(db)
-        db.add(self)
-        db.commit()
 
 
 class Recipient(Base):

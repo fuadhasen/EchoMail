@@ -129,11 +129,6 @@ const RecipientRow = ({
                 <CheckCircle2 size={11} className="text-emerald-600" />
                 Responded
               </span>
-              <span className="hidden lg:inline text-[10px] font-mono text-slate-400">
-                {recipient.last_reminder_sent
-                  ? `Last reminder: ${cooldown.lastSentText}`
-                  : "No reminders sent"}
-              </span>
             </div>
           ) : (
             <div className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-amber-800 bg-amber-50 border border-amber-200/80 px-2.5 py-0.5 rounded-full">

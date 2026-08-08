@@ -234,6 +234,8 @@ const EmailDetail = () => {
   const handleUndoResponded = (recipientEmail: string) => {
     if (!email) return;
 
+    // here we need to make is_done = false
+
     setProcessingRecipient(recipientEmail);
 
     markUnRespondedMutation.mutate(
@@ -365,24 +367,25 @@ const EmailDetail = () => {
       />
 
       {/* Work space View Mode Controller */}
-      <div className="flex  flex-wrap items-center justify-between gap-3 bg-white p-1.5 rounded-2xl border border-slate-200/80 shadow-2xs">
-        <div className="flex flex-wrap items-center gap-1">
+      <div className="flex  flex-wrap items-center justify-between gap-3 bg-white p-1.5 rounded-xl border border-slate-200/80 shadow-2xs">
+        {/* Segmented Control Track */}
+        <div className="inline-flex items-center gap-1 bg-slate-100/90 p-1 rounded-lg border  border-slate-200/60">
           <button
             type="button"
             onClick={() => setActiveTab("recipients")}
-            className={`px-3.5 py-1.5 rounded-xl font-sans text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
+            className={`px-3.5 py-1.5 rounded-md font-sans text-xs font-semibold transition-all duration-150 flex items-center gap-2 cursor-pointer ${
               activeTab === "recipients"
-                ? "bg-[#3525cd] text-white shadow-2xs"
-                : "text-slate-600 hover:text-slate-900 hover:bg-slate-100/80"
+                ? "bg-[#3525cd] text-white shadow-xs font-bold"
+                : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/60 font-medium"
             }`}
           >
             <Users size={14} />
             <span>Recipient Progress</span>
             <span
-              className={`text-[10px] font-mono px-1.5 py-0.2 rounded-md ${
+              className={`text-[10px] font-mono px-1.5 py-0.5 rounded-md font-semibold transition-colors ${
                 activeTab === "recipients"
                   ? "bg-white/20 text-white"
-                  : "bg-slate-100 text-slate-600"
+                  : "bg-slate-200/80 text-slate-600"
               }`}
             >
               {totalRecipients}
@@ -391,19 +394,19 @@ const EmailDetail = () => {
           <button
             type="button"
             onClick={() => setActiveTab("conversation")}
-            className={`px-3.5 py-1.5 rounded-xl font-sans text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
+            className={`px-3.5 py-1.5 rounded-md font-sans text-xs font-semibold transition-all duration-150 flex items-center gap-2 cursor-pointer ${
               activeTab === "conversation"
-                ? "bg-[#3525cd] text-white shadow-2xs"
-                : "text-slate-600 hover:text-slate-900 hover:bg-slate-100/80"
+                ? "bg-[#3525cd] text-white shadow-xs font-bold"
+                : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/60 font-medium"
             }`}
           >
             <MessageSquare size={14} />
             <span>Conversation Thread</span>
             <span
-              className={`text-[10px] font-mono px-1.5 py-0.2 rounded-md ${
+              className={`text-[10px] font-mono px-1.5 py-0.5 rounded-md font-semibold transition-colors ${
                 activeTab === "conversation"
                   ? "bg-white/20 text-white"
-                  : "bg-slate-100 text-slate-600"
+                  : "bg-slate-200/80 text-slate-600"
               }`}
             >
               {replyMessages &&

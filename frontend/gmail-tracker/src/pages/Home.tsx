@@ -144,7 +144,7 @@ const Home = () => {
 
         {/* right column section */}
         <div className="col-span-12 lg:col-span-4 space-y-8 flex flex-col justify-start">
-          <UpcomingDeadlines />
+          <UpcomingDeadlines emails={emails} />
           <RecentActivity emails={emails} />
         </div>
       </div>

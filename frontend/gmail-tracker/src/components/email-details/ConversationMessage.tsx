@@ -31,7 +31,7 @@ const ConversationMessage = ({
 
   return (
     <div
-      className={`p-4 sm:p-4.5 rounded-xl border transition-all duration-200 relative
+      className={`p-2 sm:px-4.5 sm:py-2.5 rounded-xl border transition-all duration-200 relative
         ${
           isLatestReply
             ? "bg-white border-[#3525cd]/30 ring-1 ring-[#3525cd]/10 shadow-2xs"

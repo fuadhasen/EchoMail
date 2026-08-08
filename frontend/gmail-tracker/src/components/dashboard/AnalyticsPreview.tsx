@@ -1,18 +1,5 @@
 import type { TrackedEmail } from "@/data/mockTrackedEmails";
-import {
-  ArrowUpRight,
-  BarChart3,
-  CheckCircle2,
-  PieChart,
-  Target,
-} from "lucide-react";
-import {
-  Cell,
-  Pie,
-  PieChart as RePieChart,
-  ResponsiveContainer,
-  Tooltip,
-} from "recharts";
+import { ArrowUpRight, BarChart3, CheckCircle2, Target } from "lucide-react";
 
 interface AnalyticsPreviewProps {
   emails: TrackedEmail[];
