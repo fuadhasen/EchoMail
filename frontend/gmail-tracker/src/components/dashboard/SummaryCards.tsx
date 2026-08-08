@@ -1,13 +1,5 @@
-import {
-  AlertTriangle,
-  BellRing,
-  CheckCircle2,
-  Clock,
-  Mail,
-  Radio,
-} from "lucide-react";
+import { BellRing, CheckCircle2, Clock, Mail } from "lucide-react";
 import { motion } from "motion/react";
-import { MdSlowMotionVideo } from "react-icons/md";
 
 interface MetricCardProps {
   totalTracked: number;
@@ -28,7 +20,7 @@ const SummaryCards = ({
     {
       id: "total-tracked",
       title: "Total Tracked",
-      value: totalTracked.toLocaleString(),
+      value: totalTracked?.toLocaleString(),
       badge: "Active System",
       badgeType: "neutral",
       icon: Mail,
@@ -39,7 +31,7 @@ const SummaryCards = ({
     {
       id: "awaiting-responses",
       title: "Awaiting Responses",
-      value: awaitingResponses.toLocaleString(),
+      value: awaitingResponses?.toLocaleString(),
       badge:
         awaitingResponses > 0 ? `${awaitingResponses} pending` : "All clear",
       badgeType: awaitingResponses > 0 ? "warning" : "success",

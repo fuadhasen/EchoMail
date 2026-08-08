@@ -1,10 +1,11 @@
-import type { TrackedEmail } from "@/data/mockTrackedEmails";
-import { baseMenuContentPropDefs } from "@radix-ui/themes/components/_internal/base-menu.props";
+import type { TrackedEmailB } from "@/services/trackedEmail";
+import { formatDeadline } from "@/utils/dateFormatter";
+import { getTrackedEmailStatus } from "@/utils/statusFilter";
 import { CheckCircle2, ChevronRight, Clock, HelpCircle } from "lucide-react";
 import { useNavigate } from "react-router";
 
 interface NeedsAttentionProps {
-  emails: TrackedEmail[];
+  emails: TrackedEmailB[];
 }
 
 const NeedsAttention = ({ emails }: NeedsAttentionProps) => {
@@ -13,18 +14,17 @@ const NeedsAttention = ({ emails }: NeedsAttentionProps) => {
   // sorted using action urgency
   const sortedEmails = [...emails].sort((a, b) => {
     const aUnrespondedRecipient = a.recipients.filter(
-      (r) => !r.responded,
+      (r) => !r.has_responded,
     ).length;
     const bUnrespondedRecipient = b.recipients.filter(
-      (r) => !r.responded,
+      (r) => !r.has_responded,
     ).length;
 
-    if (aUnrespondedRecipient < bUnrespondedRecipient) return -1;
-    return 0;
+    return bUnrespondedRecipient - aUnrespondedRecipient;
   });
 
   // Take Top 3 for compact card view
-  const displayEmails = sortedEmails.slice(0, 4);
+  const displayEmails = sortedEmails.slice(0, 3);
 
   return (
     <section className="bg-white border border-[#c7c4d8]/30 rounded-2xl overflow-hidden shadow-sm flex flex-col">
@@ -60,18 +60,10 @@ const NeedsAttention = ({ emails }: NeedsAttentionProps) => {
             const totalRecipients = email.recipients.length;
 
             const d = email.deadline.toLowerCase();
-            const isOverdue =
-              email.status === "Overdue" || d.includes("overdue");
+            const status = getTrackedEmailStatus(email.is_done, email.deadline);
+            const isOverdue = status === "Overdue" || d.includes("overdue");
 
             const isDueTomorrow = d.includes("tomorrow") || d.includes("1 day");
-
-            let daysLeftText = email.deadline;
-            if (d.includes("due in")) {
-              daysLeftText = email.deadline.replace(/Due in /i, "") + "left";
-            } else if (d.includes("overdue by ")) {
-              daysLeftText =
-                email.deadline.replace(/Overdue by /i, "") + " overdue";
-            }
 
             let statusTag = "Reminder Needed";
             let tagStyle = "bg-amber-50 text-amber-800 border-amber-200/80";
@@ -88,7 +80,7 @@ const NeedsAttention = ({ emails }: NeedsAttentionProps) => {
             }
 
             const respondedRecipient = email.recipients.filter(
-              (r) => r.responded,
+              (r) => r.has_responded,
             ).length;
 
             return (
@@ -108,7 +100,7 @@ const NeedsAttention = ({ emails }: NeedsAttentionProps) => {
                     <span>{totalRecipients} Responded</span>
                     <span className="font-mono text-[11px] text-[#777587] bg-[#f8f9ff] px-1.5 py-0.5 rounded border border-[#c7c4d8]/20 inline-flex items-center gap-1.5">
                       <Clock size={11} className="text-slate-400" />
-                      {daysLeftText}
+                      {formatDeadline(email.deadline)}
                     </span>
                   </p>
                 </div>

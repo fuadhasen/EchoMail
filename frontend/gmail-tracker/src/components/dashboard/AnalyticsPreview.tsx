@@ -1,8 +1,8 @@
-import type { TrackedEmail } from "@/data/mockTrackedEmails";
+import type { TrackedEmailB } from "@/services/trackedEmail";
 import { ArrowUpRight, BarChart3, CheckCircle2, Target } from "lucide-react";
 
 interface AnalyticsPreviewProps {
-  emails: TrackedEmail[];
+  emails: TrackedEmailB[];
 }
 
 // 2 widgets
@@ -14,7 +14,7 @@ const AnalyticsPreview = ({ emails }: AnalyticsPreviewProps) => {
   emails.forEach((email) => {
     email.recipients.forEach((r) => {
       totalRecipients++;
-      if (r.responded) {
+      if (r.has_responded) {
         respondedRecipients++;
       }
     });
@@ -56,16 +56,14 @@ const AnalyticsPreview = ({ emails }: AnalyticsPreviewProps) => {
                 </span>
                 <span className="font-mono text-xs font-bold text-[#3525cd]">
                   {respondedRecipients}{" "}
-                  <span className="text-[11px] font-normal text-slate-500">
-                    ({responseRate}%)
-                  </span>
+                  <span className="text-[11px] font-normal text-slate-500"></span>
                 </span>
               </div>
 
               <div className="h-3.5 w-full bg-slate-100 rounded-full overflow-hidden p-0.5 border border-slate-200/60">
                 <div
                   className="h-full bg-[#3525cd] rounded-full transition-all duration-500 shadow-2xs"
-                  style={{ width: `${responseRate}` }}
+                  style={{ width: `${responseRate}%` }}
                 />
               </div>
             </div>
@@ -78,9 +76,7 @@ const AnalyticsPreview = ({ emails }: AnalyticsPreviewProps) => {
                 </span>
                 <span className="font-mono text-xs font-bold text-amber-700">
                   {awaitingRecipients}{" "}
-                  <span className="text-[11px] font-normal text-slate-500">
-                    ({100 - responseRate}%)
-                  </span>
+                  <span className="text-[11px] font-normal text-slate-500"></span>
                 </span>
               </div>
               <div className="h-3.5 w-full bg-slate-100 rounded-full overflow-hidden p-0.5 border border-slate-200/60">

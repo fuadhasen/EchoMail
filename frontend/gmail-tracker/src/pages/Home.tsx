@@ -1,90 +1,32 @@
-import { getTrackedEmails, type TrackedEmail } from "@/data/mockTrackedEmails";
+import UpcomingDeadlines from "@/components/dashboard/UpcomingDeadlines";
+import useTrackedEmails from "@/hooks/useTrackedEmails";
+import { getTrackedEmailStatus } from "@/utils/statusFilter";
+import { useMemo } from "react";
 import AnalyticsPreview from "../components/dashboard/AnalyticsPreview";
 import NeedsAttention from "../components/dashboard/NeedsAttention";
 import RecentActivity from "../components/dashboard/RecentActivity";
 import SummaryCards from "../components/dashboard/SummaryCards";
-import UpcomingDeadlines from "@/components/dashboard/UpcomingDeadlines";
-import { useNavigate } from "react-router";
-import { useEffect, useMemo, useState } from "react";
-
-const initialAttentionItems = [
-  {
-    id: 1,
-    subject: "Partnership Proposal",
-    pendingRecipients: 3,
-    status: "Overdue",
-    daysLeft: "2 days left",
-  },
-  {
-    id: 2,
-    subject: "Client Feedback Request",
-    pendingRecipients: 1,
-    status: "Due Tomorrow",
-    daysLeft: "4 days left",
-  },
-  {
-    id: 3,
-    subject: "Job Application Follow-up",
-    pendingRecipients: 2,
-    status: "Reminder Needed",
-    daysLeft: "3 days left",
-  },
-];
-
-const initialActivities = [
-  {
-    id: 1,
-    iconType: "reply",
-    user: "David Smith",
-    boldText: "David Smith",
-    regularText: ' replied to "Q4 Planning"',
-    timeLabel: "2 minutes ago",
-  },
-  {
-    id: 2,
-    iconType: "reminder",
-    regularText: "Automatic reminder sent to Team Alpha",
-    timeLabel: "45 minutes ago",
-  },
-  {
-    id: 3,
-    iconType: "view",
-    user: "Marcus Roe",
-    boldText: "Marcus Roe",
-    regularText: ' opened "Agreement v2"',
-    timeLabel: "2 hours ago",
-  },
-  {
-    id: 4,
-    iconType: "mail",
-    regularText: 'New tracked message: "Client Kickoff"',
-    timeLabel: "3 hours ago",
-  },
-];
 
 const Home = () => {
-  const navigate = useNavigate();
-  const [emails, setEmails] = useState<TrackedEmail[]>([]);
-
-  // load tracked emails
-  useEffect(() => {
-    const loaded = getTrackedEmails();
-    setEmails(loaded);
-  }, []);
+  // need all tracked emails
+  const { data: emails = [] } = useTrackedEmails(true);
 
   const totalTracked = emails.length;
 
   // awaiting responses count for all tracked emails
   const awaitingResponsesCount = useMemo(() => {
     return emails.filter((e) => {
-      const pendingCount = e.recipients.filter((e) => !e.responded).length;
+      const pendingCount = e.recipients.filter((r) => !r.has_responded).length;
       return pendingCount > 0;
     }).length;
   }, [emails]);
 
   const completedThreadsCount = useMemo(() => {
     return emails.filter((e) => {
-      return e.status === "Completed" || e.recipients.every((r) => r.responded);
+      const status = getTrackedEmailStatus(e.is_done, e.deadline);
+      return (
+        status === "Completed" || e.recipients.every((r) => r.has_responded)
+      );
     }).length;
   }, [emails]);
 
@@ -104,8 +46,8 @@ const Home = () => {
   const needsAttentionEmails = useMemo(() => {
     return emails.filter((e) => {
       // if e.is_done ? for later
-      if (e.status === "Completed") return false;
-      const pendingCount = e.recipients.filter((r) => !r.responded).length;
+      if (e.is_done === true) return false;
+      const pendingCount = e.recipients.filter((r) => !r.has_responded).length;
       return pendingCount > 0;
     });
   }, [emails]);

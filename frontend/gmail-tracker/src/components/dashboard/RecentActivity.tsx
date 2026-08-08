@@ -1,8 +1,8 @@
-import type { TrackedEmail } from "@/data/mockTrackedEmails";
+import type { TrackedEmailB } from "@/services/trackedEmail";
 import { Bell, Zap } from "lucide-react";
 
 interface EfficiencyProps {
-  emails: TrackedEmail[];
+  emails: TrackedEmailB[];
 }
 
 const RecentActivity = ({ emails }: EfficiencyProps) => {
@@ -13,7 +13,7 @@ const RecentActivity = ({ emails }: EfficiencyProps) => {
     email.recipients.forEach((r) => {
       if (r.last_reminder_sent) {
         recipientsWithReminder++;
-        if (r.responded) {
+        if (r.has_responded) {
           respondedWithReminder++;
         }
       }

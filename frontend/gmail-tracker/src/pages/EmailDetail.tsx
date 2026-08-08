@@ -4,21 +4,12 @@ import EmailHeader from "@/components/email-details/EmailHeader";
 import RecipientTrackingTable from "@/components/email-details/RecipientTrackingTable";
 import RightPanel from "@/components/email-details/RightPanel";
 import { useToast } from "@/context/ToastContext";
-import {
-  getTrackedEmailById,
-  getTrackedEmails,
-  updateTrackedEmail,
-  type ThreadMessage,
-  type TrackedEmail,
-} from "@/data/mockTrackedEmails";
 import useEmailReply from "@/hooks/useEmailReply";
 import useMarkDone from "@/hooks/useMarkDone";
 import useMarkResponded from "@/hooks/useMarkResponded";
 import useMarkUnResponded from "@/hooks/useMarkUnResponded";
 import useSendReminder from "@/hooks/useSendReminder";
 import useTrackedDetail from "@/hooks/useTrackedDetail";
-import type { TrackedRecipient } from "@/services/trackedEmail";
-import { getTrackedEmailStatus } from "@/utils/statusFilter";
 import { useQueryClient } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
@@ -103,103 +94,11 @@ const EmailDetail = () => {
     );
   };
 
-  //   const recipient = email.recipients.find((r) => r.email === recipientEmail);
-  //   const updatedEmail: TrackedEmail = {
-  //     ...email,
-  //     recipients: updatedRecipients,
-  //   };
-
-  //   updateTrackedEmail(updatedEmail);
-  //   setEmail(updatedEmail);
-  //   triggerToast(
-  //     `Reminder sent to ${recipient?.name || recipientEmail}!`,
-  //     "success",
-  //   );
-  // };
-
-  // const handleToggleRecipientResponded = (recipientEmail: string) => {
-  //   const targetRecipient = email.recipients.find(
-  //     (r) => r.email === recipientEmail,
-  //   );
-  //   if (!targetRecipient) return;
-
-  //   const newStatus = !targetRecipient.responded;
-  //   const nowFormatted = new Date().toLocaleString([], {
-  //     dateStyle: "short",
-  //     timeStyle: "short",
-  //   });
-
-  //   const updatedRecipients = email.recipients.map((r) => {
-  //     if (r.email === recipientEmail) {
-  //       return {
-  //         ...r,
-  //         responded: newStatus,
-  //         respondedAt: newStatus ? nowFormatted : undefined,
-  //       };
-  //     }
-  //     return r;
-  //   });
-
-  //   // check if thread messages need updating
-  //   let existingMessages = email.threadMessages
-  //     ? [...email.threadMessages]
-  //     : [];
-  //   if (newStatus) {
-  //     // if marking as responded and no message exists from this email (not sent yet but user want to make it responded), create a mock message
-  //     const hasMessage = existingMessages.some(
-  //       (m) => m.senderEmail.toLowerCase() === recipientEmail.toLowerCase(),
-  //     );
-  //     if (!hasMessage) {
-  //       const newMessage: ThreadMessage = {
-  //         id: `msg-${Date.now()}`,
-  //         senderName: targetRecipient.name,
-  //         senderEmail: targetRecipient.email,
-  //         timestamp: nowFormatted,
-  //         content: `Thanks, I've reviewed the email and confirmed my approval.`,
-  //       };
-  //       // this recipient also responded with this message for this thread
-  //       existingMessages.push(newMessage);
-  //     }
-  //   } else {
-  //     // remove reply if toggling back to unresponded
-  //     existingMessages = existingMessages.filter(
-  //       (m) =>
-  //         m.senderEmail.toLowerCase() !== recipientEmail.toLowerCase() ||
-  //         m.isOutbound,
-  //     );
-  //   }
-
-  //   // check if required recipients are all done(true or false)
-  //   const requiredDone = updatedRecipients
-  //     .filter((r) => r.isRequired !== false)
-  //     .every((r) => r.responded);
-
-  //   const updatedOverallStatus = requiredDone
-  //     ? "Completed"
-  //     : email.status === "Completed"
-  //       ? "Pending"
-  //       : email.status;
-
-  //   const updatedEmail: TrackedEmail = {
-  //     ...email,
-  //     recipients: updatedRecipients,
-  //     status: updatedOverallStatus,
-  //     threadMessages: existingMessages,
-  //   };
-  //   updateTrackedEmail(updatedEmail);
-  //   setEmail(updatedEmail);
-  //   triggerToast(
-  //     newStatus
-  //       ? `Logged response from ${targetRecipient.name}`
-  //       : `Removed response log for ${targetRecipient.name}`,
-  //     "success",
-  //   );
-  // };
-
   const markRespondedMutation = useMarkResponded();
   const [processingRecipient, setProcessingRecipient] = useState<string | null>(
     null,
   );
+  // mark responded
   const handleToggleRecipientResponded = (recipientEmail: string) => {
     if (!email) return;
 
@@ -214,6 +113,10 @@ const EmailDetail = () => {
         onSuccess: async () => {
           await queryClient.invalidateQueries({
             queryKey: ["tracked-emails", id],
+          });
+
+          await queryClient.invalidateQueries({
+            queryKey: ["tracked-emails"],
           });
 
           triggerToast("Mark recipient responded successfully.", "success");
@@ -247,6 +150,10 @@ const EmailDetail = () => {
         onSuccess: async () => {
           await queryClient.invalidateQueries({
             queryKey: ["tracked-emails", id],
+          });
+
+          await queryClient.invalidateQueries({
+            queryKey: ["tracked-emails"],
           });
 
           triggerToast("Recipient response status undone.", "success");
@@ -312,51 +219,6 @@ const EmailDetail = () => {
       ? Math.round((respondedRecipients.length / totalRecipients) * 100)
       : 0;
 
-  // const handleMockReply = (
-  //   senderName: string,
-  //   senderEmail: string,
-  //   content: string,
-  // ) => {
-  //   const nowFormatted = new Date().toLocaleString([], {
-  //     dateStyle: "short",
-  //     timeStyle: "short",
-  //   });
-
-  //   const newMsg: ThreadMessage = {
-  //     id: `msg-${Date.now()}`,
-  //     senderName,
-  //     senderEmail,
-  //     timestamp: nowFormatted,
-  //     content,
-  //   };
-  //   const existingMessages = email.threadMessages
-  //     ? [...email.threadMessages]
-  //     : [];
-  //   existingMessages.push(newMsg);
-
-  //   // mark recipient as responded if they exist in the recipient list
-  //   const updatedRecipients = email.recipients.map((r) => {
-  //     if (r.email.toLowerCase() === senderEmail.toLowerCase()) {
-  //       return {
-  //         ...r,
-  //         responded: true,
-  //         respondedAt: nowFormatted,
-  //       };
-  //     }
-  //     return r;
-  //   });
-
-  //   const updatedEmail: TrackedEmail = {
-  //     ...email,
-  //     recipients: updatedRecipients,
-  //     threadMessages: existingMessages,
-  //   };
-
-  //   updateTrackedEmail(updatedEmail);
-  //   setEmail(updatedEmail);
-  //   triggerToast(`Added reply from ${senderName} to Gmail thread.`, "success");
-  // };
-
   return (
     <div className="w-full text-left px-4 md:px-8 py-4 space-y-6">
       <EmailHeader
@@ -367,46 +229,54 @@ const EmailDetail = () => {
       />
 
       {/* Work space View Mode Controller */}
-      <div className="flex  flex-wrap items-center justify-between gap-3 bg-white p-1.5 rounded-xl border border-slate-200/80 shadow-2xs">
-        {/* Segmented Control Track */}
-        <div className="inline-flex items-center gap-1 bg-slate-100/90 p-1 rounded-lg border  border-slate-200/60">
+      <div className="border-b border-slate-200/80 pl-2">
+        <nav
+          className="flex items-center gap-8 -mb-px"
+          aria-label="Email view tabs"
+        >
           <button
             type="button"
             onClick={() => setActiveTab("recipients")}
-            className={`px-3.5 py-1.5 rounded-md font-sans text-xs font-semibold transition-all duration-150 flex items-center gap-2 cursor-pointer ${
+            className={`group relative pb-3 pt-1 text-sm font-sans transition-colors cursor-pointer flex items-center gap-2 ${
               activeTab === "recipients"
-                ? "bg-[#3525cd] text-white shadow-xs font-bold"
-                : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/60 font-medium"
+                ? "font-bold text-slate-900"
+                : "font-medium text-slate-500 hover:text-slate-800"
             }`}
           >
-            <Users size={14} />
-            <span>Recipient Progress</span>
+            <span>Recipients</span>
             <span
-              className={`text-[10px] font-mono px-1.5 py-0.5 rounded-md font-semibold transition-colors ${
+              className={`text-[11px] font-mono px-1.5 py-0.5 rounded-md font-semibold transition-colors ${
                 activeTab === "recipients"
-                  ? "bg-white/20 text-white"
-                  : "bg-slate-200/80 text-slate-600"
+                  ? "bg-indigo-50 text-[#3525cd]"
+                  : "bg-slate-100 text-slate-500"
               }`}
             >
               {totalRecipients}
             </span>
+            <span
+              className={`absolute bottom-0 left-0 right-0 h-0.5 bg-[#3525cd] rounded-full transition-all duration-200 ${
+                activeTab === "recipients"
+                  ? "opacity-100 scale-x-100"
+                  : "opacity-0 scale-x-75"
+              }`}
+            />
           </button>
+
           <button
             type="button"
             onClick={() => setActiveTab("conversation")}
-            className={`px-3.5 py-1.5 rounded-md font-sans text-xs font-semibold transition-all duration-150 flex items-center gap-2 cursor-pointer ${
+            className={`group relative pb-3 pt-1 text-sm font-sans transition-colors cursor-pointer flex items-center gap-2 ${
               activeTab === "conversation"
-                ? "bg-[#3525cd] text-white shadow-xs font-bold"
-                : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/60 font-medium"
+                ? "font-bold text-slate-900"
+                : "font-medium text-slate-500 hover:text-slate-800"
             }`}
           >
-            <MessageSquare size={14} />
-            <span>Conversation Thread</span>
+            <span>Conversation</span>
             <span
-              className={`text-[10px] font-mono px-1.5 py-0.5 rounded-md font-semibold transition-colors ${
+              className={`text-[11px] font-mono px-1.5 py-0.5 rounded-md font-semibold transition-colors ${
                 activeTab === "conversation"
-                  ? "bg-white/20 text-white"
-                  : "bg-slate-200/80 text-slate-600"
+                  ? "bg-indigo-50 text-[#3525cd]"
+                  : "bg-slate-100 text-slate-500"
               }`}
             >
               {replyMessages &&
@@ -414,23 +284,20 @@ const EmailDetail = () => {
                   ? replyMessages.responses.length + " replies"
                   : replyMessages.responses.length + " reply")}
             </span>
+            <span
+              className={`absolute bottom-0 left-0 right-0 h-0.5 bg-[#3525cd] rounded-full transition-all duration-200 ${
+                activeTab === "conversation"
+                  ? "opacity-100 scale-x-100"
+                  : "opacity-0 scale-x-75"
+              }`}
+            />
           </button>
-        </div>
-
-        <div className="hidden sm:flex items-center gap-3 pr-2 text-xs font-mono">
-          <span className="text-slate-500">
-            Completion:{" "}
-            <strong className="text-slate-900">{completionPercentage}%</strong>
-          </span>
-          <span className="text-slate-300">•</span>
-          <span className="text-slate-500">
-            Replies:{" "}
-            <strong className="text-emerald-600">
-              {respondedRecipients.length}/{totalRecipients}
-            </strong>
-          </span>
-        </div>
+        </nav>
       </div>
+
+      {/* 
+         
+      */}
 
       {/* Dynamic View Mode Workspace */}
       {activeTab === "recipients" && (

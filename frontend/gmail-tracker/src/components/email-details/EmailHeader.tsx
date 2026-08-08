@@ -60,7 +60,7 @@ const EmailHeader = ({
         return (
           <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-50 text-amber-800 border border-amber-200/80 shadow-2xs">
             <Clock size={13} className="text-amber-600 animate-pulse" />
-            Awaiting Responses
+            Awaiting
           </span>
         );
     }
@@ -90,38 +90,12 @@ const EmailHeader = ({
 
       {/* main workspace header */}
       <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-4 pt-1">
-        <div className="space-y-3 flex-1 min-w-0">
+        <div className="space-y-3 flex-1 min-w-0 flex items-center gap-1.5">
           <h1 className="font-sans text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight leading-snug">
             {email.subject}
           </h1>
 
-          <div className="flex flex-wrap items-center gap-2 text-xs text-slate-600 font-sans">
-            <div className="hidden lg:block">{getStatusBadge()}</div>
-
-            <div className="flex items-center gap-1.5 bg-slate-50 px-2.5 py-1 rounded-lg border border-slate-200/60">
-              <User size={13} className="text-slate-400 shrink-0" />
-              <span className="text-slate-500">Sender:</span>
-              <span className="font-semibold text-slate-800">
-                {formatSenderName(email.sender)}
-              </span>
-            </div>
-
-            <div className="flex items-center gap-1.5 bg-slate-50 px-2.5 py-1 rounded-lg border border-slate-200/60">
-              <Calendar size={13} className="text-slate-400 shrink-0" />
-              <span className="text-slate-500">Sent:</span>
-              <span className="font-semibold text-slate-800">
-                {formatSentDate(email.sent_date || Date.now())}
-              </span>
-            </div>
-
-            <div className="flex items-center gap-1.5 bg-slate-50 px-2.5 py-1 rounded-lg border border-slate-200/60">
-              <Hourglass size={13} className="text-slate-400 shrink-0" />
-              <span className="text-slate-500">Deadline:</span>
-              <span className="font-semibold text-slate-800">
-                {formatDeadline(email.deadline)}
-              </span>
-            </div>
-          </div>
+          <div className="hidden lg:block">{getStatusBadge()}</div>
         </div>
 
         <div className="flex items-center gap-2.5 shrink-0 pt-2 lg:pt-0">
