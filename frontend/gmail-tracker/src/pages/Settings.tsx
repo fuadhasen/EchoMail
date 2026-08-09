@@ -1,5 +1,12 @@
 import { useToast } from "@/context/ToastContext";
-import { CheckSquare, RefreshCcw, RefreshCw, Square } from "lucide-react";
+import {
+  Check,
+  CheckSquare,
+  Loader2,
+  RefreshCcw,
+  RefreshCw,
+  Square,
+} from "lucide-react";
 import React, { useState } from "react";
 
 interface ProfileSettings {
@@ -269,10 +276,45 @@ const Settings = () => {
                   </button>
                 </div>
 
-                <div></div>
+                <div>
+                  <label className="block text-xs sm:text-sm font-semibold text-slate-800 mb-1.5">
+                    Default Reminder Template
+                  </label>
+                  <textarea
+                    rows={4}
+                    value={reminders.templateMessage}
+                    onChange={(e) =>
+                      setReminder({
+                        ...reminders,
+                        templateMessage: e.target.value,
+                      })
+                    }
+                    className="w-full bg-slate-50/80 border border-slate-200 focus:border-[#3525cd] rounded-xl p-3.5 text-xs sm:text-sm text-slate-800 leading-relaxed font-sans transition-colors resize-none"
+                  />
+                </div>
               </div>
             </section>
           </div>
+        </div>
+
+        <div className="pt-3 border-t border-slate-200/80 flex items-center justify-end">
+          <button
+            type="submit"
+            disabled={isSaving}
+            className="bg-[#3525cd] hover:bg-[#281ca8] text-white text-xs sm:text-sm font-bold py-2 px-4 rounded-xl transition-colors font-sans flex items-center gap-2 cursor-pointer shadow-2xs focus:outline-none disabled:opacity-75"
+          >
+            {isSaving ? (
+              <>
+                <Loader2 size={15} className="animate-spin text-white" />
+                <span>Saving...</span>
+              </>
+            ) : (
+              <>
+                <Check size={15} className="text-white" />
+                <span>Save Changes</span>
+              </>
+            )}
+          </button>
         </div>
       </form>
     </div>
