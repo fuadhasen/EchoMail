@@ -229,7 +229,7 @@ const EmailDetail = () => {
       />
 
       {/* Work space View Mode Controller */}
-      <div className="border-b border-slate-200/80 pl-2">
+      <div className="border-b border-slate-200/80 pl-2 text-center">
         <nav
           className="flex items-center gap-8 -mb-px"
           aria-label="Email view tabs"
