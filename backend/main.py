@@ -566,7 +566,8 @@ async def manually_check_responses():
 async def send_automatic_reminders(db: Session = Depends(get_db)):
     """
     Send automatic reminders to recipients who haven't responded.
-    In a real app, this would be run by a scheduled task.
+    In a real app, this would be run by a scheduled task. yeah 24h, or 12h reminder cadence
+    we need also reminder template here
     """
     reminders_to_send = EmailTrackerService.get_reminders_needing_sending(db)
 

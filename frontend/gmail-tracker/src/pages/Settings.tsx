@@ -1,17 +1,12 @@
+import LoadingScreen from "@/components/common/LoadingScreen";
 import { useToast } from "@/context/ToastContext";
-import {
-  Check,
-  CheckSquare,
-  Loader2,
-  RefreshCcw,
-  RefreshCw,
-  Square,
-} from "lucide-react";
-import React, { useState } from "react";
+import useAuth from "@/hooks/useAuth";
+import { Check, CheckSquare, Loader2, RefreshCw, Square } from "lucide-react";
+import React, { useEffect, useState } from "react";
 
 interface ProfileSettings {
+  // name should be editable
   fullName: string;
-  email: string;
 }
 
 interface ReminderSettings {
@@ -24,25 +19,24 @@ interface ReminderSettings {
 const Settings = () => {
   const { triggerToast } = useToast();
 
+  const { user, isPending } = useAuth();
+
   const [isSaving, setIsSaving] = useState(false);
   const [isSyncingGmail, setIsSyncingGmail] = useState(false);
 
-  // profile state
+  // profile state, we can get this for useAuth hoook
   const [profile, setProfile] = useState<ProfileSettings>(() => {
-    const saved = localStorage.getItem("echomail_profile");
-    if (saved) {
-      const parsed = JSON.parse(saved);
-      return {
-        fullName: parsed.fullName || "Fuad Hassen",
-        email: parsed.email || "fuadhas6634@gmail.com",
-      };
-    }
-
     return {
-      fullName: "Alex Rivera",
-      email: "fuya241@gmail.com",
+      fullName: "",
     };
   });
+
+  // whenever the user change, update the profile
+  useEffect(() => {
+    if (user) {
+      setProfile({ fullName: user.name });
+    }
+  }, [user]);
 
   // reminder preference state
   const [reminders, setReminder] = useState<ReminderSettings>(() => {
@@ -66,6 +60,8 @@ const Settings = () => {
       autoArchiveOnReply: true,
     };
   });
+
+  if (isPending) return <LoadingScreen />;
 
   // handle gmail reconnect
   const handleReconnectGmail = () => {
@@ -123,29 +119,27 @@ const Settings = () => {
                   <label className="block text-xs sm:text-sm font-semibold text-slate-800 mb-1.5">
                     Full Name
                   </label>
-                  <input
-                    type="text"
-                    required
-                    value={profile.fullName}
-                    onChange={(e) =>
-                      setProfile({ ...profile, fullName: e.target.value })
-                    }
-                    className="w-full bg-slate-50/80 border border-slate-200 focus:border-[#3525cd] focus:bg-white focus:outline-none  rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-slate-900 font-medium transition-colors"
-                  />
+                  <p
+                    className="w-full bg-slate-50/80 border border-slate-200
+                  focus:border-[#3525cd] focus:bg-white focus:outline-none
+                  rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-slate-900
+                  font-medium transition-colors"
+                  >
+                    {profile.fullName}
+                  </p>
                 </div>
                 <div>
                   <label className="block text-xs sm:text-sm font-semibold text-slate-800 mb-1.5">
                     Email Address
                   </label>
-                  <input
-                    type="email"
-                    required
-                    value={profile.email}
-                    onChange={(e) =>
-                      setProfile({ ...profile, email: e.target.value })
-                    }
-                    className="w-full bg-slate-50/80 border border-slate-200 focus:border-[#3525cd] focus:bg-white focus:outline-none rounded-lg px-3.5 py-2.5 text-xs sm:text-sm text-slate-900 font-medium transition-colors"
-                  />
+                  <div
+                    className="w-full bg-slate-50/80 border border-slate-200
+                  focus:border-[#3525cd] focus:bg-white focus:outline-none
+                  rounded-lg px-3.5 py-2.5 text-xs sm:text-sm text-slate-900
+                  font-medium transition-colors"
+                  >
+                    {user?.email || ""}
+                  </div>
                 </div>
               </div>
             </section>
@@ -164,7 +158,7 @@ const Settings = () => {
                     <div className="min-w-0">
                       <div className="flex items-center gap-2">
                         <span className="font-sans text-xs sm:text-sm font-bold text-slate-900 truncate">
-                          {profile.email}
+                          {user?.email || ""}
                         </span>
                       </div>
                       <span className="inline-flex items-center gap-1 mt-1 px-2 py-0.5 rounded text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200/60">

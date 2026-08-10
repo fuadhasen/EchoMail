@@ -1,7 +1,18 @@
 import type { TrackedRecipient } from "@/services/trackedEmail";
-import { CheckCircle2, Clock, Search, User } from "lucide-react";
-import { useState } from "react";
+import {
+  ArrowUpDown,
+  CheckCircle2,
+  CheckSquare,
+  Clock,
+  MinusSquare,
+  Search,
+  Square,
+  User,
+} from "lucide-react";
+import { useMemo, useState } from "react";
 import RecipientRow from "./RecipientRow";
+import { useToast } from "@/context/ToastContext";
+import { getCooldownInfo } from "@/utils/reminderService";
 
 interface RecipientTrackingTableProps {
   recipients: TrackedRecipient[];
@@ -12,6 +23,8 @@ interface RecipientTrackingTableProps {
   processingRecipient: string | null;
 }
 
+type SortField = "status" | "name" | "email" | "requirement";
+
 const RecipientTrackingTable = ({
   recipients,
   onSendReminder,
@@ -20,106 +33,286 @@ const RecipientTrackingTable = ({
   isSending,
   processingRecipient,
 }: RecipientTrackingTableProps) => {
-  const [activeFilter, setActiveFilter] = useState<
-    "all" | "pending" | "responded" | "required"
-  >("all");
-  const [searchQuery, setSearchQuery] = useState<string>("");
+  const { triggerToast } = useToast();
 
-  const pendingList = recipients.filter((r) => !r.has_responded);
-  const respondedList = recipients.filter((r) => r.has_responded);
-  // const requiredList = recipients.filter((r) => r.must_respond);
+  const [sortBy, setSortBy] = useState<SortField>("status");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
 
-  const filteredRecipients = recipients.filter((r) => {
-    const q = searchQuery.toLowerCase().trim();
-    const matchesQuery =
-      !q ||
-      r.name?.toLowerCase().includes(q) ||
-      r.email.toLowerCase().includes(q);
+  // pagination state
+  const [page, setPage] = useState<number>(1);
+  const [pageSize, setPageSize] = useState<number>(10);
 
-    if (activeFilter === "pending") return matchesQuery && !r.has_responded;
-    if (activeFilter === "responded") return matchesQuery && r.has_responded;
-    if (activeFilter === "required")
-      return matchesQuery && r.must_respond !== false;
-    return matchesQuery;
-  });
+  // selection and dispatch states
+  const [selectedEmails, setSelectedEmails] = useState<string[]>([]);
+  const [sendingEmailsMap, setSendingEmailsMap] = useState<
+    Record<string, boolean>
+  >({});
+
+  // Bulk action and processing state
+  const [isBulkSending, setIsBulkSending] = useState<boolean>(false);
+  const [sendingProgress, setIsSendingProgress] = useState<{
+    current: number;
+    total: number;
+  } | null>(null);
+
+  const [copiedToast, setCopiedToast] = useState<boolean>(false);
+
+  // sort logic
+  const sortedRecipients = useMemo(() => {
+    return [...recipients].sort((a, b) => {
+      let comparision = 0;
+      if (sortBy === "status") {
+        comparision =
+          a.has_responded === b.has_responded ? 0 : a.has_responded ? 1 : -1;
+      } else if (sortBy === "name") {
+        comparision = (a.name ?? "").localeCompare(b.name ?? "");
+      } else if (sortBy === "email") {
+        comparision = a.email.localeCompare(b.email);
+      } else if (sortBy === "requirement") {
+        const aReq = a.must_respond !== false ? 1 : 0;
+        const bReq = b.must_respond !== false ? 1 : 0;
+        comparision = aReq - bReq;
+      }
+
+      return sortOrder === "asc" ? comparision : -comparision;
+    });
+  }, [recipients, sortBy, sortOrder]);
+
+  // selection state helper
+  const allSelected =
+    sortedRecipients.length > 0 &&
+    sortedRecipients.every((r) => selectedEmails.includes(r.email));
+
+  const isSomeSelected =
+    sortedRecipients.some((r) => selectedEmails.includes(r.email)) &&
+    !allSelected;
+
+  const handleToggleSelectAll = () => {
+    const emails = sortedRecipients.map((r) => r.email);
+
+    // if all remove, or add
+    if (allSelected) {
+      setSelectedEmails(
+        selectedEmails.filter((email) => !emails.includes(email)),
+      );
+    } else {
+      setSelectedEmails([
+        ...selectedEmails,
+        ...emails.filter((email) => !selectedEmails.includes(email)),
+      ]);
+    }
+  };
+
+  const handleToggleSelectOne = (email: string) => {
+    setSelectedEmails((prev) =>
+      prev.includes(email) ? prev.filter((e) => e !== email) : [...prev, email],
+    );
+  };
+
+  const handleSortToggle = (field: Sortfeild) => {
+    if (sortBy == field) {
+      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+    } else {
+      setSortBy(field);
+      setSortOrder("asc");
+    }
+  };
+
+  const handleBulkSendReminders = async () => {
+    // later u will check is that eligible or not
+    triggerToast("Bulk Reminder sent to all recipients", "info");
+  };
+
+  const handleCopySelectedEmails = () => {
+    const text = selectedEmails.join(",");
+    navigator.clipboard.writeText(text);
+    setCopiedToast(true);
+    setTimeout(() => setCopiedToast(false), 2000);
+  };
 
   return (
     <>
-      <div className="bg-white border border-slate-200/80 shadow-2xs overflow-hidden rounded-2xl">
+      <div className="bg-white border border-slate-200/90 rounded-2xl shadow-2xs overflow-hidden">
         {/* header with title, search & filter tabs */}
-        <div className="p-4 sm:p-5 border-b border-slate-200/80 space-y-4">
-          <div className="flex items-center gap-2 justify-between">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-[#eff4ff] text-[#3525cd] flex items-center justify-center border border-[#3525cd]/15">
-                <User size={16} />
-              </div>
-              <div>
-                <h2 className="font-sans text-sm font-bold text-slate-900 tracking-tight">
-                  Recipient Progress
-                </h2>
-                <span className="text-[11px] font-sans text-slate-500">
-                  Track individual responses and send targeted reminders
-                </span>
-              </div>
-            </div>
 
-            {/* <div className="relative flex-1 max-w-xs">
-              <Search
-                size={14}
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"
-              />
+        {/* Enterprise table */}
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr className="bg-slate-100/90 border-b border-slate-200/90 text-[11px]  font-sans font-bold text-slate-600 uppercase tracking-wider select-none">
+                <th className="py-3.5 px-4 w-12 text-center">
+                  <button
+                    type="button"
+                    onClick={handleToggleSelectAll}
+                    className="text-slate-400 hover:text-slate-700 focus:outline-none cursor-pointer  flex items-center justify-center mx-auto transition-colors"
+                    title={allSelected ? "Deselect all" : "Select all"}
+                  >
+                    {allSelected ? (
+                      <CheckSquare size={16} className="text-[#3525cd]" />
+                    ) : isSomeSelected ? (
+                      <MinusSquare size={16} className="text-[#3525cd]" />
+                    ) : (
+                      <Square
+                        size={16}
+                        className="text-slate-300 hover:text-slate-400"
+                      />
+                    )}
+                  </button>
+                </th>
 
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search responder by name or email..."
-                className="w-full bg-slate-50/80 border border-slate-200/80 rounded-xl py-1.5 pl-8 pr-3 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#3525cd]/15 focus:border-[#3525cd] transition-all font-sans"
-              />
-            </div> */}
+                <th
+                  className="py-3.5 px-4 cursor-pointer hover:text-slate-900 transition-colors"
+                  onClick={() => handleSortToggle("name")}
+                >
+                  <div className="flex items-center gap-1.5">
+                    <span
+                      className={
+                        sortBy === "name" ? "text-[#3525cd] font-extrabold" : ""
+                      }
+                    >
+                      Recipient
+                    </span>
+                    <ArrowUpDown
+                      size={12}
+                      className={
+                        sortBy === "name" ? "text-[#3525cd]" : "text-slate-400"
+                      }
+                    />
+                  </div>
+                </th>
 
-            <div className="flex flex-wrap items-center gap-1 bg-slate-100/80 p-1 rounded-xl">
-              <button
-                onClick={() => setActiveFilter("all")}
-                className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
-                  activeFilter === "all"
-                    ? "bg-white text-slate-900 shadow-2xs"
-                    : "text-slate-500 hover:text-slate-800"
-                }`}
-              >
-                All {recipients.length}
-              </button>
+                <th
+                  className="py-3.5 px-4 cursor-pointer hover:text-slate-900 transition-colors"
+                  onClick={() => handleSortToggle("requirement")}
+                >
+                  <div className="flex items-center gap-1.5">
+                    <span
+                      className={
+                        sortBy === "requirement"
+                          ? "text-[#3525cd] font-extrabold"
+                          : ""
+                      }
+                    >
+                      Obligation
+                    </span>
+                    <ArrowUpDown
+                      size={12}
+                      className={
+                        sortBy === "requirement"
+                          ? "text-[#3525cd]"
+                          : "text-slate-400"
+                      }
+                    />
+                  </div>
+                </th>
 
-              <button
-                onClick={() => setActiveFilter("pending")}
-                className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer flex items-center gap-1.5 ${
-                  activeFilter === "pending"
-                    ? "bg-white text-amber-800 shadow-2xs"
-                    : "text-slate-500 hover:text-slate-800"
-                }`}
-              >
-                <Clock size={12} className="text-amber-500" />
-                Awaiting ({pendingList.length})
-              </button>
+                <th
+                  className="py-3.5 px-4 cursor-pointer hover:text-slate-900 transition-colors"
+                  onClick={() => handleSortToggle("status")}
+                >
+                  <div className="flex items-center gap-1.5">
+                    <span
+                      className={
+                        sortBy === "status"
+                          ? "text-[#3525cd] font-extrabold"
+                          : ""
+                      }
+                    >
+                      Response Status
+                    </span>
+                    <ArrowUpDown
+                      size={12}
+                      className={
+                        sortBy === "status"
+                          ? "text-[#3525cd]"
+                          : "text-slate-400"
+                      }
+                    />
+                  </div>
+                </th>
 
-              <button
-                onClick={() => setActiveFilter("responded")}
-                className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer flex items-center gap-1.5 ${
-                  activeFilter === "responded"
-                    ? "bg-white text-emerald-700 shadow-2xs"
-                    : "text-slate-500 hover:text-slate-800"
-                }`}
-              >
-                <CheckCircle2 size={12} className="text-emerald-500" />
-                Responded ({respondedList.length})
-              </button>
-            </div>
-          </div>
+                <th className="py-3.5 px-4">
+                  <span>Follow-up & Cooldown</span>
+                </th>
+
+                <th className="py-3.5 px-4 text-right">
+                  <span>Actions</span>
+                </th>
+              </tr>
+            </thead>
+
+            <tbody className="devide-y devide-slate-100 bg-white">
+              {sortedRecipients.length === 0 ? (
+                <tr>
+                  <td
+                    colSpan={6}
+                    className="py-12 text-center text-slate-400 text-xs"
+                  >
+                    No recipients found
+                  </td>
+                </tr>
+              ) : (
+                sortedRecipients.map((recipient) => {
+                  const isSelected = selectedEmails.includes(recipient.email);
+                  const isRequired = recipient.must_respond !== false;
+                  const cooldown = getCooldownInfo(
+                    recipient.last_reminder_sent,
+                  );
+                  const isSingleSending = !!sendingEmailsMap[recipient.email];
+
+                  const initials =
+                    recipient.name ??
+                    ""
+                      .split(" ")
+                      .map((n) => n[0])
+                      .join("")
+                      .substring(0, 2)
+                      .toUpperCase();
+
+                  return (
+                    <tr
+                      key={recipient.email}
+                      className={`hover:bg-slate-50/80 transition-colors text-xs font-sans ${
+                        isSelected ? "bg-indigo-50/40" : ""
+                      }`}
+                    >
+                      {/* checkbox */}
+                      <td>
+                        {isSelected ? (
+                          <CheckSquare size={16} className="text-[#3525cd]" />
+                        ) : (
+                          <Square
+                            size={16}
+                            className="text-slate-300 hover:text-slate-400"
+                          />
+                        )}
+                      </td>
+
+                      {/* recipient profile */}
+                      <td></td>
+
+                      {/* requirement role */}
+                      <td></td>
+
+                      {/* status */}
+                      <td></td>
+
+                      {/* cooldown info */}
+                      <td></td>
+
+                      {/* action button */}
+                      <td></td>
+                    </tr>
+                  );
+                })
+              )}
+            </tbody>
+          </table>
         </div>
 
-        <div className="bg-white border border-slate-200/80 shadow-2xs overflow-hidden">
+        {/* <div className="bg-white border border-slate-200/80 shadow-2xs overflow-hidden">
           <div className="p-4 sm:p-5 bg-slate-50/40">
-            {filteredRecipients.length === 0 ? (
+            {recipients.length === 0 ? (
               <div className="p-8 text-center bg-white border border-slate-200/80 rounded-xl space-y-2">
                 <p className="text-slate-500 text-xs font-semibold">
                   No recipients found
@@ -130,7 +323,7 @@ const RecipientTrackingTable = ({
               </div>
             ) : (
               <div className="space-y-2.5 -p-10">
-                {filteredRecipients.map((recipient) => (
+                {recipients.map((recipient) => (
                   <RecipientRow
                     key={recipient.email}
                     recipient={recipient}
@@ -144,7 +337,7 @@ const RecipientTrackingTable = ({
               </div>
             )}
           </div>
-        </div>
+        </div> */}
       </div>
     </>
   );

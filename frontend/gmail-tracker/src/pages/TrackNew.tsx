@@ -785,6 +785,7 @@ const TrackNew = () => {
                     </label>
                   </div>
 
+                  {/* default follow-up window - 3 days */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="relative">
                       <label className="block text-[10px] font-bold text-slate-400 mb-1">

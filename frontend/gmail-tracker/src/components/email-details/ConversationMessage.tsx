@@ -57,7 +57,7 @@ const ConversationMessage = ({
               {isLatestReply && (
                 <span className="text-[10px] font-sans font-semibold text-[#3525cd] bg-[#eff4ff] border border-[#3525cd]/30 px-2 py-0.2 rounded-md flex items-center gap-1">
                   <Sparkles size={10} className="text-[#3525cd]" />
-                  Lates Reply
+                  Latest Reply
                 </span>
               )}
             </div>
