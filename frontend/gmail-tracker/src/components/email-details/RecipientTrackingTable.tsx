@@ -1,16 +1,23 @@
 import type { TrackedRecipient } from "@/services/trackedEmail";
 import {
   ArrowUpDown,
+  Check,
   CheckCircle2,
   CheckSquare,
   Clock,
+  Copy,
+  Info,
+  Loader2,
   MinusSquare,
+  RotateCcw,
   Search,
+  Send,
+  Sparkles,
   Square,
   User,
+  X,
 } from "lucide-react";
 import { useMemo, useState } from "react";
-import RecipientRow from "./RecipientRow";
 import { useToast } from "@/context/ToastContext";
 import { getCooldownInfo } from "@/utils/reminderService";
 
@@ -19,7 +26,7 @@ interface RecipientTrackingTableProps {
   onSendReminder: (email: string) => void;
   onToggleResponse: (email: string) => void;
   onUndoResponded: (email: string) => void;
-  isSending: string | null;
+  sendingRecipient: string | null;
   processingRecipient: string | null;
 }
 
@@ -30,7 +37,7 @@ const RecipientTrackingTable = ({
   onSendReminder,
   onToggleResponse,
   onUndoResponded,
-  isSending,
+  sendingRecipient,
   processingRecipient,
 }: RecipientTrackingTableProps) => {
   const { triggerToast } = useToast();
@@ -38,22 +45,14 @@ const RecipientTrackingTable = ({
   const [sortBy, setSortBy] = useState<SortField>("status");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
 
-  // pagination state
-  const [page, setPage] = useState<number>(1);
-  const [pageSize, setPageSize] = useState<number>(10);
-
   // selection and dispatch states
   const [selectedEmails, setSelectedEmails] = useState<string[]>([]);
-  const [sendingEmailsMap, setSendingEmailsMap] = useState<
-    Record<string, boolean>
-  >({});
 
-  // Bulk action and processing state
-  const [isBulkSending, setIsBulkSending] = useState<boolean>(false);
-  const [sendingProgress, setIsSendingProgress] = useState<{
-    current: number;
-    total: number;
-  } | null>(null);
+  // const [isBulkSending, setIsBulkSending] = useState<boolean>(false);
+  // const [sendingProgress, setIsSendingProgress] = useState<{
+  //   current: number;
+  //   total: number;
+  // } | null>(null);
 
   const [copiedToast, setCopiedToast] = useState<boolean>(false);
 
@@ -109,7 +108,7 @@ const RecipientTrackingTable = ({
     );
   };
 
-  const handleSortToggle = (field: Sortfeild) => {
+  const handleSortToggle = (field: SortField) => {
     if (sortBy == field) {
       setSortOrder(sortOrder === "asc" ? "desc" : "asc");
     } else {
@@ -134,6 +133,42 @@ const RecipientTrackingTable = ({
     <>
       <div className="bg-white border border-slate-200/90 rounded-2xl shadow-2xs overflow-hidden">
         {/* header with title, search & filter tabs */}
+        {selectedEmails.length > 0 && (
+          <div className="bg-[#3525cd] text-white py-3 px-4 sm:px-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm border-b border-indigo-900 transition-all duration-200 animate-in fade-in">
+            <div className="flex items-center gap-3 text-xs font-sans">
+              <span className="font-bold bg-white/20 text-white px-2.5 py-1 rounded-lg font-mono">
+                {selectedEmails.length} of {recipients.length} Selected
+              </span>
+
+              <span className="text-indigo-100 hidden sm:inline text-xs font-medium">
+                Perform action on selected recipients
+              </span>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2 shrink-0">
+              <button
+                type="button"
+                onClick={handleCopySelectedEmails}
+                className="bg-white/10 hover:bg-white/20 text-white border border-white/20 px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer"
+                title="Copy selected email addresses to clipboard"
+              >
+                <Copy size={13} />
+                <span>{copiedToast ? "Copied!" : "Copy Emails"}</span>
+              </button>
+
+              {/* bulk reminders dispatch button */}
+              <button></button>
+              <button
+                type="button"
+                onClick={() => setSelectedEmails([])}
+                className="text-white/80 hover:text-white p-1.5 rounded-lg hover:bg-white/10 transition-colors cursor-pointer ml-1"
+                title="Deselect all"
+              >
+                <X size={15} />
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Enterprise table */}
         <div className="overflow-x-auto">
@@ -258,16 +293,9 @@ const RecipientTrackingTable = ({
                   const cooldown = getCooldownInfo(
                     recipient.last_reminder_sent,
                   );
-                  const isSingleSending = !!sendingEmailsMap[recipient.email];
-
-                  const initials =
-                    recipient.name ??
-                    ""
-                      .split(" ")
-                      .map((n) => n[0])
-                      .join("")
-                      .substring(0, 2)
-                      .toUpperCase();
+                  // emails map for sending recipient will be true for some time (till backend call is finished)
+                  const isSingleSending = sendingRecipient === recipient.email;
+                  const isMarking = processingRecipient === recipient.email;
 
                   return (
                     <tr
@@ -277,31 +305,198 @@ const RecipientTrackingTable = ({
                       }`}
                     >
                       {/* checkbox */}
-                      <td>
-                        {isSelected ? (
-                          <CheckSquare size={16} className="text-[#3525cd]" />
-                        ) : (
-                          <Square
-                            size={16}
-                            className="text-slate-300 hover:text-slate-400"
-                          />
-                        )}
+                      <td className="py-3 px-4 text-center">
+                        <button
+                          type="button"
+                          onClick={() => handleToggleSelectOne(recipient.email)}
+                          className="text-slate-400 hover:text-slate-700 cursor-pointer flex items-center justify-center mx-auto transition-colors"
+                        >
+                          {isSelected ? (
+                            <CheckSquare size={16} className="text-[#3525cd]" />
+                          ) : (
+                            <Square
+                              size={16}
+                              className="text-slate-300 hover:text-slate-400"
+                            />
+                          )}
+                        </button>
                       </td>
 
                       {/* recipient profile */}
-                      <td></td>
+                      <td className="py-3 px-4">
+                        <div className="flex items-center gap-3">
+                          <div
+                            className={`w-8 h-8 rounded-xl flex items-center justify-center font-bold text-xs shrink-0 border ${
+                              recipient.has_responded
+                                ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                                : "bg-indigo-50 text-[#3525cd] border-indigo-100"
+                            }`}
+                          >
+                            {<User size={14} />}
+                          </div>
+                          <div className="min-w-0">
+                            <h4 className="font-bold text-slate-900 truncate text-xs sm:text-sm">
+                              {recipient.name}
+                            </h4>
+                            <p className="font-mono text-[11px] text-slate-500 truncate">
+                              {recipient.email}
+                            </p>
+                          </div>
+                        </div>
+                      </td>
 
                       {/* requirement role */}
-                      <td></td>
+                      <td className="py-3 px-4">
+                        {isRequired ? (
+                          <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-indigo-50 text-[#3525cd] border border-indigo-100">
+                            Required
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-mono font-medium text-slate-500 bg-slate-100 border border-slate-200">
+                            Optional
+                          </span>
+                        )}
+                      </td>
 
                       {/* status */}
-                      <td></td>
+                      <td className="py-3 px-4">
+                        {recipient.has_responded ? (
+                          <span className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200/80 px-2.5 py-1 rounded-full">
+                            <CheckCircle2
+                              size={13}
+                              className="text-emerald-600"
+                            />
+                            <span>Responded</span>
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-800 bg-amber-50 border border-amber-200/80 px-2.5 py-1 rounded-full">
+                            <Clock
+                              size={13}
+                              className="text-amber-600 animate-pulse"
+                            />
+                            <span>Awaiting Reply</span>
+                          </span>
+                        )}
+                      </td>
 
                       {/* cooldown info */}
-                      <td></td>
+                      <td className="py-3 px-4 text-slate-500 text-[11px]">
+                        {!recipient.has_responded ? (
+                          cooldown.isEligible ? (
+                            <span className="text-emerald-700 font-semibold inline-flex items-center gap-1 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-md">
+                              <Sparkles
+                                size={11}
+                                className="text-emerald-600"
+                              />
+                              Ready for follow-up
+                            </span>
+                          ) : (
+                            <span className="text-slate-600 inline-flex items-center gap-1">
+                              <Info size={11} className="text-amber-500" />
+                              Cooldown: {cooldown.timeRemainingText}
+                            </span>
+                          )
+                        ) : (
+                          <span className="text-slate-400">—</span>
+                        )}
+                      </td>
 
                       {/* action button */}
-                      <td></td>
+                      <td className="py-3 px-4 text-right">
+                        <div className="flex items-center justify-end gap-1.5">
+                          {!recipient.has_responded ? (
+                            <>
+                              {cooldown.isEligible ? (
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    onSendReminder(recipient.email)
+                                  }
+                                  disabled={isSingleSending}
+                                  className="bg-[#3525cd] hover:bg-[#281ca8] active:bg-[#1f1587] disabled:opacity-75 text-white py-1 px-3 rounded-lg font-sans text-[11px]  font-semibold flex items-center gap-1.5 shadow-2xs transition-all cursor-pointer"
+                                  title="Send individual reminder email"
+                                >
+                                  {isSingleSending ? (
+                                    <>
+                                      <Loader2
+                                        size={10}
+                                        className="animate-spin text-white"
+                                      />
+                                      <span>Sending...</span>
+                                    </>
+                                  ) : (
+                                    <>
+                                      <Send
+                                        size={11}
+                                        className="shrink-0 translate-y-[0.5px]"
+                                      />
+                                      <span className="leading-none">
+                                        Send Reminder
+                                      </span>
+                                    </>
+                                  )}
+                                </button>
+                              ) : (
+                                <button
+                                  type="button"
+                                  disabled
+                                  className="bg-slate-100 text-slate-400 border border-slate-200/80 py-1 px-2 rounded-lg text-[11px] font-medium cursor-not-allowed"
+                                  title={
+                                    cooldown.timeRemainingText || undefined
+                                  }
+                                >
+                                  On cooldown
+                                </button>
+                              )}
+
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  onToggleResponse(recipient.email)
+                                }
+                                className="bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 py-1 px-2 rounded-lg font-semibold text-[11px] flex items-center gap-1 transition-all cursor-pointer"
+                                title="Mark manually as responded"
+                              >
+                                {isMarking ? (
+                                  <>
+                                    <Loader2
+                                      size={12}
+                                      className="animate-spin text-white"
+                                    />
+                                    <span>Marking...</span>
+                                  </>
+                                ) : (
+                                  <>
+                                    <Check size={13} className="stroke-2.5" />
+                                    <span className="hidden sm:inline">
+                                      Done
+                                    </span>
+                                  </>
+                                )}
+                              </button>
+                            </>
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={() => onUndoResponded(recipient.email)}
+                              className="bg-white hover:bg-slate-50 text-slate-600 border border-slate-200 py-1 px-2.5 rounded-lg text-[11px] font-medium flex items-center gap-1 transition-all cursor-pointer shadow-2xs"
+                              title="Undo response status"
+                            >
+                              {isMarking ? (
+                                <>
+                                  <Loader2 size={12} className="animate-spin" />
+                                  <span>Undoing...</span>
+                                </>
+                              ) : (
+                                <>
+                                  <RotateCcw size={12} />
+                                  <span>Undo</span>
+                                </>
+                              )}
+                            </button>
+                          )}
+                        </div>
+                      </td>
                     </tr>
                   );
                 })
@@ -310,34 +505,26 @@ const RecipientTrackingTable = ({
           </table>
         </div>
 
-        {/* <div className="bg-white border border-slate-200/80 shadow-2xs overflow-hidden">
-          <div className="p-4 sm:p-5 bg-slate-50/40">
-            {recipients.length === 0 ? (
-              <div className="p-8 text-center bg-white border border-slate-200/80 rounded-xl space-y-2">
-                <p className="text-slate-500 text-xs font-semibold">
-                  No recipients found
-                </p>
-                <p className="text-slate-400 text-xs">
-                  No recipients match your current search or filter criteria.
-                </p>
-              </div>
-            ) : (
-              <div className="space-y-2.5 -p-10">
-                {recipients.map((recipient) => (
-                  <RecipientRow
-                    key={recipient.email}
-                    recipient={recipient}
-                    onSendReminder={onSendReminder}
-                    onToggleResponse={onToggleResponse}
-                    onUndoResponded={onUndoResponded}
-                    isSending={isSending === recipient.email}
-                    isMarking={processingRecipient === recipient.email}
-                  />
-                ))}
-              </div>
-            )}
+        {/* table footer */}
+        <div className="p-4 border-t border-slate-200/80 bg-slate-50/80 flex items-center justify-between gap-3 text-xs text-slate-600 font-sans">
+          <div className="flex items-center gap-3">
+            <span>
+              Showing{" "}
+              <strong className="text-slate-900 font-mono">
+                {sortedRecipients.length === 0 ? 0 : 1}
+              </strong>{" "}
+              to{" "}
+              <strong className="text-slate-900 font-mono">
+                {sortedRecipients.length}
+              </strong>{" "}
+              of{" "}
+              <strong className="text-slate-900 font-mono">
+                {recipients.length}
+              </strong>{" "}
+              recipients
+            </span>
           </div>
-        </div> */}
+        </div>
       </div>
     </>
   );

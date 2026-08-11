@@ -52,7 +52,7 @@ const TrackedEmails = () => {
   };
 
   return (
-    <div className="w-full text-left px-4 md:px-8 py-4">
+    <div className="w-full text-left px-4 md:px-8 py-4 ">
       {/* Header Section */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 pb-5 border-b border-slate-200/80">
         <div>

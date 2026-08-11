@@ -1,4 +1,5 @@
 import type { TrackedEmailB } from "@/services/trackedEmail";
+import { formatDeadline, formatSentDate } from "@/utils/dateFormatter";
 import { getTrackedEmailStatus } from "@/utils/statusFilter";
 import { ShieldCheck } from "lucide-react";
 
@@ -94,14 +95,14 @@ const RightPanel = ({
           <div className="flex items-center justify-between text-slate-600 py-1 border-b border-slate-100">
             <span className="text-slate-500">Target Deadline</span>
             <span className="font-mono text-[11px] font-semibold text-slate-800">
-              {email.deadline}
+              {formatDeadline(email.deadline)}
             </span>
           </div>
 
           <div className="flex items-center justify-between text-slate-600 py-1 border-b border-slate-100">
             <span className="text-slate-500">Sent Timestamp</span>
             <span className="font-mono text-[11px] text-slate-700">
-              {email.sent_date}
+              {formatSentDate(email.sent_date)}
             </span>
           </div>
 

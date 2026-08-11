@@ -66,6 +66,8 @@ const EmailDetail = () => {
   const handleSendIndividualReminder = (recipientEmail: string) => {
     if (!email) return;
 
+    console.log("this endpoint is hitted");
+
     setSendingRecipient(recipientEmail);
 
     sendReminderMutation.mutate(
@@ -308,7 +310,7 @@ const EmailDetail = () => {
               onSendReminder={handleSendIndividualReminder}
               onToggleResponse={handleToggleRecipientResponded}
               onUndoResponded={handleUndoResponded}
-              isSending={sendingRecipient}
+              sendingRecipient={sendingRecipient}
               processingRecipient={processingRecipient}
             />
           </div>

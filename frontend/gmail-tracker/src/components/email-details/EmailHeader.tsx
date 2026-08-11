@@ -90,11 +90,10 @@ const EmailHeader = ({
 
       {/* main workspace header */}
       <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-4 pt-1">
-        <div className="space-y-3 flex-1 min-w-0 flex items-center gap-1.5">
+        <div className="space-y-3 flex-1 min-w-0 flex-col items-center gap-1.5">
           <h1 className="font-sans text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight leading-snug">
             {email.subject}
           </h1>
-
           <div className="hidden lg:block">{getStatusBadge()}</div>
         </div>
 

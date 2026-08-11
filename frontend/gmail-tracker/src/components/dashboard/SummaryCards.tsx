@@ -79,7 +79,7 @@ const SummaryCards = ({
             transition={{ duration: 0.25, delay: idx * 0.05 }}
             className={`bg-white p-6 rounded-2xl border border-slate-200/80 transition-all duration-200 shadow-2xs cursor-default ${m.hoverBorder} group relative flex flex-col justify-between`}
           >
-            <div className="flex justify-between items-center mb-4">
+            <div className="flex justify-between items-center mb-4 p-2">
               <span className="font-sans font-bold text-[11px] uppercase tracking-wider text-slate-600">
                 {m.title}
               </span>

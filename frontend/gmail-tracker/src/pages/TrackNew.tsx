@@ -203,33 +203,18 @@ const TrackNew = () => {
   ];
 
   return (
-    <div className="w-full text-left space-y-6 pb-12">
+    <div className="w-full text-left px-4 md:px-8 py-4 space-y-6">
       {/*Top Header Navigation and Status Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200/60 pb-5">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 pb-5 border-b border-slate-200/80">
         <div className="flex items-center gap-3">
-          <Link
-            to={"/tracked"}
-            className="p-2 rounded-xl bg-white border border-slate-200 text-[#777587] hover:text-[#3525cd] hover:border-[#3525cd]/30 shadow-2xs gap-2 cursor-pointer group"
-            title="Back to Tracked Emails"
-          >
-            <ArrowLeft
-              size={14}
-              className="stroke-2.5 group-hover:-translate-x-0.5 transition-transform"
-            />
-          </Link>
           <div>
-            <div className="flex items-center gap-2">
-              <span className="px-2.5 py-0.5 rounded-md bg-[#3525cd]/10 text-[#3525cd] text-[10px] font-extrabold uppercase tracking-widest font-mono">
-                Response Loop Builder
-              </span>
-              <span className="text-slate-300">•</span>
-              <span className="text-slate-400 font-mono text-[11px]">
-                Gmail Outbox Sync
-              </span>
-            </div>
-            <h1 className="font-sans text-2xl md:text-3xl font-black text-[#0b1c30] tracking-tight mt-0.5">
-              Track New Sent Email
+            <h1 className="font-sans text-2xl md:text-3xl font-bold text-slate-900 tracking-tight">
+              Tracked New Sent Email
             </h1>
+            <p className="font-sans text-xs sm:text-sm text-slate-500 leading-relaxed max-w-2xl ml-2">
+              Locate an outbox thread from Gmail and set up response deadline
+              tracking.
+            </p>
           </div>
         </div>
 

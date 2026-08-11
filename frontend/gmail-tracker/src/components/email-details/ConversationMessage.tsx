@@ -1,10 +1,6 @@
 import type { EmailReply } from "@/services/emailReply";
-import {
-  formatEmail,
-  formatSenderName,
-  formatSentDate,
-} from "@/utils/dateFormatter";
-import { ChevronDown, ChevronUp, Sparkles, User } from "lucide-react";
+import { formatSentDate } from "@/utils/dateFormatter";
+import { ChevronDown, ChevronUp } from "lucide-react";
 import { useState } from "react";
 
 interface ConversationMessageProps {
@@ -29,65 +25,75 @@ const ConversationMessage = ({
       ? textContent.substring(0, MAX_CHAR_LIMIT) + "..."
       : textContent;
 
+  const senderName = message.sender?.split("<")[0].trim();
+
+  const initials = senderName
+    ? senderName
+        .split(/\s+/)
+        .map((name) => name[0])
+        .join("")
+        .substring(0, 2)
+        .toUpperCase()
+    : "??";
   return (
-    <div
-      className={`p-2 sm:px-4.5 sm:py-2.5 rounded-xl border transition-all duration-200 relative
-        ${
-          isLatestReply
-            ? "bg-white border-[#3525cd]/30 ring-1 ring-[#3525cd]/10 shadow-2xs"
-            : "bg-white border-slate-200/90 shadow-2xs hover:border-slate-300"
-        }`}
-    >
-      {/* sender header */}
-      <div className="flex items-start justify-between gap-3 mb-2.5">
-        <div className="flex items-center gap-3 min-w-0">
-          {/* Avatar */}
+    <div className="p-4 sm:p-5 hover:bg-slate-50/50 transition-colors border-b border-slate-100 last:border-b-0">
+      <div className="flex items-start gap-3 sm:gap-3.5">
+        {/* avatar */}
+        <div className="relative flex flex-col items-center shrink-0">
+          {/* Vertical Connecting Line */}
+          {!isLatestReply && (
+            <div className="absolute top-4 sm:top-4.5 -bottom-5 sm:-bottom-6 w-0.5 bg-slate-200 z-0" />
+          )}
+
+          {/* Avatar Circle */}
           <div
-            className={`w-8 h-8 rounded-lg flex items-center justify-center font-sans font-bold text-xs shrink-0 border ${"bg-emerald-50 text-emerald-700 border-emerald-200/80"}`}
+            className={`relative z-10 w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center font-mono font-bold text-xs shrink-0 select-none ${
+              isLatestReply
+                ? "bg-[#3525cd] text-white shadow-2xs"
+                : "bg-emerald-50 text-emerald-700 border border-emerald-200/80"
+            }`}
           >
-            {<User size={14} />}
-          </div>
-
-          <div className="min-w-0">
-            <div className="flex items-center gap-2 flex-wrap">
-              <h4 className="font-sans text-xs sm:text-sm font-semibold text-slate-900 truncate">
-                {formatSenderName(message.sender)}
-              </h4>
-
-              {isLatestReply && (
-                <span className="text-[10px] font-sans font-semibold text-[#3525cd] bg-[#eff4ff] border border-[#3525cd]/30 px-2 py-0.2 rounded-md flex items-center gap-1">
-                  <Sparkles size={10} className="text-[#3525cd]" />
-                  Latest Reply
-                </span>
-              )}
-            </div>
-            <p className="font-mono text-[11px] text-slate-500 truncate">
-              {formatEmail(message.sender)}
-            </p>
+            {initials}
           </div>
         </div>
 
-        <span className="text-[11px] font-mono text-slate-400 font-medium shrink-0 pt-0.5">
-          {formatSentDate(timeText)}
-        </span>
-      </div>
+        {/* content area */}
+        <div className="flex-1 min-w-0">
+          <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1 mb-1.5">
+            <div className="flex flex-wrap items-center gap-2 min-w-0">
+              <span className="font-sans text-xs sm:text-sm font-bold text-slate-900 truncate">
+                {message.sender}
+              </span>
 
-      {/* message body */}
-      <div className="pl-10 sm:pl-10.5 pr-1">
-        <p className="font-sans text-xs sm:text-sm text-slate-700 leading-relaxed whitespace-pre-wrap">
-          {displayContent}
-        </p>
+              {isLatestReply && (
+                <span className="text-[10px] font-mono font-semibold text-[#3525cd] bg-indigo-50 border border-indigo-100 px-2 py-0.5 rounded-full">
+                  Latest Response
+                </span>
+              )}
+            </div>
 
-        {isLongMessage && (
-          <button
-            type="button"
-            onClick={() => setIsExpanded(!isExpanded)}
-            className="mt-1.5 inline-flex items-center gap-1 text-[11px] font-semibold text-[#3525cd] hover:text-[#281ca8] focus:outline-none cursor-pointer"
-          >
-            <span>{isExpanded ? "Show less" : "Read full message"}</span>
-            {isExpanded ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
-          </button>
-        )}
+            {timeText && (
+              <time className="font-mono text-xs text-slate-400 shrink-0">
+                {formatSentDate(timeText)}
+              </time>
+            )}
+          </div>
+
+          <p className="font-sans text-xs sm:text-sm text-slate-700 leading-relaxed whitespace-pre-wrap selection:bg-indigo-100">
+            {displayContent}
+          </p>
+
+          {isLongMessage && (
+            <button
+              type="button"
+              onClick={() => setIsExpanded(!isExpanded)}
+              className="mt-2 text-xs font-semibold text-[#3525cd] hover:text-[#281ca8] cursor-pointer inline-flex items-center gap-1 transition-colors"
+            >
+              <span>{isExpanded ? "Show less" : "Read full message"}</span>
+              {isExpanded ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );

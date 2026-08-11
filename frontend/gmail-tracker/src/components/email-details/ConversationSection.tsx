@@ -1,5 +1,5 @@
 import type { EmailReply } from "@/services/emailReply";
-import { Clock, MessageSquare } from "lucide-react";
+import { Clock, Inbox, MessageSquare } from "lucide-react";
 import ConversationMessage from "./ConversationMessage";
 import { useState } from "react";
 import ConversationSkeleton from "./ConversationSkeleton";
@@ -36,56 +36,41 @@ const ConversationSection = ({
   const replyCount = messages.length;
 
   return (
-    <div className="bg-white border border-slate-200/80 rounded-2xl p-4 sm:p-5 shadow-2xs space-y-4">
-      {/* top header and subject */}
-      <div className="pb-3 border-b border-slate-100 space-y-2">
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg  bg-[#eff4ff] text-[#3525cd] flex items-center justify-center border border-[#3525cd]/15">
-              <MessageSquare size={14} />
-            </div>
-            <div>
-              <h3 className="font-sans text-xs font-bold text-slate-900 uppercase">
-                Conversation Thread
+    <div className="bg-white border border-slate-200/80 rounded-2xl shadow-2xs overflow-hidden">
+      {/* header */}
+      <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between gap-3 select-none">
+        <div className="flex items-center gap-2.5">
+          <div className="w-8 h-8 rounded-lg bg-indigo-50 text-[#3525cd] flex items-center justify-center shrink-0">
+            <MessageSquare size={16} />
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <h3 className="font-sans text-sm font-bold text-slate-900 tracking-tight">
+                Thread Responses
               </h3>
-            </div>
-
-            <span className="text-[11px] font-mono font-medium text-slate-600 bg-slate-100 px-2.5 py-0.5 rounded-full border border-slate-200/60">
-              {messages.length} {messages.length === 1 ? "message" : "messages"}
-              {replyCount > 0 &&
-                ` (${replyCount} ${replyCount === 1 ? "reply" : "replies"})`}
-            </span>
-          </div>
-        </div>
-
-        {/* email subject line and sub-metadata */}
-        <div className="pt-2 flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 bg-slate-50/70 p-2.5 rounded-xl border border-slate-200/50">
-          <div className="min-w-0 flex-1">
-            <span className="text-[10px] font-mono font-semibold text-slate-400 block uppercase">
-              Subject
-            </span>
-            <p className="font-sans text-xs sm:text-sm font-semibold text-slate-900 truncate">
-              {email.subject}
-            </p>
-          </div>
-
-          {email.sent_date && (
-            <div className="flex items-center gap-2 text-[11px] font-mono text-slate-500 shrink-0">
-              <span className="flex items-center gap-1">
-                <Clock size={11} /> {formatSentDate(email.sent_date)}
+              <span className="text-xs font-mono font-medium text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full">
+                {replyCount} {replyCount === 1 ? "reply" : "replies"}
               </span>
             </div>
-          )}
+          </div>
         </div>
       </div>
 
-      {/* message stack */}
+      {/* main thread body */}
       {messages.length === 0 ? (
-        <div className="p-8 text-center text-slate-400 text-xs font-sans">
-          No conversation messages captured in this thread yet.
+        <div className="py-12 px-4 text-center bg-slate-50/30 flex flex-col items-center justify-center">
+          <div className="w-9 h-9 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mb-2">
+            <Inbox size={18} />
+          </div>
+          <h4 className="font-sans text-xs sm:text-sm font-bold text-slate-800">
+            No responses yet
+          </h4>
+          <p className="font-sans text-xs text-slate-500 max-w-sm leading-normal mt-0.5">
+            Conversation replies from recipients will appear here automatically.
+          </p>
         </div>
       ) : (
-        <div className="space-y-3">
+        <div>
           {messages.map((msg, idx) => (
             <ConversationMessage
               key={msg.response_id}

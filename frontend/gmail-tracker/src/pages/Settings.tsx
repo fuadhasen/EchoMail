@@ -89,9 +89,9 @@ const Settings = () => {
       window.dispatchEvent(new Event("storage"));
     }, 600);
   };
-
+  // w-full max-w-7xl px-2 sm:px-4 text-left py-4 space-y-8
   return (
-    <div className="w-full max-w-7xl px-2 sm:px-4 text-left py-4 space-y-8 bg-white">
+    <div className=" w-full  text-left px-4 md:px-8 py-4 space-y-6">
       {/* page header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200/80 pb-5">
         <div>
