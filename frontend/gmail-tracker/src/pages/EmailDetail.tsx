@@ -1,3 +1,4 @@
+import AutomaticDetectionCard from "@/components/email-details/AutomaticDetectionCard";
 import ConversationSection from "@/components/email-details/ConversationSection";
 import EmailDetailsSkeleton from "@/components/email-details/EmailDetailsSkeleton";
 import EmailHeader from "@/components/email-details/EmailHeader";
@@ -34,9 +35,17 @@ const EmailDetail = () => {
   } = useEmailReply(email?.email_id);
 
   const [isSyncing, setIsSyncing] = useState(false);
-  const [activeTab, setActiveTab] = useState<"recipients" | "conversation">(
-    "recipients",
-  );
+
+  const handleSyncOutbox = () => {
+    setIsSyncing(true);
+    setTimeout(() => {
+      setIsSyncing(false);
+    }, 600);
+  };
+
+  const [activeTab, setActiveTab] = useState<
+    "recipients" | "conversation" | "timeline"
+  >("recipients");
 
   const markDoneMutation = useMarkDone();
 
@@ -294,6 +303,34 @@ const EmailDetail = () => {
               }`}
             />
           </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveTab("timeline")}
+            className={`group relative pb-3 pt-1 text-sm font-sans transition-colors cursor-pointer flex items-center gap-2 ${
+              activeTab === "timeline"
+                ? "font-bold text-slate-900"
+                : "font-medium text-slate-500 hover:text-slate-800"
+            }`}
+          >
+            <span className="">Response Timeline</span>
+            <span
+              className={`text-[10px] font-mono px-1.5 py-0.5 rounded-md font-bold transition-colors ${
+                activeTab === "timeline"
+                  ? "bg-emerald-50 text-emerald-700 border border-emerald-200/80"
+                  : "bg-slate-100 text-slate-500"
+              }`}
+            >
+              ● Auto
+            </span>
+            <span
+              className={`absolute bottom-0 left-0 right-0 h-0.5 bg-[#3525cd] rounded-full transition-all duration-200 ${
+                activeTab === "timeline"
+                  ? "opacity-100 scale-x-100"
+                  : "opacity-0 scale-x-75"
+              }`}
+            />
+          </button>
         </nav>
       </div>
 
@@ -341,14 +378,7 @@ const EmailDetail = () => {
             />
           </div>
           <div className="lg:col-span-4 space-y-6">
-            <RightPanel
-              email={email}
-              respondedCount={respondedRecipients.length}
-              totalCount={totalRecipients}
-              requiredCount={requiredRecipients.length}
-              requiredRespondedCount={requiredResponded.length}
-              completionPercentage={completionPercentage}
-            />
+            <AutomaticDetectionCard email={email} onSync={handleSyncOutbox} />
           </div>
         </div>
       )}
