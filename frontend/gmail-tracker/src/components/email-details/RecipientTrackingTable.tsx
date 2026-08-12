@@ -507,23 +507,7 @@ const RecipientTrackingTable = ({
 
         {/* table footer */}
         <div className="p-4 border-t border-slate-200/80 bg-slate-50/80 flex items-center justify-between gap-3 text-xs text-slate-600 font-sans">
-          <div className="flex items-center gap-3">
-            <span>
-              Showing{" "}
-              <strong className="text-slate-900 font-mono">
-                {sortedRecipients.length === 0 ? 0 : 1}
-              </strong>{" "}
-              to{" "}
-              <strong className="text-slate-900 font-mono">
-                {sortedRecipients.length}
-              </strong>{" "}
-              of{" "}
-              <strong className="text-slate-900 font-mono">
-                {recipients.length}
-              </strong>{" "}
-              recipients
-            </span>
-          </div>
+          <div className="flex items-center gap-3"></div>
         </div>
       </div>
     </>

@@ -3,6 +3,7 @@ import ConversationSection from "@/components/email-details/ConversationSection"
 import EmailDetailsSkeleton from "@/components/email-details/EmailDetailsSkeleton";
 import EmailHeader from "@/components/email-details/EmailHeader";
 import RecipientTrackingTable from "@/components/email-details/RecipientTrackingTable";
+import ResponseTimeline from "@/components/email-details/ResponseTimeline";
 import RightPanel from "@/components/email-details/RightPanel";
 import { useToast } from "@/context/ToastContext";
 import useEmailReply from "@/hooks/useEmailReply";
@@ -377,6 +378,18 @@ const EmailDetail = () => {
               isRetrying={isFetchingReplies}
             />
           </div>
+          <div className="lg:col-span-4 space-y-6">
+            <AutomaticDetectionCard email={email} onSync={handleSyncOutbox} />
+          </div>
+        </div>
+      )}
+
+      {activeTab === "timeline" && (
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+          <div className="lg:col-span-8 space-y-6">
+            <ResponseTimeline email={email} />
+          </div>
+
           <div className="lg:col-span-4 space-y-6">
             <AutomaticDetectionCard email={email} onSync={handleSyncOutbox} />
           </div>
