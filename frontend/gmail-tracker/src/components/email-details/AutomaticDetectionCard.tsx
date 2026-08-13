@@ -7,6 +7,8 @@ import {
   CheckCircle2,
   Clock,
   Cpu,
+  Pause,
+  Play,
   Radio,
   RefreshCw,
   ShieldCheck,
@@ -31,14 +33,12 @@ const AutomaticDetectionCard = ({
 
   const [isSyncing, setIsSyncing] = useState(false);
   const [lastSyncText, setLastSyncText] = useState("2m ago");
+  const [isQueuePaused, setIsQueuePaused] = useState(false);
+  const [isDetectionPaused, setIsDetectionPaused] = useState(false);
 
   const total = email.recipients.length;
   const responded = email.recipients.filter((r) => r.has_responded).length;
   const pending = total - responded;
-
-  const status = getTrackedEmailStatus(email.is_done, email.deadline);
-
-  const isCompleted = status === "Completed";
 
   const handleScanNow = () => {
     setIsSyncing(true);
@@ -51,6 +51,28 @@ const AutomaticDetectionCard = ({
         "info",
       );
     }, 600);
+  };
+
+  const handleTogglePause = () => {
+    const nextState = !isQueuePaused;
+    setIsQueuePaused(nextState);
+    triggerToast(
+      nextState
+        ? "Automated reminder queue paused."
+        : "Automated reminder queue resumed & active.",
+      nextState ? "info" : "success",
+    );
+  };
+
+  const handleToggelDetectionPause = () => {
+    const nextState = !isDetectionPaused;
+    setIsDetectionPaused(nextState);
+    triggerToast(
+      nextState
+        ? "Automatic response detection paused."
+        : "Automatic response detection resumed & active.",
+      nextState ? "info" : "success",
+    );
   };
 
   return (
@@ -144,38 +166,52 @@ const AutomaticDetectionCard = ({
       {/* view 1: response detection detailed information */}
       {activeTab === "detection" && (
         <div className="space-y-3 pt-0.5">
-          <div className="bg-indigo-50/40 border border-indigo-100/80 rounded-xl p-3.5 space-y-2">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-slate-900 font-sans">
-                Outbox Capture Engine
-              </span>
-              <span className="font-mono text-[10px] text-emerald-700 bg-emerald-50 border border-emerald-200/60 px-2 py-0.5 rounded-md font-bold">
-                Active Listener
-              </span>
-            </div>
-
-            <div className="grid grid-cols-2 gap-2 text-xs pt-1">
-              <div className="bg-white border border-slate-200/60 rounded-lg p-2.5 space-y-0.5">
-                <span className="text-[10px] font-sans text-slate-500 block">
-                  Captured Replies
-                </span>
-                <span className="font-mono text-sm font-bold text-emerald-600">
-                  {responded}{" "}
-                  <span className="text-xs text-slate-400 font-normal">
-                    of {total}
-                  </span>
+          {/* main status banner for detection */}
+          <div className="bg-indigo-50/50 border border-indigo-200/70  rounded-xl p-3.5 flex items-center justify-between gap-3">
+            <div className="space-y-0.5 min-w-0">
+              <div className="flex items-center gap-2">
+                <Radio
+                  size={14}
+                  className={
+                    isDetectionPaused
+                      ? "text-amber-600 shrink-0"
+                      : "text-[#3525cd] shrink-0"
+                  }
+                />
+                <span className="text-xs font-bold text-slate-900 tracking-tight">
+                  {isDetectionPaused
+                    ? "Detection Engine Paused"
+                    : "Outbox Listener Active"}
                 </span>
               </div>
-
-              <div className="bg-white border border-slate-200/60 rounded-lg p-2.5 space-y-0.5">
-                <span className="text-[10px] font-sans text-slate-500 block">
-                  Awaiting Detection
-                </span>
-                <span className="font-mono text-sm font-bold text-amber-600">
-                  {pending}
-                </span>
-              </div>
+              <p className="text-[11px] text-slate-500 truncate">
+                {isDetectionPaused
+                  ? "Auto response listener is suspended. Replies will not auto-sync."
+                  : `Scanning outbox • ${responded} of ${total} responses captured`}
+              </p>
             </div>
+
+            <button
+              type="button"
+              onClick={handleToggelDetectionPause}
+              className={`text-[11px] font-semibold px-2.5 py-1 rounded-lg border transition-all cursor-pointer flex items-center gap-1.5 shrink-0 ${
+                isDetectionPaused
+                  ? "bg-indigo-100 text-indigo-900 border-indigo-300 hover:bg-indigo-200"
+                  : "bg-white text-slate-700 border-slate-200 hover:bg-slate-50 shadow-2xs"
+              }`}
+            >
+              {isDetectionPaused ? (
+                <>
+                  <Play size={11} className="fill-indigo-800 text-indigo-800" />
+                  <span>Resume</span>
+                </>
+              ) : (
+                <>
+                  <Pause size={11} className="text-slate-500" />
+                  <span>Pause</span>
+                </>
+              )}
+            </button>
           </div>
 
           {/* Technical detection metadata */}
@@ -215,36 +251,50 @@ const AutomaticDetectionCard = ({
 
       {/* view 2: auto reminder detailed information */}
       {activeTab === "reminders" && (
-        <div className="space-y-3 pt-0.5">
-          <div className="bg-amber-50/40 border border-amber-100/80 rounded-xl p-3.5 space-y-2">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-slate-900 font-sans">
-                Dispatch Status
-              </span>
-              <span className="font-mono text-[10px] text-amber-700 bg-amber-50 border border-amber-200/80 px-2 py-0.5 rounded-md font-bold flex items-center gap-1">
-                <Zap size={10} className="text-amber-500 fill-amber-500" />
-                24h Guard
-              </span>
+        <div className="space-y-3 pt-0.5 font-sans">
+          {/* main status */}
+          <div className="bg-amber-50/50 border border-amber-200/70 rounded-xl p-3.5 flex items-center justify-between gap-3">
+            <div className="space-y-0.5 min-w-0">
+              <div className="flex items-center gap-2">
+                <BellRing size={14} className="text-amber-600 shrink-0" />
+                <span className="text-xs font-bold text-slate-900 tracking-tight">
+                  {pending > 0
+                    ? `${pending} Reminders Queued`
+                    : "All Responses Received"}
+                </span>
+              </div>
+              <p className="text-[11px] text-slate-500 truncate">
+                {isQueuePaused
+                  ? "Queue is paused. Automatic reminder dispatches are suspended."
+                  : pending > 0
+                    ? "Next auto-dispatch scheduled for Today at 09:00 AM"
+                    : "Auto-reminder queue is complete and inactive."}
+              </p>
             </div>
 
-            <div className="bg-white border border-slate-200/60 rounded-lg p-2.5 space-y-1">
-              <div className="flex items-center justify-between text-xs">
-                <span className="text-slate-500 font-sans">
-                  Pending Reminders
-                </span>
-                <span className="font-mono font-bold text-slate-900">
-                  {pending} Recipients
-                </span>
-              </div>
-              <div className="flex items-center justify-between text-xs pt-1 border-t border-slate-100">
-                <span className="text-slate-500 font-sans">
-                  Next Auto-Dispatch
-                </span>
-                <span className="font-mono text-[11px] font-semibold text-[#3525cd]">
-                  {pending > 0 ? "Today at 09:00 AM" : "Halted (Thread Done)"}
-                </span>
-              </div>
-            </div>
+            {pending > 0 && (
+              <button
+                type="button"
+                onClick={handleTogglePause}
+                className={`text-[11px] font-semibold px-2.5 py-1 rounded-lg border transition-all cursor-pointer flex items-center gap-1.5 shrink-0 ${
+                  isQueuePaused
+                    ? "bg-amber-100 text-amber-900 border-amber-300 hover:bg-amber-200"
+                    : "bg-white text-slate-700 border-slate-200 hover:bg-slate-50 shadow-2xs"
+                }`}
+              >
+                {isQueuePaused ? (
+                  <>
+                    <Play size={11} className="fill-amber-800 text-amber-800" />
+                    <span>Resume</span>
+                  </>
+                ) : (
+                  <>
+                    <Pause size={11} className="text-slate-500" />
+                    <span>Pause</span>
+                  </>
+                )}
+              </button>
+            )}
           </div>
 
           {/* Reminder Rule and cadence information */}

@@ -1,6 +1,5 @@
 import useAuth from "@/hooks/useAuth";
 import {
-  BarChart3,
   Bell,
   ChevronsUpDown,
   Grid,
@@ -24,7 +23,7 @@ const SideBar = () => {
     { name: "Dashboard", icon: Grid, path: "/" },
     { name: "Tracked Emails", icon: Mail, path: "/tracked" },
     { name: "Track New", icon: Plus, path: "/track_new" },
-    { name: "Reminder List", icon: Bell, path: "/reminders" },
+    { name: "Automation", icon: Bell, path: "/automation" },
   ];
 
   const settingsItem = { name: "Settings", icon: Settings, path: "/settings" };

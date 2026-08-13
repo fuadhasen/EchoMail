@@ -17,10 +17,12 @@ import {
   RefreshCw,
   RotateCcw,
   User,
+  Users,
 } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router";
 import MarkCompleteModal from "./MarkCompleteModal";
+import { parsePerson } from "@/services/emailmapper";
 
 interface EmailHeaderProps {
   email: TrackedEmailB;
@@ -31,8 +33,7 @@ interface EmailHeaderProps {
 
 const EmailHeader = ({
   email,
-  isSyncing,
-  onSync,
+
   onSetStatus,
 }: EmailHeaderProps) => {
   const [isMarkCompleteModalOpen, setIsMarkCompleteModalOpen] = useState(false);
@@ -67,10 +68,10 @@ const EmailHeader = ({
   };
 
   return (
-    <div className="space-y-4 pb-4 border-b border-slate-200/80">
+    <div className="space-y-4 pb-4 border-b border-slate-200/80 bg-white rounded-xl p-6">
       {/* quick action bar */}
-      <div className="flex flex-wrap items-center justify-between gap-3 text-xs">
-        <div className="flex items-center gap-2 text-slate-500 font-sans">
+      <div className="flex flex-wrap gap-3 text-xs">
+        <div className="flex items-center justify-between gap-2 text-slate-500 font-sans">
           <Link
             to={"/tracked"}
             className="inline-flex items-center gap-1.5 font-semibold text-slate-600 hover:text-slate-900 transition-colors group cursor-pointer"
@@ -81,42 +82,27 @@ const EmailHeader = ({
             />
             <span>TrackedEmails</span>
           </Link>
-          <span className="text-slate-300">/</span>
-          <span className="font-mono text-slate-400 font-medium">
+          <span className="font-mono text-[11px] font-medium text-slate-400 bg-slate-50 px-2 py-0.5 rounded border border-slate-200/60">
             Thread #{email.thread_id}
           </span>
         </div>
       </div>
 
       {/* main workspace header */}
-      <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-4 pt-1">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
         <div className="space-y-3 flex-1 min-w-0 flex-col items-center gap-1.5">
-          <h1 className="font-sans text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight leading-snug">
+          <h1 className="font-sans text-2xl sm:text-4xl font-bold text-slate-900 tracking-tight leading-snug">
             {email.subject}
           </h1>
-          <div className="hidden lg:block">{getStatusBadge()}</div>
         </div>
 
-        <div className="flex items-center gap-2.5 shrink-0 pt-2 lg:pt-0">
-          {onSync && (
-            <button
-              onClick={onSync}
-              disabled={isSyncing}
-              className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-700 hover:text-slate-900 bg-white hover:bg-slate-50 border border-slate-200/80 hover:border-slate-300 px-3.5 py-2 rounded-xl shadow-2xs transition-all cursor-pointer disabled:opacity-50"
-              title="Sync Gmail Thread"
-            >
-              <RefreshCw
-                size={12}
-                className={`text-slate-500 ${isSyncing ? "animate-spin text-[#3525cd]" : ""}`}
-              />
-              <span>{isSyncing ? "Syncing..." : "Sync Thread"}</span>
-            </button>
-          )}
+        <div className="hidden lg:block">{getStatusBadge()}</div>
 
+        <div className="flex items-center gap-2.5 shrink-0 pt-2 lg:pt-0">
           {status !== "Completed" ? (
             <button
               onClick={() => setIsMarkCompleteModalOpen(true)}
-              className="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-xl font-sans text-xs font-semibold shadow-2xs hover:shadow-xs transition-all cursor-pointer group"
+              className="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-1.5 rounded-xl font-sans text-xs font-semibold shadow-2xs hover:shadow-xs transition-all cursor-pointer group"
             >
               <Check
                 size={14}
@@ -133,6 +119,38 @@ const EmailHeader = ({
               <span>Re-open Thread</span>
             </button>
           )}
+        </div>
+      </div>
+
+      <div className="pt-3.5 border-t border-slate-100 flex flex-wrap items-center gap-2 sm:gap-2.5 text-xs font-sans">
+        <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-50/90 border border-slate-200/70 text-slate-600 shadow-2xs">
+          <User size={13} className="text-slate-400 shrink-0" />
+          <span className="text-slate-400 text-[10px] font-semibold uppercase tracking-wider">
+            From
+          </span>
+          <span className="font-semibold text-slate-800">
+            {parsePerson(email.sender).name || "You (Product Lead)"}
+          </span>
+        </div>
+
+        <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-50/90 border border-slate-200/70 text-slate-600 shadow-2xs">
+          <Calendar size={13} className="text-slate-400 shrink-0" />
+          <span className="text-slate-400 text-[10px] font-semibold uppercase tracking-wider">
+            Sent
+          </span>
+          <span className="font-semibold text-slate-800">
+            {formatSentDate(email.sent_date)}
+          </span>
+        </div>
+
+        <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-50/90 border border-slate-200/70 text-slate-600 shadow-2xs">
+          <Clock size={13} className="text-slate-400 shrink-0" />
+          <span className="text-slate-400 text-[10px] font-semibold uppercase tracking-wider">
+            Due
+          </span>
+          <span className="font-semibold text-slate-800">
+            {formatDeadline(email.deadline)}
+          </span>
         </div>
       </div>
 

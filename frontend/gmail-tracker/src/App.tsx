@@ -1,5 +1,5 @@
 import { Navigate, Route, Routes } from "react-router";
-import Analytics from "./pages/Analytics";
+import Analytics from "./pages/Automation";
 import EmailDetail from "./pages/EmailDetail";
 import Home from "./pages/Home";
 import Layout from "./components/Layout";
@@ -9,6 +9,7 @@ import TrackedEmails from "./pages/TrackedEmail";
 import TrackNew from "./pages/TrackNew";
 import AuthGuard from "./guards/AuthGuard";
 import ReminderList from "./pages/ReminderList";
+import Automation from "./pages/Automation";
 
 const App = () => {
   return (
@@ -27,7 +28,7 @@ const App = () => {
         <Route path="tracked" element={<TrackedEmails />} />
         <Route path="track_new" element={<TrackNew />} />
         <Route path="settings" element={<Settings />} />
-        <Route path="reminders" element={<ReminderList />} />
+        <Route path="automation" element={<Automation />} />
 
         {/* Fallback route: redirect back to Dashboared / Home */}
         <Route path="*" element={<Navigate to="/" replace />} />

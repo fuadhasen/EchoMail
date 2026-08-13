@@ -8,7 +8,7 @@ import type { SentEmailB } from "./email";
  * { name: "Fuad Hassen", email: "fuad@gmail.com" }
  */
 
-function parsePerson(value: string) {
+export function parsePerson(value: string) {
   const match = value.match(/^(.*?)<(.+)>$/);
 
   if (!match) {
@@ -47,6 +47,6 @@ export function mapSentEmail(email: SentEmailB): SentEmail {
     recipients,
 
     snippet: email.snippet,
-    sentDate: email.sentdate,
+    sentDate: email.sent_date,
   };
 }
