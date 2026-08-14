@@ -95,7 +95,7 @@ const Settings = () => {
       {/* page header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200/80 pb-5">
         <div>
-          <h1 className="font-sans text-2xl font-bold text-slate-900 tracking-tight">
+          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900">
             Settings
           </h1>
           <p className="font-sans text-sm text-slate-500 mt-1">

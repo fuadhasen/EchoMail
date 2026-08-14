@@ -208,7 +208,7 @@ const TrackNew = () => {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 pb-5 border-b border-slate-200/80">
         <div className="flex items-center gap-3">
           <div>
-            <h1 className="font-sans text-2xl md:text-3xl font-bold text-slate-900 tracking-tight">
+            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900">
               Tracked New Sent Email
             </h1>
             <p className="font-sans text-xs sm:text-sm text-slate-500 leading-relaxed max-w-2xl ml-2">
