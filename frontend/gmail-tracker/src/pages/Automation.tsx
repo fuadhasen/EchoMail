@@ -1,5 +1,6 @@
 import { useToast } from "@/context/ToastContext";
 import {
+  ArrowRight,
   CheckCircle2,
   Clock,
   Cpu,
@@ -13,6 +14,15 @@ import {
   Zap,
 } from "lucide-react";
 import React, { useState } from "react";
+import {
+  ResponsiveContainer,
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  Tooltip,
+} from "recharts";
+
 import { useNavigate } from "react-router";
 
 const activityData = [
@@ -498,10 +508,168 @@ const Automation = () => {
               </div>
             </div>
           </section>
+
+          {/* Mini Graph */}
+          <section className="w-full bg-white border border-slate-200/80 rounded-xl p-4 sm:p-5 shadow-2xs flex flex-col justify-between space-y-3">
+            <div className="flex items-start justify-between">
+              <div>
+                <h2 className="text-xs sm:text-sm font-bold text-slate-900 tracking-tight">
+                  Automation Activity
+                </h2>
+                <p className="text-[11px] text-slate-500 font-normal">
+                  Last 7 days
+                </p>
+              </div>
+
+              <div className="text-right">
+                <span className="text-base sm:text-lg font-extrabold text-slate-900 leading-none block">
+                  32
+                </span>
+
+                <span className="text-[9px] font-medium text-slate-400 uppercase tracking-wider">
+                  actions
+                </span>
+              </div>
+            </div>
+
+            {/* lightweight area chart */}
+            <div className="h-28 w-full pb-1 pt-1">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart
+                  data={activityData}
+                  margin={{ top: 6, right: 6, left: -28, bottom: 0 }}
+                >
+                  <defs>
+                    <linearGradient
+                      id="purpleGradient"
+                      x1="0"
+                      y1="0"
+                      x2="0"
+                      y2="1"
+                    >
+                      <stop offset="5%" stopColor="#3525cd" stopOpacity={0.2} />
+                      <stop
+                        offset="95%"
+                        stopColor="#3525cd"
+                        stopOpacity={0.0}
+                      />
+                    </linearGradient>
+                  </defs>
+                  <XAxis
+                    dataKey="day"
+                    axisLine={false}
+                    tickLine={false}
+                    tick={{ fontSize: 10, fill: "#64748b" }}
+                    dy={4}
+                  />
+                  <YAxis
+                    axisLine={false}
+                    tickLine={false}
+                    tick={{ fontSize: 9, fill: "#94a3b8" }}
+                    domain={[0, "auto"]}
+                  />
+                  <Tooltip content={<CustomTooltip />} />
+                  <Area
+                    type="monotone"
+                    dataKey="actions"
+                    stroke="#3525cd"
+                    strokeWidth={2}
+                    fillOpacity={1}
+                    fill="url(#purpleGradient)"
+                    activeDot={{
+                      r: 4,
+                      fill: "#3525cd",
+                      stroke: "#ffffff",
+                      strokeWidth: 2,
+                    }}
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+
+            {/* Footer */}
+            <div className="pt-2 border-t border-slate-100 flex flex-wrap items-center justify-between text-[11px] text-slate-500 gap-1">
+              <div className="flex items-center gap-1.5 font-bold text-slate-800">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#3525cd]" />
+                <span>32 automated actions</span>
+              </div>
+
+              <div className="font-mono text-slate-500 text-[10px]">
+                18 reminders · 9 responses · 5 completed
+              </div>
+            </div>
+          </section>
         </div>
 
         {/* Right */}
-        <div className="lg:col-span-6">right</div>
+        <div className="lg:col-span-6">
+          <section className="w-full h-full bg-white  border border-slate-200/80 rounded-xl p-4 sm:p-5 shadow-2xs flex flex-col justify-between">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <div>
+                <h2 className="text-xs sm:text-sm font-bold text-slate-900 tracking-tight">
+                  Recent Activity
+                </h2>
+                <p className="text-[11px] text-slate-500 font-normal">
+                  Latest automated background events
+                </p>
+              </div>
+
+              <span className="text-[10px] font-mono font-medium text-slate-500 bg-slate-50 border border-slate-200/60 px-2 py-0.5 rounded">
+                Live Log
+              </span>
+            </div>
+
+            <div className="relative flex-1 flex flex-col justify-evenly py-3 my-1">
+              <div className="absolute left-2.75 top-4 bottom-4 w-px bg-slate-200/70 z-0" />
+
+              {recentActivities.map((activity) => (
+                <div
+                  key={activity.id}
+                  className="relative flex items-start gap-3 text-xs z-10 group py-1"
+                >
+                  <div
+                    className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 border-2 border-white shadow-2xs ${activity.bg}`}
+                  >
+                    {activity.icon}
+                  </div>
+
+                  {/* text content */}
+                  <div className="flex-1 min-w-0 pt-0.5">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="font-bold text-slate-900 text-xs group-hover:text-[#3525cd] transition-colors truncate">
+                        {activity.title}
+                      </span>
+                      <span className="text-[10px] font-mono font-medium text-slate-400 shrink-0">
+                        {activity.time}
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-slate-500 font-normal leading-relaxed mt-0.5">
+                      {activity.description}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
+              <span className="text-[10px] text-slate-400 font-medium">
+                Showing Last 4 events
+              </span>
+              <button
+                className="text-[#3525cd] hover:text-[#2b1ea8] font-semibold text-xs inline-flex items-center gap-1 hover:underline cursor-pointer transition-colors"
+                onClick={() =>
+                  triggerToast(
+                    "Opening complete automation activity log history...",
+                    "info",
+                  )
+                }
+              >
+                <span>View all activity</span>
+                <ArrowRight size={12} />
+              </button>
+            </div>
+          </section>
+        </div>
       </div>
     </div>
   );

@@ -212,6 +212,7 @@ async def logout():
 
     try:
         os.remove(TOKEN_PATH)
+        os.remove(USER_PATH)
     except Exception as e:
         raise HTTPException(status_code=403, detail="logout Failed")
 

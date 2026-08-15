@@ -1,4 +1,5 @@
 import useAuth from "@/hooks/useAuth";
+import useLogout from "@/hooks/useLogout";
 import {
   Bell,
   ChevronsUpDown,
@@ -15,6 +16,7 @@ import { Link, NavLink } from "react-router";
 
 const SideBar = () => {
   const { user } = useAuth();
+  const logout = useLogout();
 
   const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState(false);
   const [isMobileProfileOpen, setIsMobileProfileOpen] = useState(false);
@@ -210,13 +212,15 @@ const SideBar = () => {
                     <div className="h-px bg-zinc-100 my-1" />
                     <button
                       onClick={() => {
-                        setIsMobileProfileOpen(false);
-                        setIsMobileDrawerOpen(false);
+                        // setIsMobileProfileOpen(false);
+                        // setIsMobileDrawerOpen(false);
+                        logout.mutate();
                       }}
+                      disabled={logout.isPending}
                       className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-left font-sans text-xs font-bold text-red-600 hover:bg-red-50 transition-all cursor-pointer"
                     >
                       <LogOut size={14} className="text-red-400" />
-                      Sign Out
+                      {logout.isPending ? "Logging out..." : "Logout"}
                     </button>
                   </div>
                 </>
@@ -229,17 +233,17 @@ const SideBar = () => {
       )}
 
       {/* desktop side bar */}
-      <aside className="hidden md:flex flex-col w-64 border-r border-zinc-200/80 px-4 py-6 shrink-0 bg-zinc-50 relative">
+      <aside className="hidden md:flex flex-col w-72 border-r border-zinc-200/80 px-4 py-6 shrink-0 bg-zinc-50 relative">
         {/* {Brand Logo section} */}
         <Link
           to={"/"}
-          className="group mb-8 px-2 flex items-center gap-2.5 focus:outline-none cursor-pointer"
+          className="group  px-2 flex items-center gap-2.5 focus:outline-none cursor-pointer p-4 border-b border-slate-200"
         >
           <div className="w-6.5 h-6.5 bg-zinc-900 border border-zinc-800 rounded-md flex items-center justify-center text-zinc-100 text-[11px] transition-all duration-200 group-hover:scale-[1.02] font-extrabold shadow-sm font-sans">
             E
           </div>
           <div className="text-left">
-            <h1 className="font-sans text-[13px] font-bold text-zinc-900 leading-none tracking-tight">
+            <h1 className="font-sans text-[15px] font-bold text-zinc-900 leading-none ">
               EchoMail
             </h1>
             <p className="font-sans text-[8px] uppercase tracking-wider text-zinc-400/80 font-bold mt-0.5">
@@ -249,7 +253,7 @@ const SideBar = () => {
         </Link>
 
         {/* Navigation links */}
-        <nav className="flex-1 space-y-1 overflow-y-auto">
+        <nav className="flex-1 space-y-1 overflow-y-auto mt-8">
           <div className="space-y-2">
             {navItems.map((item) => {
               const Icon = item.icon;
@@ -369,13 +373,14 @@ const SideBar = () => {
                 <div className="h-px bg-zinc-100 my-1" />
                 <button
                   onClick={() => {
-                    setIsMobileProfileOpen(false);
-                    setIsMobileDrawerOpen(false);
+                    // setIsMobileProfileOpen(false);
+                    // setIsMobileDrawerOpen(false);
+                    logout.mutate();
                   }}
                   className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-left font-sans text-xs font-bold text-red-600 hover:bg-red-50 transition-all cursor-pointer"
                 >
                   <LogOut size={14} className="text-red-400" />
-                  Sign Out
+                  {logout.isPending ? "Logging out..." : "Logout"}
                 </button>
               </div>
             </>
