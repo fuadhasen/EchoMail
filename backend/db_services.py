@@ -528,7 +528,7 @@ class EmailTrackerService:
         db.commit()
 
         # Send notification about the new response (if needed)
-        # but i dont know how to implement this
+        # but i dont know how to implement this for the moment
         try:
             from scheduler import send_notification
 
