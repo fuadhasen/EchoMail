@@ -491,7 +491,7 @@ class EmailTrackerService:
         if not association:
             return False
 
-        # If recipient already marked as responded, do nothing
+        # If recipient already marked as responded, do nothing boom, this is where we know new responses
         if association.has_responded:
             return True
 
@@ -528,6 +528,7 @@ class EmailTrackerService:
         db.commit()
 
         # Send notification about the new response (if needed)
+        # but i dont know how to implement this
         try:
             from scheduler import send_notification
 

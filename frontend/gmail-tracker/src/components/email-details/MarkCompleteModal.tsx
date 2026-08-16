@@ -55,7 +55,7 @@ const MarkCompleteModal = ({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs animate-in fade-in duration-200"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/30 backdrop-blur-xs transition-opacity animate-in fade-in duration-150"
       onClick={(e) => {
         if (e.target === e.currentTarget && !isSubmitting) {
           onClose();
@@ -63,76 +63,28 @@ const MarkCompleteModal = ({
       }}
       aria-modal="true"
       role="dialog"
+      aria-labelledby="mark-complete-modal-title"
     >
-      <div className="relative w-full max-w-md bg-white rounded-2xl  border border-slate-200/90 shadow-xl overflow-hidden animate-in zoom-in-95 duration-150">
-        {/* header */}
-        <div className="p-5 pb-0 flex items-start justify-between gap-3">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-200/70 flex items-center justify-center shrink-0">
-              <CheckCircle2 size={20} className="stroke-[2.2]" />
-            </div>
-
-            <div>
-              <h3 className="font-sans text-lg font-bold text-slate-900 leading-snug">
-                Mark email as complete ?
-              </h3>
-              <p className="font-sans text-xs text-slate-500 mt-0.5">
-                Stop active tracking for this thread
-              </p>
-            </div>
-          </div>
-
-          <button
-            type="button"
-            onClick={onClose}
-            disabled={isSubmitting}
-            className="text-slate-400 hover:text-slate-600 p-1.5 rounded-lg hover:bg-slate-100 transition-colors cursor-pointer disabled:opacity-50"
+      <div className="w-full max-w-sm bg-white rounded-2xl border border-slate-200/90 shadow-[0_8px_30px_rgba(0,0,0,0.08)] p-6 space-y-4 text-left font-sans animate-in zoom-in-95 duration-150">
+        <div className="space-y-1.5">
+          <h3
+            id="mark-complete-modal-title"
+            className="text-base font-semibold text-slate-900 tracking-tight"
           >
-            <X size={16} />
-          </button>
-        </div>
-
-        <div className="p-5 space-y-4">
-          <p className="font-sans text-xs text-slate-600 leading-relaxed">
-            This will stop active tracking for this email. You can still view
-            the email and its response history later.
+            Mark this email as complete?
+          </h3>
+          <p className="text-xs text-slate-500 leading-relaxed">
+            Active tracking and automated reminders will be stopped for this
+            thread.
           </p>
-
-          <div className="bg-slate-50/90 border border-slate-200/80 rounded-xl p-3.5 space-y-2.5">
-            <div className="flex items-start gap-2">
-              <Mail size={14} className="text-slate-400 shrink-0 mt-0.5" />
-              <span className="font-sans text-xs font-bold text-slate-800 line-clamp-2 leading-snug">
-                {email.subject}
-              </span>
-            </div>
-            <div className="pt-2 border-t border-slate-200/60 flex flex-wrap items-center justify-between gap-2 text-xs font-sans">
-              <div className="flex items-center gap-1.5 text-slate-500">
-                <User size={13} className="text-slate-400" />
-                <span>
-                  <strong className="text-slate-700">{totalRecipients}</strong>{" "}
-                  recipient
-                  {totalRecipients !== 1 ? "s" : ""}
-                </span>
-              </div>
-              <div className="flex items-center gap-1.5 text-slate-600 font-medium">
-                <CheckCircle2 size={13} className="text-emerald-500" />
-                <span>
-                  <strong className="text-emerald-700">
-                    {respondedRecipients}{" "}
-                  </strong>
-                  of {totalRecipients} responded
-                </span>
-              </div>
-            </div>
-          </div>
         </div>
 
-        <div className="p-4 bg-slate-50/60 border-t border-slate-100 flex items-center justify-end gap-2.5">
+        <div className="flex items-center justify-end gap-2 pt-2">
           <button
             type="button"
             onClick={onClose}
             disabled={isSubmitting}
-            className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-700 bg-white border border-slate-200/90 hover:bg-slate-50 hover:border-slate-300 transition-all cursor-pointer shadow-2xs disabled:opacity-50"
+            className="px-3.5 py-2 rounded-xl text-xs font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100/80 transition-colors cursor-pointer disabled:opacity-50"
           >
             Cancel
           </button>
@@ -141,19 +93,10 @@ const MarkCompleteModal = ({
             type="button"
             onClick={handleConfirm}
             disabled={isSubmitting}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 transition-all cursor-pointer shadow-2xs disabled:opacity-80"
+            className="px-4 py-2 rounded-xl text-xs font-medium text-white bg-slate-950 hover:bg-slate-800 active:scale-[0.98] transition-all cursor-pointer disabled:opacity-60 shadow-2xs"
+            id="btn-confirm-mark-complete"
           >
-            {isSubmitting ? (
-              <>
-                <Loader2 size={14} className="animate-spin text-emerald-100" />
-                <span>Marking as complete...</span>
-              </>
-            ) : (
-              <>
-                <CheckCircle2 size={14} className="text-emerald-100" />
-                <span>Mark as Complete</span>
-              </>
-            )}
+            {isSubmitting ? "Marking Complete..." : "Mark Complete"}
           </button>
         </div>
       </div>

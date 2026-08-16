@@ -329,7 +329,7 @@ const Automation = () => {
         {/* left */}
         <div className="lg:col-span-6 space-y-5 flex flex-col justify-between">
           {/* Automation status and cadence */}
-          <section className="w-full bg-white border border-slate-200/80 rounded-xl p-4 sm:p-5 shadow-2xs space-y-3.5">
+          {/* <section className="w-full bg-white border border-slate-200/80 rounded-xl p-4 sm:p-5 shadow-2xs space-y-3.5">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <div>
                 <h2 className="text-xs sm:text-sm font-bold text-slate-900 tracking-tight">
@@ -347,7 +347,7 @@ const Automation = () => {
 
             <div className="divide-y divide-slate-100 border border-slate-200/80 rounded-lg overflow-hidden bg-white">
               {/* engine 1: response detection */}
-              <div className="p-3 sm:p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-slate-50/50 transition-colors">
+          {/* <div className="p-3 sm:p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-slate-50/50 transition-colors">
                 <div className="flex items-center gap-3 min-w-0  sm:w-5/12">
                   <div className="w-8 h-8 rounded-lg bg-indigo-50 border border-indigo-100 text-[#3525cd] flex items-center justify-center shrink-0">
                     <Radio size={16} />
@@ -425,10 +425,10 @@ const Automation = () => {
                     )}
                   </button>
                 </div>
-              </div>
+              </div> */}
 
-              {/* engine 2: autmatic reminder */}
-              <div className="p-3 sm:p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-slate-50/50 transition-colors">
+          {/* engine 2: autmatic reminder */}
+          {/* <div className="p-3 sm:p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-slate-50/50 transition-colors">
                 <div className="flex items-center gap-3 min-w-0 sm:w-5/12">
                   <div className="w-8 h-8 rounded-lg bg-indigo-50 border border-indigo-100 text-[#3525cd] flex items-center justify-center shrink-0">
                     <Clock size={16} />
@@ -505,9 +505,9 @@ const Automation = () => {
                     )}
                   </button>
                 </div>
-              </div>
-            </div>
-          </section>
+              </div> */}
+          {/* </div> */}
+          {/* </section>  */}
 
           {/* Mini Graph */}
           <section className="w-full bg-white border border-slate-200/80 rounded-xl p-4 sm:p-5 shadow-2xs flex flex-col justify-between space-y-3">

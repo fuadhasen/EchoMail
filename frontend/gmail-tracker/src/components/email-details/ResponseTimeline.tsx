@@ -152,14 +152,10 @@ const ResponseTimeline = ({ email }: ResponseTimelineProps) => {
       <div className="bg-slate50/80 border border-slate-200/80  rounded-xl p-3.5 sm:p-4 space-y-3">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
           <div className="space-y-0.5">
-            <h4 className="font-sans text-xs font-bold text-slate-900 tracking-tight flex items-center gap-1.5">
+            <h4 className="font-sans text-lg font-bold text-slate-900 tracking-tight flex items-center gap-1.5">
               <BarChart3 size={15} className="text-[#3525cd]" />
               <span>Thread Activity Audit Trial</span>
             </h4>
-            <p className="font-sans text-xs text-slate-500">
-              Chronological ledger of outbox dipatches, captured responses, and
-              reminder events.
-            </p>
           </div>
 
           <div>
@@ -171,7 +167,7 @@ const ResponseTimeline = ({ email }: ResponseTimelineProps) => {
         </div>
 
         {/* quick event filter bar */}
-        <div className="pt-2 border-t border-slate-200/60  flex items-center justify-between gap-2 flex-wrap text-xs font-sans">
+        {/* <div className="pt-2 border-t border-slate-200/60  flex items-center justify-between gap-2 flex-wrap text-xs font-sans">
           <div className="flex items-center gap-1">
             <Filter size={12} className="text-slate-400 mr-1" />
             <span className="text-[11px] text-slate-500 font-medium mr-1">
@@ -216,12 +212,7 @@ const ResponseTimeline = ({ email }: ResponseTimelineProps) => {
               {allTimelineEvents.filter((e) => e.type === "reminder").length})
             </button>
           </div>
-
-          <span className="text-[10px] font-mono text-slate-400 flex items-center gap-1">
-            <Clock size={10} />
-            Auto-updated
-          </span>
-        </div>
+        </div> */}
       </div>
 
       {/* response timeline header */}
