@@ -1,17 +1,18 @@
 import { Navigate, Route, Routes } from "react-router";
-import Analytics from "./pages/Automation";
+import Layout from "./components/Layout";
+import AuthGuard from "./guards/AuthGuard";
+import Automation from "./pages/Automation";
 import EmailDetail from "./pages/EmailDetail";
 import Home from "./pages/Home";
-import Layout from "./components/Layout";
 import LoginWithHandler from "./pages/login";
 import Settings from "./pages/Settings";
 import TrackedEmails from "./pages/TrackedEmail";
 import TrackNew from "./pages/TrackNew";
-import AuthGuard from "./guards/AuthGuard";
-import ReminderList from "./pages/ReminderList";
-import Automation from "./pages/Automation";
+import useEchomailWebSocket from "./hooks/useEchomailWebSocket";
 
 const App = () => {
+  useEchomailWebSocket();
+
   return (
     <Routes>
       <Route path="/login" element={<LoginWithHandler />} />

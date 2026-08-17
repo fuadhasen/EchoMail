@@ -1,7 +1,6 @@
 import type { TrackedEmailB } from "@/services/trackedEmail";
 import { formatDeadline, formatSentDate } from "@/utils/dateFormatter";
 import { getTrackedEmailStatus } from "@/utils/statusFilter";
-import { ShieldCheck } from "lucide-react";
 
 interface RightPanelProps {
   email: TrackedEmailB;
@@ -12,74 +11,11 @@ interface RightPanelProps {
   completionPercentage: number;
 }
 
-const RightPanel = ({
-  email,
-  respondedCount,
-  totalCount,
-  requiredCount,
-  requiredRespondedCount,
-  completionPercentage,
-}: RightPanelProps) => {
+const RightPanel = ({ email }: RightPanelProps) => {
   const status = getTrackedEmailStatus(email.is_done, email.deadline);
-  const isOverdue = status === "Overdue";
-  const isCompleted = status === "Completed";
 
   return (
     <div className="space-y-4">
-      {/* response progress box */}
-      <div className="bg-white border border-slate-200/80 rounded-2xl p-5 shadow-2xs">
-        <div className="flex items-center justify-between mb-3">
-          <h3 className="font-sans text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
-            <ShieldCheck size={14} className="text-[#3525cd]" />
-            Response Progress
-          </h3>
-          <span className="text-xs font-mono font-bold text-[#3525cd]">
-            {completionPercentage}%
-          </span>
-        </div>
-
-        {/* progress bar */}
-        <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden mb-4">
-          <div
-            style={{ width: `${completionPercentage}%` }}
-            className={`h-full transition-all duration-500 rounded-full ${
-              isCompleted
-                ? "bg-emerald-500"
-                : isOverdue
-                  ? "bg-rose-500"
-                  : "bg-[#3525cd]"
-            }`}
-          />
-        </div>
-
-        {/* breakdown stats */}
-        <div className="grid grid-cols-2 gap-2 text-center text-xs">
-          <div className="bg-slate-50/80 border border-slate-200/60 p-2.5 rounded-xl">
-            <span className="text-[10px] font-sans font-medium text-slate-500 block">
-              Required
-            </span>
-            <span className="font-mono text-sm font-bold text-emerald-600">
-              {requiredRespondedCount}{" "}
-              <span className="text-[11px] text-slate-400 font-normal">
-                / {requiredCount}
-              </span>
-            </span>
-          </div>
-
-          <div className="bg-slate-50/80 border border-slate-200/60 p-2.5 rounded-xl">
-            <span className="text-[10px] font-sans font-medium text-slate-500 block">
-              Total Replies
-            </span>
-            <span className="font-mono text-sm font-bold text-emerald-600">
-              {respondedCount}{" "}
-              <span className="text-[11px] text-slate-400 font-normal">
-                / {totalCount}
-              </span>
-            </span>
-          </div>
-        </div>
-      </div>
-
       {/* SLA Metrics and Thread specs*/}
       <div className="bg-white border border-slate-200/80 rounded-2xl p-4.5 shadow-2xs space-y-3">
         <h4 className="font-sans text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-1.5">

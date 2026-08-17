@@ -4,7 +4,9 @@ import json
 import os
 from email.utils import parsedate_to_datetime
 from urllib.parse import urlencode
-from fastapi import FastAPI, Query, Depends, HTTPException, Body
+from fastapi import FastAPI, Query, Depends, HTTPException, Body, WebSocket
+from websocket import websocket_endpoint
+from websocket import manager
 from fastapi.responses import RedirectResponse
 from typing import List, Optional
 from datetime import datetime, timedelta
@@ -22,7 +24,6 @@ from scheduler import start_scheduler, stop_scheduler, check_email_responses
 from pathlib import Path
 from fastapi.middleware.cors import CORSMiddleware
 from dependencies import get_email_service
-
 
 
 # Pydantic models for request/response validation
@@ -114,6 +115,7 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 
+
 # Temporarily for single user support!
 # TOKEN_PATH=Path("token.json")
 
@@ -125,10 +127,25 @@ app.add_middleware(
     allow_headers=["*"]
 )
 
+@app.websocket("/ws")
+async def websocket_route(websocket: WebSocket):
+    await websocket_endpoint(websocket)
+
+
+
 
 @app.get("/")
 async def root():
-    return {"message": "Welcome to my very first app"}
+    return {"message": "Welcome to my very first Fullstack app"}
+
+@app.post("/test_websocket")
+async def test_websocket():
+    await manager.broadcast({
+        "type": "test",
+        "message": "Hello from EchoMail backend!"
+    })
+
+    return {"success": True}
 
 # google login endpoint
 @app.get("/auth/google")

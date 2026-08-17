@@ -31,6 +31,7 @@ interface RecipientTrackingTableProps {
 }
 
 type SortField = "status" | "name" | "email" | "requirement";
+type StatusFilter = "all" | "pending" | "responded";
 
 const RecipientTrackingTable = ({
   recipients,
@@ -41,6 +42,9 @@ const RecipientTrackingTable = ({
   processingRecipient,
 }: RecipientTrackingTableProps) => {
   const { triggerToast } = useToast();
+
+  const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
 
   const [sortBy, setSortBy] = useState<SortField>("status");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
@@ -56,49 +60,41 @@ const RecipientTrackingTable = ({
 
   const [copiedToast, setCopiedToast] = useState<boolean>(false);
 
-  // sort logic
-  const sortedRecipients = useMemo(() => {
-    return [...recipients].sort((a, b) => {
-      let comparision = 0;
-      if (sortBy === "status") {
-        comparision =
-          a.has_responded === b.has_responded ? 0 : a.has_responded ? 1 : -1;
-      } else if (sortBy === "name") {
-        comparision = (a.name ?? "").localeCompare(b.name ?? "");
-      } else if (sortBy === "email") {
-        comparision = a.email.localeCompare(b.email);
-      } else if (sortBy === "requirement") {
-        const aReq = a.must_respond !== false ? 1 : 0;
-        const bReq = b.must_respond !== false ? 1 : 0;
-        comparision = aReq - bReq;
-      }
+  const totalCount = recipients.length;
+  const respondedCount = recipients.filter((r) => r.has_responded).length;
+  const pendingCount = totalCount - respondedCount;
 
-      return sortOrder === "asc" ? comparision : -comparision;
+  // filtered Recipients
+  const filteredRecipients = useMemo(() => {
+    return recipients.filter((recipient) => {
+      const matchesSearch =
+        searchQuery.trim() === "" ||
+        recipient.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        recipient.email.toLowerCase().includes(searchQuery.toLowerCase());
+
+      if (!matchesSearch) return false;
+
+      if (statusFilter === "pending") return !recipient.has_responded;
+      if (statusFilter === "responded") return recipient.has_responded;
+
+      return true;
     });
-  }, [recipients, sortBy, sortOrder]);
+  }, [recipients, searchQuery, statusFilter]);
 
   // selection state helper
   const allSelected =
-    sortedRecipients.length > 0 &&
-    sortedRecipients.every((r) => selectedEmails.includes(r.email));
+    filteredRecipients.length > 0 &&
+    filteredRecipients.every((r) => selectedEmails.includes(r.email));
 
   const isSomeSelected =
-    sortedRecipients.some((r) => selectedEmails.includes(r.email)) &&
+    filteredRecipients.some((r) => selectedEmails.includes(r.email)) &&
     !allSelected;
 
   const handleToggleSelectAll = () => {
-    const emails = sortedRecipients.map((r) => r.email);
-
-    // if all remove, or add
     if (allSelected) {
-      setSelectedEmails(
-        selectedEmails.filter((email) => !emails.includes(email)),
-      );
+      setSelectedEmails([]);
     } else {
-      setSelectedEmails([
-        ...selectedEmails,
-        ...emails.filter((email) => !selectedEmails.includes(email)),
-      ]);
+      setSelectedEmails(filteredRecipients.map((r) => r.email));
     }
   };
 
@@ -117,10 +113,10 @@ const RecipientTrackingTable = ({
     }
   };
 
-  const handleBulkSendReminders = async () => {
-    // later u will check is that eligible or not
-    triggerToast("Bulk Reminder sent to all recipients", "info");
-  };
+  // const handleBulkSendReminders = async () => {
+  //   // later u will check is that eligible or not
+  //   triggerToast("Bulk Reminder sent to all recipients", "info");
+  // };
 
   const handleCopySelectedEmails = () => {
     const text = selectedEmails.join(",");
@@ -131,383 +127,336 @@ const RecipientTrackingTable = ({
 
   return (
     <>
-      <div className="bg-white border border-slate-200/90 rounded-2xl shadow-2xs overflow-hidden">
-        {/* header with title, search & filter tabs */}
-        {selectedEmails.length > 0 && (
-          <div className="bg-[#3525cd] text-white py-3 px-4 sm:px-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm border-b border-indigo-900 transition-all duration-200 animate-in fade-in">
-            <div className="flex items-center gap-3 text-xs font-sans">
-              <span className="font-bold bg-white/20 text-white px-2.5 py-1 rounded-lg font-mono">
-                {selectedEmails.length} of {recipients.length} Selected
-              </span>
+      <div className="bg-white border border-slate-200/90 rounded-2xl shadow-xs overflow-hidden font-sans text-left">
+        {/* 1. Header Toolbar */}
+        <div className="p-4 sm:p-5 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white">
+          {/* Search */}
+          <div className="relative flex-1 max-w-sm">
+            <Search
+              size={14}
+              className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
+            />
+            <input
+              type="text"
+              placeholder="Search recipients..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-8 py-2 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#3525cd]/15 focus:border-[#3525cd] transition-all"
+            />
+            {searchQuery && (
+              <button
+                type="button"
+                onClick={() => setSearchQuery("")}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-0.5 cursor-pointer"
+              >
+                <X size={13} />
+              </button>
+            )}
+          </div>
 
-              <span className="text-indigo-100 hidden sm:inline text-xs font-medium">
-                Perform action on selected recipients
+          {/* Status Filter Tabs */}
+          <div className="flex items-center gap-1.5 bg-slate-100/70 p-1 rounded-xl border border-slate-200/70 text-xs">
+            <button
+              type="button"
+              onClick={() => setStatusFilter("all")}
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                statusFilter === "all"
+                  ? "bg-white text-slate-900 shadow-2xs"
+                  : "text-slate-600 hover:text-slate-900"
+              }`}
+            >
+              All ({totalCount})
+            </button>
+            <button
+              type="button"
+              onClick={() => setStatusFilter("pending")}
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer flex items-center gap-1.5 ${
+                statusFilter === "pending"
+                  ? "bg-white text-[#3525cd] shadow-2xs"
+                  : "text-slate-600 hover:text-slate-900"
+              }`}
+            >
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+              <span>Awaiting ({pendingCount})</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setStatusFilter("responded")}
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer flex items-center gap-1.5 ${
+                statusFilter === "responded"
+                  ? "bg-white text-emerald-700 shadow-2xs"
+                  : "text-slate-600 hover:text-slate-900"
+              }`}
+            >
+              <Check size={12} className="text-emerald-600 stroke-[2.5]" />
+              <span>Responded ({respondedCount})</span>
+            </button>
+          </div>
+        </div>
+
+        {selectedEmails.length > 0 && (
+          <div className="bg-indigo-50 border-b border-indigo-100 px-4 sm:px-5 py-2.5 flex flex-wrap items-center justify-between gap-3 animate-in fade-in duration-150">
+            <div className="flex items-center gap-2 text-xs text-slate-800">
+              <span className="w-5 h-5 rounded-full bg-[#3525cd] text-white flex items-center justify-center font-bold text-[10px]">
+                {selectedEmails.length}
               </span>
+              <span className="font-semibold">Selected</span>
             </div>
 
-            <div className="flex flex-wrap items-center gap-2 shrink-0">
+            <div className="flex items-center gap-2 text-xs">
               <button
                 type="button"
                 onClick={handleCopySelectedEmails}
-                className="bg-white/10 hover:bg-white/20 text-white border border-white/20 px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer"
-                title="Copy selected email addresses to clipboard"
+                className="bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 px-3 py-1.5 rounded-lg font-medium flex items-center gap-1.5 transition-all cursor-pointer"
               >
-                <Copy size={13} />
-                <span>{copiedToast ? "Copied!" : "Copy Emails"}</span>
+                <Copy size={12} />
+                <span>Copy</span>
               </button>
 
-              {/* bulk reminders dispatch button */}
-              <button></button>
               <button
                 type="button"
                 onClick={() => setSelectedEmails([])}
-                className="text-white/80 hover:text-white p-1.5 rounded-lg hover:bg-white/10 transition-colors cursor-pointer ml-1"
-                title="Deselect all"
+                className="text-slate-400 hover:text-slate-700 p-1 cursor-pointer"
+                title="Clear selection"
               >
-                <X size={15} />
+                <X size={14} />
               </button>
             </div>
           </div>
         )}
 
         {/* Enterprise table */}
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="bg-slate-100/90 border-b border-slate-200/90 text-[11px]  font-sans font-bold text-slate-600 uppercase tracking-wider select-none">
-                <th className="py-3.5 px-4 w-12 text-center">
-                  <button
-                    type="button"
-                    onClick={handleToggleSelectAll}
-                    className="text-slate-400 hover:text-slate-700 focus:outline-none cursor-pointer  flex items-center justify-center mx-auto transition-colors"
-                    title={allSelected ? "Deselect all" : "Select all"}
-                  >
-                    {allSelected ? (
-                      <CheckSquare size={16} className="text-[#3525cd]" />
-                    ) : isSomeSelected ? (
-                      <MinusSquare size={16} className="text-[#3525cd]" />
-                    ) : (
-                      <Square
-                        size={16}
-                        className="text-slate-300 hover:text-slate-400"
+        <div className="p-4 sm:p-5 space-y-2.5 bg-slate-50/40">
+          {filteredRecipients.length === 0 ? (
+            <div className="py-12 px-4 text-center space-y-2 bg-white rounded-xl border border-slate-200/80">
+              <div className="w-10 h-10 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mx-auto">
+                <User size={18} />
+              </div>
+              <h3 className="text-sm font-bold text-slate-900">
+                No recipients found
+              </h3>
+              <p className="text-xs text-slate-500">
+                Try adjusting your search or filter.
+              </p>
+            </div>
+          ) : (
+            filteredRecipients.map((recipient) => {
+              const isSelected = selectedEmails.includes(recipient.email);
+              const isRequired = recipient.must_respond !== false;
+              const cooldown = getCooldownInfo(recipient.last_reminder_sent);
+
+              const isSingleSending = sendingRecipient === recipient.email;
+              const isMarking = processingRecipient === recipient.email;
+
+              return (
+                <div
+                  key={recipient.email}
+                  className={`bg-white rounded-xl border transition-all duration-150 p-3.5 sm:p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 group ${
+                    isSelected
+                      ? "border-[#3525cd] bg-indigo-50/20 shadow-xs"
+                      : "border-slate-200/90 hover:border-slate-300 hover:shadow-xs"
+                  }`}
+                >
+                  {/* Left: Checkbox + Avatar + Name + Email + Tag */}
+                  <div className="flex items-center gap-3 min-w-0 flex-1">
+                    {/* Select Checkbox */}
+                    <button
+                      type="button"
+                      onClick={() => handleToggleSelectOne(recipient.email)}
+                      className="text-slate-400 hover:text-slate-700 cursor-pointer shrink-0"
+                      aria-label={`Select ${recipient.name}`}
+                    >
+                      {isSelected ? (
+                        <CheckSquare size={16} className="text-[#3525cd]" />
+                      ) : (
+                        <Square
+                          size={16}
+                          className="text-slate-300 group-hover:text-slate-400"
+                        />
+                      )}
+                    </button>
+
+                    {/* Clean Initials Avatar with Live Status Dot */}
+                    <div className="relative shrink-0">
+                      <div
+                        className={`w-9 h-9 rounded-full flex items-center justify-center font-bold text-xs ${
+                          recipient.has_responded
+                            ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                            : "bg-indigo-50 text-[#3525cd] border border-indigo-100"
+                        }`}
+                      >
+                        {<User size={13} />}
+                      </div>
+                      <span
+                        className={`absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full ring-2 ring-white ${
+                          recipient.has_responded
+                            ? "bg-emerald-500"
+                            : "bg-amber-400"
+                        }`}
                       />
-                    )}
-                  </button>
-                </th>
+                    </div>
 
-                <th
-                  className="py-3.5 px-4 cursor-pointer hover:text-slate-900 transition-colors"
-                  onClick={() => handleSortToggle("name")}
-                >
-                  <div className="flex items-center gap-1.5">
-                    <span
-                      className={
-                        sortBy === "name" ? "text-[#3525cd] font-extrabold" : ""
-                      }
-                    >
-                      Recipient
-                    </span>
-                    <ArrowUpDown
-                      size={12}
-                      className={
-                        sortBy === "name" ? "text-[#3525cd]" : "text-slate-400"
-                      }
-                    />
-                  </div>
-                </th>
-
-                <th
-                  className="py-3.5 px-4 cursor-pointer hover:text-slate-900 transition-colors"
-                  onClick={() => handleSortToggle("requirement")}
-                >
-                  <div className="flex items-center gap-1.5">
-                    <span
-                      className={
-                        sortBy === "requirement"
-                          ? "text-[#3525cd] font-extrabold"
-                          : ""
-                      }
-                    >
-                      Obligation
-                    </span>
-                    <ArrowUpDown
-                      size={12}
-                      className={
-                        sortBy === "requirement"
-                          ? "text-[#3525cd]"
-                          : "text-slate-400"
-                      }
-                    />
-                  </div>
-                </th>
-
-                <th
-                  className="py-3.5 px-4 cursor-pointer hover:text-slate-900 transition-colors"
-                  onClick={() => handleSortToggle("status")}
-                >
-                  <div className="flex items-center gap-1.5">
-                    <span
-                      className={
-                        sortBy === "status"
-                          ? "text-[#3525cd] font-extrabold"
-                          : ""
-                      }
-                    >
-                      Response Status
-                    </span>
-                    <ArrowUpDown
-                      size={12}
-                      className={
-                        sortBy === "status"
-                          ? "text-[#3525cd]"
-                          : "text-slate-400"
-                      }
-                    />
-                  </div>
-                </th>
-
-                <th className="py-3.5 px-4">
-                  <span>Follow-up & Cooldown</span>
-                </th>
-
-                <th className="py-3.5 px-4 text-right">
-                  <span>Actions</span>
-                </th>
-              </tr>
-            </thead>
-
-            <tbody className="devide-y devide-slate-100 bg-white">
-              {sortedRecipients.length === 0 ? (
-                <tr>
-                  <td
-                    colSpan={6}
-                    className="py-12 text-center text-slate-400 text-xs"
-                  >
-                    No recipients found
-                  </td>
-                </tr>
-              ) : (
-                sortedRecipients.map((recipient) => {
-                  const isSelected = selectedEmails.includes(recipient.email);
-                  const isRequired = recipient.must_respond !== false;
-                  const cooldown = getCooldownInfo(
-                    recipient.last_reminder_sent,
-                  );
-                  // emails map for sending recipient will be true for some time (till backend call is finished)
-                  const isSingleSending = sendingRecipient === recipient.email;
-                  const isMarking = processingRecipient === recipient.email;
-
-                  return (
-                    <tr
-                      key={recipient.email}
-                      className={`hover:bg-slate-50/80 transition-colors text-xs font-sans ${
-                        isSelected ? "bg-indigo-50/40" : ""
-                      }`}
-                    >
-                      {/* checkbox */}
-                      <td className="py-3 px-4 text-center">
-                        <button
-                          type="button"
-                          onClick={() => handleToggleSelectOne(recipient.email)}
-                          className="text-slate-400 hover:text-slate-700 cursor-pointer flex items-center justify-center mx-auto transition-colors"
-                        >
-                          {isSelected ? (
-                            <CheckSquare size={16} className="text-[#3525cd]" />
-                          ) : (
-                            <Square
-                              size={16}
-                              className="text-slate-300 hover:text-slate-400"
-                            />
-                          )}
-                        </button>
-                      </td>
-
-                      {/* recipient profile */}
-                      <td className="py-3 px-4">
-                        <div className="flex items-center gap-3">
-                          <div
-                            className={`w-8 h-8 rounded-xl flex items-center justify-center font-bold text-xs shrink-0 border ${
-                              recipient.has_responded
-                                ? "bg-emerald-50 text-emerald-700 border-emerald-200"
-                                : "bg-indigo-50 text-[#3525cd] border-indigo-100"
-                            }`}
-                          >
-                            {<User size={14} />}
-                          </div>
-                          <div className="min-w-0">
-                            <h4 className="font-bold text-slate-900 truncate text-xs sm:text-sm">
-                              {recipient.name}
-                            </h4>
-                            <p className="font-mono text-[11px] text-slate-500 truncate">
-                              {recipient.email}
-                            </p>
-                          </div>
-                        </div>
-                      </td>
-
-                      {/* requirement role */}
-                      <td className="py-3 px-4">
+                    {/* Name, Email & Requirement Badge */}
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <h4 className="text-xs sm:text-sm font-semibold text-slate-900 truncate">
+                          {recipient.name}
+                        </h4>
                         {isRequired ? (
-                          <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-indigo-50 text-[#3525cd] border border-indigo-100">
+                          <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-slate-100 text-slate-600">
                             Required
                           </span>
                         ) : (
-                          <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-mono font-medium text-slate-500 bg-slate-100 border border-slate-200">
+                          <span className="px-1.5 py-0.5 rounded text-[10px] font-medium text-slate-400 bg-slate-50">
                             Optional
                           </span>
                         )}
-                      </td>
+                      </div>
+                      <div className="flex items-center gap-1.5 text-xs text-slate-400">
+                        <span className="truncate text-[11px]">
+                          {recipient.email}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
 
-                      {/* status */}
-                      <td className="py-3 px-4">
-                        {recipient.has_responded ? (
-                          <span className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200/80 px-2.5 py-1 rounded-full">
-                            <CheckCircle2
-                              size={13}
-                              className="text-emerald-600"
-                            />
-                            <span>Responded</span>
-                          </span>
-                        ) : (
-                          <span className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-800 bg-amber-50 border border-amber-200/80 px-2.5 py-1 rounded-full">
-                            <Clock
-                              size={13}
-                              className="text-amber-600 animate-pulse"
-                            />
-                            <span>Awaiting Reply</span>
-                          </span>
-                        )}
-                      </td>
+                  {/* Right: Clean Status Capsule & Direct Actions */}
+                  <div className="flex items-center justify-between sm:justify-end gap-2.5 shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-100">
+                    {/* Status Pill */}
+                    {recipient.has_responded ? (
+                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200/70">
+                        <Check size={11} className="stroke-[2.5]" />
+                        <span>Responded</span>
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200/70">
+                        <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
+                        <span>Awaiting</span>
+                      </span>
+                    )}
 
-                      {/* cooldown info */}
-                      <td className="py-3 px-4 text-slate-500 text-[11px]">
-                        {!recipient.has_responded ? (
-                          cooldown.isEligible ? (
-                            <span className="text-emerald-700 font-semibold inline-flex items-center gap-1 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-md">
-                              <Sparkles
-                                size={11}
-                                className="text-emerald-600"
-                              />
-                              Ready for follow-up
-                            </span>
-                          ) : (
-                            <span className="text-slate-600 inline-flex items-center gap-1">
-                              <Info size={11} className="text-amber-500" />
-                              Cooldown: {cooldown.timeRemainingText}
-                            </span>
-                          )
-                        ) : (
-                          <span className="text-slate-400">—</span>
-                        )}
-                      </td>
-
-                      {/* action button */}
-                      <td className="py-3 px-4 text-right">
-                        <div className="flex items-center justify-end gap-1.5">
-                          {!recipient.has_responded ? (
-                            <>
-                              {cooldown.isEligible ? (
-                                <button
-                                  type="button"
-                                  onClick={() =>
-                                    onSendReminder(recipient.email)
-                                  }
-                                  disabled={isSingleSending}
-                                  className="bg-[#3525cd] hover:bg-[#281ca8] active:bg-[#1f1587] disabled:opacity-75 text-white py-1 px-3 rounded-lg font-sans text-[11px]  font-semibold flex items-center gap-1.5 shadow-2xs transition-all cursor-pointer"
-                                  title="Send individual reminder email"
-                                >
-                                  {isSingleSending ? (
-                                    <>
-                                      <Loader2
-                                        size={10}
-                                        className="animate-spin text-white"
-                                      />
-                                      <span>Sending...</span>
-                                    </>
-                                  ) : (
-                                    <>
-                                      <Send
-                                        size={11}
-                                        className="shrink-0 translate-y-[0.5px]"
-                                      />
-                                      <span className="leading-none">
-                                        Send Reminder
-                                      </span>
-                                    </>
-                                  )}
-                                </button>
-                              ) : (
-                                <button
-                                  type="button"
-                                  disabled
-                                  className="bg-slate-100 text-slate-400 border border-slate-200/80 py-1 px-2 rounded-lg text-[11px] font-medium cursor-not-allowed"
-                                  title={
-                                    cooldown.timeRemainingText || undefined
-                                  }
-                                >
-                                  On cooldown
-                                </button>
-                              )}
-
-                              <button
-                                type="button"
-                                onClick={() =>
-                                  onToggleResponse(recipient.email)
-                                }
-                                className="bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 py-1 px-2 rounded-lg font-semibold text-[11px] flex items-center gap-1 transition-all cursor-pointer"
-                                title="Mark manually as responded"
-                              >
-                                {isMarking ? (
-                                  <>
-                                    <Loader2
-                                      size={12}
-                                      className="animate-spin text-white"
-                                    />
-                                    <span>Marking...</span>
-                                  </>
-                                ) : (
-                                  <>
-                                    <Check size={13} className="stroke-2.5" />
-                                    <span className="hidden sm:inline">
-                                      Done
-                                    </span>
-                                  </>
-                                )}
-                              </button>
-                            </>
-                          ) : (
+                    {/* Actions */}
+                    <div className="flex items-center gap-1.5">
+                      {!recipient.has_responded ? (
+                        <>
+                          {cooldown.isEligible ? (
                             <button
                               type="button"
-                              onClick={() => onUndoResponded(recipient.email)}
-                              className="bg-white hover:bg-slate-50 text-slate-600 border border-slate-200 py-1 px-2.5 rounded-lg text-[11px] font-medium flex items-center gap-1 transition-all cursor-pointer shadow-2xs"
-                              title="Undo response status"
+                              onClick={() => onSendReminder(recipient.email)}
+                              disabled={isSingleSending}
+                              className="bg-[#3525cd] hover:bg-[#281ca8] text-white py-1.5 px-3 rounded-lg font-semibold text-xs flex items-center gap-1.5 transition-all cursor-pointer shadow-2xs active:scale-[0.98]"
+                              title="Send nudge email"
                             >
-                              {isMarking ? (
+                              {isSingleSending ? (
                                 <>
-                                  <Loader2 size={12} className="animate-spin" />
-                                  <span>Undoing...</span>
+                                  <Loader2
+                                    size={10}
+                                    className="animate-spin text-white"
+                                  />
+                                  <span>Sending...</span>
                                 </>
                               ) : (
                                 <>
-                                  <RotateCcw size={12} />
-                                  <span>Undo</span>
+                                  <Send
+                                    size={11}
+                                    className="shrink-0 translate-y-[0.5px]"
+                                  />
+                                  <span className="leading-none">
+                                    Send Reminder
+                                  </span>
                                 </>
                               )}
                             </button>
+                          ) : (
+                            <span
+                              className="bg-slate-100 text-slate-500 px-2.5 py-1.5 rounded-lg text-xs font-medium inline-flex items-center gap-1 cursor-default"
+                              title={
+                                cooldown.timeRemainingText || "In cooldown"
+                              }
+                            >
+                              <Clock size={11} className="text-slate-400" />
+                              <span>
+                                {cooldown.timeRemainingText || "Cooldown"}
+                              </span>
+                            </span>
                           )}
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })
-              )}
-            </tbody>
-          </table>
+
+                          <button
+                            type="button"
+                            onClick={() => onToggleResponse(recipient.email)}
+                            className="bg-white hover:bg-slate-50 text-slate-600 hover:text-slate-900 border border-slate-200 py-1.5 px-2.5 rounded-lg font-medium text-xs flex items-center gap-1 transition-all cursor-pointer"
+                            title="Mark response as complete"
+                          >
+                            {isMarking ? (
+                              <>
+                                <Loader2
+                                  size={12}
+                                  className="animate-spin text-white"
+                                />
+                                <span>Marking...</span>
+                              </>
+                            ) : (
+                              <>
+                                <Check size={13} className="stroke-2.5" />
+                                <span className="hidden sm:inline">Done</span>
+                              </>
+                            )}
+                          </button>
+                        </>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => onUndoResponded(recipient.email)}
+                          className="bg-white hover:bg-slate-50 text-slate-500 hover:text-slate-800 border border-slate-200 py-1.5 px-2.5 rounded-lg text-xs font-medium flex items-center gap-1 transition-all cursor-pointer"
+                          title="Revert to awaiting response"
+                        >
+                          {isMarking ? (
+                            <>
+                              <Loader2 size={12} className="animate-spin" />
+                              <span>Undoing...</span>
+                            </>
+                          ) : (
+                            <>
+                              <RotateCcw size={12} />
+                              <span>Undo</span>
+                            </>
+                          )}
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              );
+            })
+          )}
         </div>
 
         {/* table footer */}
-        <div className="p-4 border-t border-slate-200/80 bg-slate-50/80 flex items-center justify-between gap-3 text-xs text-slate-600 font-sans">
-          <div className="flex items-center gap-3"></div>
+        <div className="px-4 sm:px-5 py-3 bg-slate-50/80 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={handleToggleSelectAll}
+              className="inline-flex items-center gap-1.5 font-medium text-slate-700 hover:text-slate-900 cursor-pointer select-none"
+            >
+              {allSelected ? (
+                <CheckSquare size={14} className="text-[#3525cd]" />
+              ) : isSomeSelected ? (
+                <MinusSquare size={14} className="text-[#3525cd]" />
+              ) : (
+                <Square
+                  size={14}
+                  className="text-slate-300 hover:text-slate-400"
+                />
+              )}
+              <span>Select all</span>
+            </button>
+          </div>
+
+          <span>
+            {respondedCount} of {totalCount} completed (
+            {Math.round((respondedCount / (totalCount || 1)) * 100)}%)
+          </span>
         </div>
       </div>
     </>

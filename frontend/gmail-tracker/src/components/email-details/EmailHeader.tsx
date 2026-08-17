@@ -136,7 +136,7 @@ const EmailHeader = ({
         </div>
       </div>
 
-      <div className="px-5 sm:px-6 py-2.5 bg-white border-t border-slate-200/80 flex items-center justify-between gap-4">
+      <div className="px-5 sm:px-6 py-2.5 bg-slate-50/80 border-t border-slate-200/80 flex items-center justify-between gap-4">
         <nav className="flex items-center gap-1 select-none overflow-x-auto w-full sm:w-auto">
           {/* Lens1: Recipients */}
           <button
