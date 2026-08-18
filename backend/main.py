@@ -6,7 +6,7 @@ from email.utils import parsedate_to_datetime
 from urllib.parse import urlencode
 from fastapi import FastAPI, Query, Depends, HTTPException, Body, WebSocket
 from websocket import websocket_endpoint
-from websocket import manager
+from websocket import manager, WebSocketDisconnect
 from fastapi.responses import RedirectResponse
 from typing import List, Optional
 from datetime import datetime, timedelta
@@ -101,7 +101,7 @@ scopes = [
 async def lifespan(app: FastAPI):
     # Startup: create tables and start the scheduler
     create_tables()
-    # start_scheduler()
+    start_scheduler()
     print(
         "Application started - Background scheduler is running to check emails every 10 minutes"
     )
@@ -109,7 +109,7 @@ async def lifespan(app: FastAPI):
     yield  # This is where the application runs
 
     # Shutdown: stop the scheduler
-    # stop_scheduler()
+    stop_scheduler()
     print("Application shutting down - Background scheduler stopped")
 
 
@@ -131,7 +131,18 @@ app.add_middleware(
 async def websocket_route(websocket: WebSocket):
     await websocket_endpoint(websocket)
 
+    try:
+        while True:
+            # Keep the connection alive.
+            # We don't currently need messages from the frontend.
+            await websocket.receive_text()
 
+    except WebSocketDisconnect:
+        manager.disconnect(websocket)
+
+    except Exception as e:
+        print(f"WebSocket error: {e}")
+        manager.disconnect(websocket)
 
 
 @app.get("/")

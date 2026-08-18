@@ -452,11 +452,6 @@ const RecipientTrackingTable = ({
               <span>Select all</span>
             </button>
           </div>
-
-          <span>
-            {respondedCount} of {totalCount} completed (
-            {Math.round((respondedCount / (totalCount || 1)) * 100)}%)
-          </span>
         </div>
       </div>
     </>

@@ -471,7 +471,8 @@ class EmailTrackerService:
             response_id: Gmail message ID of the response
 
         Returns:
-            True if a recipient was updated, False otherwise
+            return information about what happened so the caller can later decide
+            whether to broadcast a WebSocket event.
         """
         # Try to find a recipient with this email address
         recipient = db.query(Recipient).filter(Recipient.email == sender_email).first()
@@ -489,11 +490,14 @@ class EmailTrackerService:
         )
 
         if not association:
-            return False
+            return {"response_detected": False, "tracking_completed": False}
 
         # If recipient already marked as responded, do nothing boom, this is where we know new responses
         if association.has_responded:
-            return True
+            return {
+                "response_detected": False,
+                "tracking_completed": False,
+            }
 
         # Mark recipient as responded
         association.has_responded = True
@@ -504,42 +508,49 @@ class EmailTrackerService:
         tracked_email = (
             db.query(TrackedEmail).filter(TrackedEmail.id == tracked_email_id).first()
         )
-        if tracked_email:
-            # Check if all required recipients have responded
-            required_recipients = (
-                db.query(TrackedEmailRecipient)
-                .filter(
-                    TrackedEmailRecipient.tracked_email_id == tracked_email_id,
-                    TrackedEmailRecipient.must_respond is True,
-                )
-                .all()
-            )
 
-            all_responded = all(
-                recipient.has_responded for recipient in required_recipients
-            )
 
-            # If all required recipients have responded, mark the email as done
-            if all_responded and len(required_recipients) > 0:
-                tracked_email.is_done = True
-                db.add(tracked_email)
+        if not tracked_email:
+            db.commit()
+
+            return {
+                "response_detected": True,
+                "tracking_completed": False,
+            }
+
+        # Check if all required recipients have responded
+        required_recipients = (
+            db.query(TrackedEmailRecipient)
+            .filter(
+                TrackedEmailRecipient.tracked_email_id == tracked_email_id,
+                TrackedEmailRecipient.must_respond.is_(True),
+            )
+            .all()
+        )
+
+        all_responded = (len(required_recipients) > 0 and all(
+            recipient.has_responded for recipient in required_recipients
+        ))
+
+        # remember whether the email was already completed
+        was_already_done = tracked_email.is_done
+
+        tracking_completed = False
+
+        # If all required recipients have responded, mark the email as done and notify the user?,
+        if all_responded and not was_already_done:
+            tracked_email.is_done = True
+            db.add(tracked_email)
+
+            tracking_completed = True
 
         # Commit changes
         db.commit()
 
-        # Send notification about the new response (if needed)
-        # but i dont know how to implement this for the moment
-        try:
-            from scheduler import send_notification
-
-            send_notification(
-                "New Response Detected",
-                f"Recipient {sender_email} has responded to email '{tracked_email.subject}'",
-            )
-        except ImportError:
-            # If notification system is not available, just log the info
-            print(
-                f"Recipient {sender_email} has responded to email ID {tracked_email_id}"
-            )
-
-        return True
+        return {
+            "response_detected": True,
+            "tracking_completed": tracking_completed,
+            "tracked_email_id": tracked_email.id,
+            "recipient_email": sender_email,
+            "subject": tracked_email.subject
+        }

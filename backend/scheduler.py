@@ -8,11 +8,13 @@ from datetime import datetime
 import subprocess
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.interval import IntervalTrigger
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
 import notifiers
 
 from gmail_services import GmailService
 from models import SessionLocal
 from db_services import EmailTrackerService
+from websocket import manager
 
 # Configure logging
 logging.basicConfig(
@@ -103,14 +105,14 @@ def send_notification(title: str, message: str) -> bool:
         logger.warning(
             f"No notification methods available. Message logged only: {title} - {message}"
         )
-        return True  # Return True since we at least logged the notification
+        return True  # Return True since we at least logged the notification sadly
 
     except Exception as e:
         logger.error(f"Failed to send notification: {str(e)}")
         return False
 
 
-def check_email_responses():
+async def check_email_responses():
     """Check for new responses to tracked emails.
 
     This function is called by the scheduler and should handle any exceptions gracefully
@@ -149,25 +151,46 @@ def check_email_responses():
                     # Extract email address from sender (which might be in format "Name <email@domain.com>")
                     email_address = extract_email_address(response_sender)
 
-                    if email_address:
-                        # Check if this sender is one of our tracked recipients
-                        EmailTrackerService.check_and_mark_responded(
-                            db=db_session,
-                            tracked_email_id=email.id,
-                            sender_email=email_address,
-                            response_id=response_id,
+                    # Check if this sender is one of our tracked recipients
+                    result = EmailTrackerService.check_and_mark_responded(
+                        db=db_session,
+                        tracked_email_id=email.id,
+                        sender_email=email_address,
+                        response_id=response_id,
+                    )
+
+                    if result["response_detected"]:
+                         await manager.broadcast(
+                             {
+                                "type": "response_detected",
+                                "tracked_email_id": result["tracked_email_id"],
+                                "recipient_email": result["recipient_email"],
+                                "subject": result["subject"],
+                            }
+                         )
+
+                    if (result["tracking_completed"]):
+                        await manager.broadcast(
+                            {
+                                "type": "tracking_completed",
+                                "tracked_email_id": result["tracked_email_id"],
+                                "subject": result["subject"],
+                            }
                         )
+
             except Exception as e:
                 print(f"Error checking responses for email {email.id}: {str(e)}")
                 continue
 
-        db_session.close()
+            finally:
+                db_session.close()
+
     except Exception as e:
         print(f"Error in check_email_responses: {str(e)}")
 
 
 # Create and configure the scheduler
-scheduler = BackgroundScheduler()
+scheduler = AsyncIOScheduler()
 
 
 def start_scheduler():
@@ -177,7 +200,7 @@ def start_scheduler():
         # Check emails every 10 minutes
         scheduler.add_job(
             check_email_responses,
-            trigger=IntervalTrigger(minutes=10),  # Changed from 2 to 10 minutes
+            trigger=IntervalTrigger(seconds=10),  # Changed from 2 to 10 minutes
             id="check_email_responses",
             name="Check for email responses every 10 minutes",
             replace_existing=True,
