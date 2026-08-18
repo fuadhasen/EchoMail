@@ -1,21 +1,16 @@
 import { useToast } from "@/context/ToastContext";
-import type { TrackedEmail } from "@/data/mockTrackedEmails";
 import type { TrackedEmailB } from "@/services/trackedEmail";
-import { getTrackedEmailStatus } from "@/utils/statusFilter";
 import {
   BellRing,
   CheckCircle2,
   Clock,
   Cpu,
-  Pause,
-  Play,
   Radio,
   RefreshCw,
   ShieldCheck,
   Sparkles,
-  Zap,
 } from "lucide-react";
-import React, { Activity, useState } from "react";
+import { Activity, useState } from "react";
 
 interface AutomaticDetectionCardProps {
   email: TrackedEmailB;
@@ -33,8 +28,6 @@ const AutomaticDetectionCard = ({
 
   const [isSyncing, setIsSyncing] = useState(false);
   const [lastSyncText, setLastSyncText] = useState("2m ago");
-  const [isQueuePaused, setIsQueuePaused] = useState(false);
-  const [isDetectionPaused, setIsDetectionPaused] = useState(false);
 
   const total = email.recipients.length;
   const responded = email.recipients.filter((r) => r.has_responded).length;
@@ -51,28 +44,6 @@ const AutomaticDetectionCard = ({
         "info",
       );
     }, 600);
-  };
-
-  const handleTogglePause = () => {
-    const nextState = !isQueuePaused;
-    setIsQueuePaused(nextState);
-    triggerToast(
-      nextState
-        ? "Automated reminder queue paused."
-        : "Automated reminder queue resumed & active.",
-      nextState ? "info" : "success",
-    );
-  };
-
-  const handleToggelDetectionPause = () => {
-    const nextState = !isDetectionPaused;
-    setIsDetectionPaused(nextState);
-    triggerToast(
-      nextState
-        ? "Automatic response detection paused."
-        : "Automatic response detection resumed & active.",
-      nextState ? "info" : "success",
-    );
   };
 
   return (
@@ -167,8 +138,8 @@ const AutomaticDetectionCard = ({
       {activeTab === "detection" && (
         <div className="space-y-3 pt-0.5">
           {/* main status banner for detection */}
-          <div className="bg-indigo-50/50 border border-indigo-200/70  rounded-xl p-3.5 flex items-center justify-between gap-3">
-            <div className="space-y-0.5 min-w-0">
+          {/* <div className="bg-indigo-50/50 border border-indigo-200/70  rounded-xl p-3.5 flex items-center justify-between gap-3"> */}
+          {/* <div className="space-y-0.5 min-w-0">
               <div className="flex items-center gap-2">
                 <Radio
                   size={14}
@@ -189,9 +160,9 @@ const AutomaticDetectionCard = ({
                   ? "Auto response listener is suspended. Replies will not auto-sync."
                   : `Scanning outbox • ${responded} of ${total} responses captured`}
               </p>
-            </div>
+            </div> */}
 
-            <button
+          {/* <button
               type="button"
               onClick={handleToggelDetectionPause}
               className={`text-[11px] font-semibold px-2.5 py-1 rounded-lg border transition-all cursor-pointer flex items-center gap-1.5 shrink-0 ${
@@ -211,8 +182,8 @@ const AutomaticDetectionCard = ({
                   <span>Pause</span>
                 </>
               )}
-            </button>
-          </div>
+            </button> */}
+          {/* </div> */}
 
           {/* Technical detection metadata */}
           <div className="bg-slate-50/80 border border-slate-200/60 rounded-xl p-3 space-y-2 text-xs font-sans">
@@ -253,8 +224,8 @@ const AutomaticDetectionCard = ({
       {activeTab === "reminders" && (
         <div className="space-y-3 pt-0.5 font-sans">
           {/* main status */}
-          <div className="bg-amber-50/50 border border-amber-200/70 rounded-xl p-3.5 flex items-center justify-between gap-3">
-            <div className="space-y-0.5 min-w-0">
+          {/* <div className="bg-amber-50/50 border border-amber-200/70 rounded-xl p-3.5 flex items-center justify-between gap-3"> */}
+          {/* <div className="space-y-0.5 min-w-0">
               <div className="flex items-center gap-2">
                 <BellRing size={14} className="text-amber-600 shrink-0" />
                 <span className="text-xs font-bold text-slate-900 tracking-tight">
@@ -270,9 +241,9 @@ const AutomaticDetectionCard = ({
                     ? "Next auto-dispatch scheduled for Today at 09:00 AM"
                     : "Auto-reminder queue is complete and inactive."}
               </p>
-            </div>
+            </div> */}
 
-            {pending > 0 && (
+          {/* {pending > 0 && (
               <button
                 type="button"
                 onClick={handleTogglePause}
@@ -294,8 +265,8 @@ const AutomaticDetectionCard = ({
                   </>
                 )}
               </button>
-            )}
-          </div>
+            )} */}
+          {/* </div> */}
 
           {/* Reminder Rule and cadence information */}
           <div className="bg-slate-50/80 border border-slate-200/60 rounded-xl p-3 space-y-2 text-xs font-sans">

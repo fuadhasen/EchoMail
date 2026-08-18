@@ -1,56 +1,104 @@
-import React, { useEffect } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import { useEffect } from "react";
 
 const useEchomailWebSocket = () => {
+  const queryClient = useQueryClient();
+
   useEffect(() => {
-    const socket = new WebSocket("ws://localhost:8000/ws");
+    let socket: WebSocket | null = null;
+    let reconnectTimeout: ReturnType<typeof setTimeout> | null = null;
+    let shouldReconnect = true;
 
-    socket.onopen = () => {
-      console.log("Echomail web socket connected");
-    };
+    const connect = () => {
+      console.log("Connecting to EchoMail WebSocket...");
 
-    socket.onmessage = async (event) => {
-      console.log("everything is fine");
-      const data = JSON.parse(event.data);
+      socket = new WebSocket("ws://localhost:8000/ws");
 
-      console.log("Web socket event", data);
+      socket.onopen = () => {
+        console.log("EchoMail WebSocket connected");
+      };
 
-      if (data.type === "response_detected") {
-        if (Notification.permission === "default") {
-          await Notification.requestPermission();
-        }
+      socket.onmessage = async (event) => {
+        const data = JSON.parse(event.data);
 
-        if (Notification.permission === "granted") {
-          new Notification("EchoMail — New Response", {
-            body: `${data.recipient_email} responded to "${data.subject}"`,
+        console.log("WebSocket event:", data);
+
+        if (data.type === "response_detected") {
+          // Keep your React Query data synchronized
+          queryClient.invalidateQueries({
+            queryKey: ["tracked_emails", data.tracked_email_id],
           });
-        }
-      }
 
-      if (data.type === "tracking_completed") {
-        if (Notification.permission === "default") {
-          await Notification.requestPermission();
+          // Browser notification
+          if (Notification.permission === "default") {
+            await Notification.requestPermission();
+          }
+
+          if (Notification.permission === "granted") {
+            new Notification("EchoMail — New Response", {
+              body: `${data.recipient_email} responded to "${data.subject}"`,
+            });
+          }
         }
 
-        if (Notification.permission === "granted") {
-          new Notification("EchoMail — Tracking Complete", {
-            body: `Everyone has responded to "${data.subject}".`,
+        if (data.type === "tracking_completed") {
+          queryClient.invalidateQueries({
+            queryKey: ["tracked_emails", data.tracked_email_id],
           });
+
+          if (Notification.permission === "default") {
+            await Notification.requestPermission();
+          }
+
+          if (Notification.permission === "granted") {
+            new Notification("EchoMail — Tracking Complete", {
+              body: `Everyone has responded to "${data.subject}".`,
+            });
+          }
         }
-      }
+      };
+
+      socket.onerror = (error) => {
+        console.error(" EchoMail WebSocket error:", error);
+      };
+
+      socket.onclose = (event) => {
+        console.log(
+          "WebSocket disconnected",
+          "code:",
+          event.code,
+          "reason:",
+          event.reason,
+        );
+
+        if (!shouldReconnect) {
+          return;
+        }
+
+        console.log("Reconnecting in 3 seconds...");
+
+        reconnectTimeout = setTimeout(() => {
+          connect();
+        }, 3000);
+      };
     };
 
-    socket.onclose = () => {
-      console.log("Echomail web socket disconnected");
-    };
+    // Initial connection
+    connect();
 
-    socket.onerror = (error) => {
-      console.error("EchoMail WebSocket error:", error);
-    };
-
+    // Cleanup
     return () => {
-      // socket.onclose();
+      shouldReconnect = false;
+
+      if (reconnectTimeout) {
+        clearTimeout(reconnectTimeout);
+      }
+
+      if (socket) {
+        socket.close();
+      }
     };
-  }, []);
+  }, [queryClient]);
 };
 
 export default useEchomailWebSocket;
