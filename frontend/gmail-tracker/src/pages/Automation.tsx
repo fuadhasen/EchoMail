@@ -1,7 +1,11 @@
 import { useToast } from "@/context/ToastContext";
 import {
+  AlertCircle,
   ArrowRight,
+  Check,
   CheckCircle2,
+  ChevronDown,
+  ChevronUp,
   Clock,
   Cpu,
   Pause,
@@ -316,6 +320,26 @@ const Automation = () => {
     return events;
   }, [emails]);
 
+  const filteredEvents = useMemo(() => {
+    if (filterType === "all") return allEvents;
+    return allEvents.filter((ev) => ev.type === filterType);
+  }, [allEvents, filterType]);
+
+  // compact slice
+  const displayedEvents = useMemo(() => {
+    if (showAllActivity) return filteredEvents;
+    return filteredEvents.slice(0, 4);
+  }, [filteredEvents, showAllActivity]);
+
+  const counts = useMemo(() => {
+    return {
+      all: allEvents.length,
+      response: allEvents.filter((e) => e.type === "response").length,
+      reminder: allEvents.filter((e) => e.type === "reminder").length,
+      completed: allEvents.filter((e) => e.type === "completed").length,
+    };
+  }, [allEvents]);
+
   const handleManualSync = () => {
     if (isSyncing) return;
     setIsSyncing(true);
@@ -486,187 +510,6 @@ const Automation = () => {
       <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
         {/* left */}
         <div className="lg:col-span-6 space-y-5 flex flex-col justify-between">
-          {/* Automation status and cadence */}
-          {/* <section className="w-full bg-white border border-slate-200/80 rounded-xl p-4 sm:p-5 shadow-2xs space-y-3.5">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-              <div>
-                <h2 className="text-xs sm:text-sm font-bold text-slate-900 tracking-tight">
-                  Automation Status & Cadence
-                </h2>
-                <p className="text-[11px] text-slate-500 font-normal">
-                  Real-time execution status and schedules for core engines
-                </p>
-              </div>
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-[10px] sm:text-[11px] font-semibold border border-emerald-200/70 shrink-0">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                Engine Operational
-              </span>
-            </div>
-
-            <div className="divide-y divide-slate-100 border border-slate-200/80 rounded-lg overflow-hidden bg-white">
-              {/* engine 1: response detection */}
-          {/* <div className="p-3 sm:p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-slate-50/50 transition-colors">
-                <div className="flex items-center gap-3 min-w-0  sm:w-5/12">
-                  <div className="w-8 h-8 rounded-lg bg-indigo-50 border border-indigo-100 text-[#3525cd] flex items-center justify-center shrink-0">
-                    <Radio size={16} />
-                  </div>
-                  <div className="min-w-0">
-                    <div className="flex items-center gap-2">
-                      <h3 className="text-xs sm:text-sm font-bold text-slate-900 truncate">
-                        Response Detection
-                      </h3>
-
-                      <span
-                        className={`inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.2 rounded-full border shrink-0 ${
-                          detectionEnabled
-                            ? "text-emerald-700 bg-emerald-50 border-emerald-200/80"
-                            : "text-amber-700 bg-amber-50 border-amber-200/80"
-                        }`}
-                      >
-                        <span
-                          className={`w-1.5 h-1.5 rounded-full ${detectionEnabled ? "bg-emerald-500 animate-pulse" : "bg-amber-500"}`}
-                        />
-                        {detectionEnabled ? "Active" : "Paused"}
-                      </span>
-                    </div>
-                    <p className="text-[11px] text-slate-500 font-normal truncate mt-0.5">
-                      Inbound reply monitoring engine
-                    </p>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-3 gap-2  sm:gap-4 sm:w-5/12 bg-slate-50/80 sm:bg-transparent p-2 sm:p-0 rounded-md text-left">
-                  <div>
-                    <span className="text-[9px] text-slate-400 block font-semibold uppercase tracking-wider">
-                      Cadence
-                    </span>
-                    <span className="text-xs font-bold text-slate-800 mt-0.5 block">
-                      Every 5 min
-                    </span>
-                  </div>
-                  <div>
-                    <span className="text-[9px] text-slate-400 block font-semibold uppercase tracking-wider">
-                      Last Check
-                    </span>
-                    <span className="text-xs font-bold text-slate-800 mt-0.5 block">
-                      {lastCheckText}
-                    </span>
-                  </div>
-                  <div>
-                    <span className="text-[9px] text-slate-400 block font-semibold uppercase tracking-wider">
-                      Next Check
-                    </span>
-                    <span
-                      className={`text-xs font-bold mt-0.5 block  ${detectionEnabled ? "text-[#3525cd]" : "text-slate-400"}`}
-                    >
-                      {detectionEnabled ? "in 3 min" : "Paused"}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-end sm:w-2/12 shrink-0">
-                  <button
-                    type="button"
-                    onClick={toggleDetection}
-                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-semibold border transition-all cursor-pointer bg-white text-slate-700 border-slate-200 hover:bg-slate-50 hover:border-slate-300 shadow-2xs"
-                  >
-                    {detectionEnabled ? (
-                      <>
-                        <Pause size={12} className="text-slate-500" />
-                        <span>Pause</span>
-                      </>
-                    ) : (
-                      <>
-                        <Play size={12} className="text-emerald-600" />
-                        <span>Resume</span>
-                      </>
-                    )}
-                  </button>
-                </div>
-              </div> */}
-
-          {/* engine 2: autmatic reminder */}
-          {/* <div className="p-3 sm:p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-slate-50/50 transition-colors">
-                <div className="flex items-center gap-3 min-w-0 sm:w-5/12">
-                  <div className="w-8 h-8 rounded-lg bg-indigo-50 border border-indigo-100 text-[#3525cd] flex items-center justify-center shrink-0">
-                    <Clock size={16} />
-                  </div>
-                  <div className="min-w-0">
-                    <div className="flex items-center gap-2">
-                      <h3 className="text-xs sm:text-sm font-bold text-slate-900 truncate">
-                        Automatic Reminders
-                      </h3>
-                      <span
-                        className={`inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.2 rounded-full border shrink-0 ${
-                          remindersEnabled
-                            ? "text-emerald-700 bg-emerald-50 border-emerald-200/80"
-                            : "text-amber-700 bg-amber-50 border-amber-200/80"
-                        }`}
-                      >
-                        <span
-                          className={`w-1.5 h-1.5 rounded-full ${remindersEnabled ? "bg-emerald-500 animate-pulse" : "bg-amber-500"}`}
-                        />
-                        {remindersEnabled ? "Active" : "Paused"}
-                      </span>
-                    </div>
-                    <p className="text-[11px] text-slate-500 font-normal truncate mt-0.5">
-                      Scheduled follow-up dispatch engine
-                    </p>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-3 gap-2 sm:gap-4 sm:w-5/12 bg-slate-50/80 sm:bg-transparent p-2 sm:p-0 rounded-md text-left">
-                  <div>
-                    <span className="text-[9px] text-slate-400 block font-semibold uppercase tracking-wider">
-                      Cadence
-                    </span>
-                    <span className="text-xs font-bold text-slate-800 mt-0.5 block">
-                      Every 24 hrs
-                    </span>
-                  </div>
-                  <div>
-                    <span className="text-[9px] text-slate-400 block font-semibold uppercase tracking-wider">
-                      Last Run
-                    </span>
-                    <span className="text-xs font-bold text-slate-800 mt-0.5 block">
-                      18 min ago
-                    </span>
-                  </div>
-                  <div>
-                    <span className="text-[9px] text-slate-400 block font-semibold uppercase tracking-wider">
-                      Next Run
-                    </span>
-                    <span
-                      className={`text-xs font-bold mt-0.5 block ${remindersEnabled ? "text-[#3525cd]" : "text-slate-400"}`}
-                    >
-                      {remindersEnabled ? "in 6 hrs" : "Paused"}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-end sm:w-2/12 shrink-0">
-                  <button
-                    type="button"
-                    onClick={toggleReminders}
-                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-semibold border transition-all cursor-pointer bg-white text-slate-700 border-slate-200 hover:bg-slate-50 hover:border-slate-300 shadow-2xs"
-                  >
-                    {remindersEnabled ? (
-                      <>
-                        <Pause size={12} className="text-slate-500" />
-                        <span>Pause</span>
-                      </>
-                    ) : (
-                      <>
-                        <Play size={12} className="text-emerald-600" />
-                        <span>Resume</span>
-                      </>
-                    )}
-                  </button>
-                </div>
-              </div> */}
-          {/* </div> */}
-          {/* </section>  */}
-
           {/* Mini Graph */}
           <section className="w-full bg-white border border-slate-200/80 rounded-xl p-4 sm:p-5 shadow-2xs flex flex-col justify-between space-y-3">
             <div className="flex items-start justify-between">
@@ -760,8 +603,9 @@ const Automation = () => {
         </div>
 
         {/* Right */}
-        <div className="lg:col-span-6">
+        <div className="lg:col-span-6 space-y-5">
           <section className="w-full h-full bg-white  border border-slate-200/80 rounded-xl p-4 sm:p-5 shadow-2xs flex flex-col justify-between">
+            {/* header */}
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <div>
                 <h2 className="text-xs sm:text-sm font-bold text-slate-900 tracking-tight">
@@ -772,59 +616,216 @@ const Automation = () => {
                 </p>
               </div>
 
-              <span className="text-[10px] font-mono font-medium text-slate-500 bg-slate-50 border border-slate-200/60 px-2 py-0.5 rounded">
-                Live Log
-              </span>
-            </div>
-
-            <div className="relative flex-1 flex flex-col justify-evenly py-3 my-1">
-              <div className="absolute left-2.75 top-4 bottom-4 w-px bg-slate-200/70 z-0" />
-
-              {recentActivities.map((activity) => (
-                <div
-                  key={activity.id}
-                  className="relative flex items-start gap-3 text-xs z-10 group py-1"
+              <div className="flex flex-wrap items-center gap-1 bg-slate-50 p-1 rounded-xl border border-slate-200/70">
+                <button
+                  onClick={() => setFilterType("all")}
+                  className={`px-2 py-0.5 text-[11px] font-semibold rounded-lg transition-all cursor-pointer ${
+                    filterType === "all"
+                      ? "bg-white text-slate-900 shadow-2xs font-bold"
+                      : "text-slate-500 hover:text-slate-800"
+                  }`}
                 >
-                  <div
-                    className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 border-2 border-white shadow-2xs ${activity.bg}`}
-                  >
-                    {activity.icon}
-                  </div>
+                  All ({counts.all})
+                </button>
 
-                  {/* text content */}
-                  <div className="flex-1 min-w-0 pt-0.5">
-                    <div className="flex items-center justify-between gap-2">
-                      <span className="font-bold text-slate-900 text-xs group-hover:text-[#3525cd] transition-colors truncate">
-                        {activity.title}
-                      </span>
-                      <span className="text-[10px] font-mono font-medium text-slate-400 shrink-0">
-                        {activity.time}
-                      </span>
-                    </div>
-                    <p className="text-[11px] text-slate-500 font-normal leading-relaxed mt-0.5">
-                      {activity.description}
-                    </p>
-                  </div>
-                </div>
-              ))}
+                <button
+                  onClick={() => setFilterType("response")}
+                  className={`px-2 py-0.5 text-[11px] font-semibold rounded-lg transition-all cursor-pointer ${
+                    filterType === "response"
+                      ? "bg-emerald-600 text-white shadow-2xs font-bold"
+                      : "text-slate-500 hover:text-slate-800"
+                  }`}
+                >
+                  Replies ({counts.response})
+                </button>
+
+                <button
+                  onClick={() => setFilterType("reminder")}
+                  className={`px-2 py-0.5 text-[11px] font-semibold rounded-lg transition-all cursor-pointer ${
+                    filterType === "reminder"
+                      ? "bg-amber-600 text-white shadow-2xs font-bold"
+                      : "text-slate-500 hover:text-slate-800"
+                  }`}
+                >
+                  Reminders ({counts.reminder})
+                </button>
+              </div>
             </div>
 
+            {/* time line stream */}
+            <div className="relative pl-7 sm:pl-8 pt-1">
+              <div
+                className="absolute left-3.25 top-3 bottom-3 w-px bg-slate-200/90"
+                aria-hidden="true"
+              />
+
+              {displayedEvents.length === 0 ? (
+                <div className="py-8 text-center text-slate-400 text-xs">
+                  No activity found for the selected filter.
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {displayedEvents.map((event) => {
+                    return (
+                      <div
+                        key={event.id}
+                        onClick={() =>
+                          navigate(`/tracked-emails/${event.emailId}`)
+                        }
+                        className="relative group transition-all cursor-pointer"
+                      >
+                        <div className="absolute -left-7 sm:-left-8 top-3.5 w-6.75 flex items-center justify-center">
+                          {event.type === "sent" && (
+                            <span className="w-3 h-3 rounded-full bg-slate-900 ring-4 ring-white shadow-2xs" />
+                          )}
+
+                          {event.type === "response" && (
+                            <span className="w-3 h-3 rounded-full bg-emerald-600 ring-4 ring-white shadow-2xs flex items-center justify-center">
+                              <span className="w-1 h-1 rounded-full bg-white" />
+                            </span>
+                          )}
+
+                          {event.type === "reminder" && (
+                            <span className="w-2.5 h-2.5 rounded-full bg-amber-500 ring-4 ring-white shadow-2xs" />
+                          )}
+
+                          {event.type === "completed" && (
+                            <span className="w-3.5 h-3.5 rounded-full bg-emerald-600 text-white flex items-center justify-center ring-4 ring-white shadow-2xs">
+                              <Check size={9} className="stroke-3" />
+                            </span>
+                          )}
+                        </div>
+
+                        <div className="p-3 rounded-xl border border-slate-100/90 hover:border-slate-300/80 bg-slate-50/40 hover:bg-slate-50/90 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-4 shadow-2xs">
+                          {/* left column */}
+                          <div className="sm:w-28 md:w-32 shrink-0 flex sm:flex-col items-baseline sm:items-start justify-between sm:justify-center gap-0.5">
+                            <span className="text-[11px] font-semibold text-slate-800 tracking-tight">
+                              {event.dateLabel}
+                            </span>
+                            <span className="font-mono text-[10px] text-slate-400 font-medium">
+                              {event.timeLabel}
+                            </span>
+                          </div>
+
+                          {/* middle */}
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-1.5 mb-0.5">
+                              <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">
+                                Thread
+                              </span>
+                              <span className="text-[11px] font-semibold text-[#3525cd] hover:underline truncate max-w-[190px] sm:max-w-xs">
+                                {event.emailSubject}
+                              </span>
+                            </div>
+
+                            <div className="flex items-center gap-1.5 ">
+                              <h3
+                                className={`text-xs font-semibold tracking-tight truncate ${
+                                  event.type === "completed"
+                                    ? "text-slate-900 font-bold"
+                                    : "text-slate-900"
+                                }`}
+                              >
+                                {event.title}
+                              </h3>
+                              {event.type === "response" && (
+                                <span
+                                  className="inline-flex items-center text-emerald-600 font-bold text-[11px]"
+                                  title="Response confirmed"
+                                >
+                                  ✓
+                                </span>
+                              )}
+                            </div>
+
+                            <p className="text-[11px] text-slate-500 truncate mt-0.5">
+                              {event.meta}
+                            </p>
+                          </div>
+
+                          <div className="shrink-0 flex items-center gap-1.5 sm:justify-end">
+                            {event.type === "response" && event.duration && (
+                              <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[10px] font-mono font-medium text-slate-600 bg-slate-100 border border-slate-200/80">
+                                <Clock
+                                  size={10}
+                                  className="text-emerald-600 shrink-0"
+                                />
+                                <span>{event.duration}</span>
+                              </div>
+                            )}
+
+                            {event.type === "sent" && (
+                              <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[10px] font-mono font-medium text-slate-600 bg-slate-100 border border-slate-200/80">
+                                <Send
+                                  size={10}
+                                  className="text-slate-400 shrink-0"
+                                />
+                                <span>{event.badgeText}</span>
+                              </div>
+                            )}
+
+                            {event.type === "reminder" && (
+                              <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[10px] font-mono font-medium text-amber-700 bg-amber-50 border border-amber-200/70">
+                                <AlertCircle
+                                  size={10}
+                                  className="text-amber-500 shrink-0"
+                                />
+                                <span>Sent</span>
+                              </div>
+                            )}
+
+                            {event.type === "completed" && (
+                              <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[10px] font-mono font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200/80">
+                                <CheckCircle2
+                                  size={10}
+                                  className="text-emerald-600 shrink-0"
+                                />
+                                <span>Complete</span>
+                              </div>
+                            )}
+
+                            <div className="text-slate-400 group-hover:text-[#3525cd] transition-colors pl-1">
+                              <ArrowRight
+                                size={13}
+                                className="group-hover:translate-x-0.5 transition-transform"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            {/* footer */}
             <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
-              <span className="text-[10px] text-slate-400 font-medium">
-                Showing Last 4 events
+              <span className="text-[11px] text-slate-400 font-medium">
+                {showAllActivity
+                  ? `Showing all ${filteredEvents.length} events`
+                  : `Showing 4 of ${filteredEvents.length} events`}
               </span>
-              <button
-                className="text-[#3525cd] hover:text-[#2b1ea8] font-semibold text-xs inline-flex items-center gap-1 hover:underline cursor-pointer transition-colors"
-                onClick={() =>
-                  triggerToast(
-                    "Opening complete automation activity log history...",
-                    "info",
-                  )
-                }
-              >
-                <span>View all activity</span>
-                <ArrowRight size={12} />
-              </button>
+
+              {filteredEvents.length > 4 && (
+                <button
+                  type="button"
+                  onClick={() => setShowAllActivity(!showAllActivity)}
+                  className="inline-flex items-center gap-1.5 text-xs font-bold text-[#3525cd] hover:text-[#2b1ea8] transition-colors cursor-pointer hover:underline"
+                  id="btn-toggle-see-all-activity"
+                >
+                  <span>
+                    {showAllActivity
+                      ? "Show less activity"
+                      : `See all activity (${filteredEvents.length})`}
+                  </span>
+                  {showAllActivity ? (
+                    <ChevronUp size={14} />
+                  ) : (
+                    <ChevronDown size={14} />
+                  )}
+                </button>
+              )}
             </div>
           </section>
         </div>
