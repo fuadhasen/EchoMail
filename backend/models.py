@@ -40,6 +40,8 @@ class TrackedEmailRecipient(Base):
     response_id = Column(String(255), nullable=True) # Gmail Message ID of the response
     last_reminder_sent = Column(DateTime, nullable=True)
 
+    response_at = Column(DateTime, nullable=True)
+
     # Relationship
     recipient = relationship("Recipient", back_populates="email_associations")
 

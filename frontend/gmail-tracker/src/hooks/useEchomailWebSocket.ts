@@ -84,7 +84,7 @@ const useEchomailWebSocket = () => {
     };
 
     // Initial connection
-    connect();
+    // connect();
 
     // Cleanup
     return () => {

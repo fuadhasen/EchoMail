@@ -1,11 +1,9 @@
+import type { EmailReply } from "@/services/emailReply";
 import type { TrackedEmailB } from "@/services/trackedEmail";
 import { getTrackedEmailStatus } from "@/utils/statusFilter";
 import {
-  AlertTriangle,
   ArrowLeft,
-  Check,
   CheckCircle2,
-  Clock,
   Clock3,
   MessageSquare,
   Radio,
@@ -15,6 +13,7 @@ import {
 import { useState } from "react";
 import { Link } from "react-router";
 import MarkCompleteModal from "./MarkCompleteModal";
+import { useToast } from "@/context/ToastContext";
 
 export type WorkspaceViewMode = "recipients" | "conversation" | "timeline";
 
@@ -25,7 +24,7 @@ interface EmailHeaderProps {
   isSyncing?: boolean;
   onSync?: () => void;
   onSetStatus: () => void;
-  replyMessages?: [];
+  replyMessages?: EmailReply[];
 }
 
 const EmailHeader = ({
@@ -35,6 +34,7 @@ const EmailHeader = ({
   onSetStatus,
   replyMessages = [],
 }: EmailHeaderProps) => {
+  const { triggerToast } = useToast();
   const [isMarkCompleteModalOpen, setIsMarkCompleteModalOpen] = useState(false);
   const status = getTrackedEmailStatus(email.is_done, email.deadline);
   const displayStatus = status;
@@ -43,8 +43,9 @@ const EmailHeader = ({
   const respondedRecipients =
     email.recipients?.filter((r) => r.has_responded).length || 0;
 
-  const pendingCount = totalRecipients - respondedRecipients;
-
+  const reopenThread = () => {
+    triggerToast("Email status updated to incomplete", "success");
+  };
   const getStatusBadge = () => {
     switch (displayStatus) {
       case "Completed":
@@ -125,7 +126,7 @@ const EmailHeader = ({
               </button>
             ) : (
               <button
-                onClick={() => onSetStatus()}
+                onClick={() => reopenThread()}
                 className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold text-slate-700 hover:text-slate-900 bg-white hover:bg-slate-50 border border-slate-200 transition-colors cursor-pointer shadow-2xs"
               >
                 <RotateCcw size={13} className="text-slate-500" />

@@ -13,7 +13,7 @@ import {
   Workflow,
   Zap,
 } from "lucide-react";
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import {
   ResponsiveContainer,
   AreaChart,
@@ -24,6 +24,8 @@ import {
 } from "recharts";
 
 import { useNavigate } from "react-router";
+import useTrackedEmails from "@/hooks/useTrackedEmails";
+import { getTrackedEmailStatus } from "@/utils/statusFilter";
 
 const activityData = [
   { day: "Mon", actions: 3, reminders: 2, responses: 1, completed: 0 },
@@ -35,40 +37,128 @@ const activityData = [
   { day: "Sun", actions: 3, reminders: 2, responses: 1, completed: 0 },
 ];
 
-const recentActivities = [
-  {
-    id: 1,
-    title: "Response detected",
-    description: "John responded to Project Proposal",
-    time: "2 min ago",
-    icon: <CheckCircle2 size={11} className="text-emerald-600" />,
-    bg: "bg-emerald-50",
-  },
-  {
-    id: 2,
-    title: "Reminder sent",
-    description: "Reminder sent to Sarah",
-    time: "18 min ago",
-    icon: <Send size={11} className="text-[#3525cd]" />,
-    bg: "bg-indigo-50",
-  },
-  {
-    id: 3,
-    title: "Email completed",
-    description: "All required recipients responded",
-    time: "1h ago",
-    icon: <Zap size={11} className="text-emerald-600" />,
-    bg: "bg-emerald-50",
-  },
-  {
-    id: 4,
-    title: "Response detected",
-    description: "Alex replied to Vendor Agreement",
-    time: "3h ago",
-    icon: <CheckCircle2 size={11} className="text-emerald-600" />,
-    bg: "bg-emerald-50",
-  },
-];
+interface GlobalActivityEvent {
+  id: string;
+  emailId: string;
+  emailSubject: string;
+  type: "sent" | "response" | "reminder" | "completed";
+  dateLabel: string;
+  timeLabel: string;
+  title: string;
+  meta: string;
+  recipientEmail?: string;
+  recipientName?: string;
+  duration?: string;
+  badgeText?: string;
+  timestampMs: number;
+}
+
+/**
+ * Converts various date string formats to milliseconds for accurate chronological sorting.
+ */
+function parseToTimestampMs(dateStr?: string | null, fallbackMs = 0): number {
+  if (!dateStr) return fallbackMs;
+  try {
+    const directDate = new Date(dateStr).getTime();
+    if (!isNaN(directDate)) return directDate;
+
+    const commaParts = dateStr.split(",").map((s) => s.trim());
+    if (commaParts.length >= 3) {
+      const parsed = new Date(
+        `${commaParts[0]}, ${commaParts[1]} ${commaParts[2]}`,
+      ).getTime();
+      if (!isNaN(parsed)) return parsed;
+    }
+  } catch {
+    // Ignore
+  }
+  return fallbackMs;
+}
+
+/**
+ * Calculates human-readable turnaround duration between dispatch and reply.
+ */
+function calculateTurnaround(
+  sentDateStr: string,
+  responseDateStr?: string | null,
+): string {
+  if (responseDateStr && sentDateStr) {
+    try {
+      const sent = parseToTimestampMs(sentDateStr);
+      const resp = parseToTimestampMs(responseDateStr);
+      if (sent > 0 && resp > 0 && resp >= sent) {
+        const diffMinutes = Math.floor((resp - sent) / (1000 * 60));
+        const days = Math.floor(diffMinutes / (60 * 24));
+        const hours = Math.floor((diffMinutes % (60 * 24)) / 60);
+        const mins = diffMinutes % 60;
+
+        if (days > 0) {
+          return `${days}d ${hours}h`;
+        }
+        if (hours > 0) {
+          return `${hours}h ${mins}m`;
+        }
+        return `${mins || 1}m`;
+      }
+    } catch {
+      // fallback
+    }
+  }
+  return "Prompt";
+}
+
+/**
+ * Extracts clean Date and Time strings from arbitrary timestamp formats.
+ */
+function parseDateTimeLabels(dateStr: string | null): {
+  dateLabel: string;
+  timeLabel: string;
+} {
+  if (!dateStr) {
+    return { dateLabel: "Initial", timeLabel: "12:00 PM" };
+  }
+
+  const commaParts = dateStr.split(",").map((s) => s.trim());
+  if (commaParts.length >= 3) {
+    return {
+      dateLabel: `${commaParts[0]}, ${commaParts[1]}`,
+      timeLabel: commaParts[2],
+    };
+  }
+  if (commaParts.length === 2) {
+    return { dateLabel: commaParts[0], timeLabel: commaParts[1] };
+  }
+
+  try {
+    const d = new Date(dateStr);
+    if (!isNaN(d.getTime())) {
+      const monthNames = [
+        "Jan",
+        "Feb",
+        "Mar",
+        "Apr",
+        "May",
+        "Jun",
+        "Jul",
+        "Aug",
+        "Sep",
+        "Oct",
+        "Nov",
+        "Dec",
+      ];
+      const dateLabel = `${monthNames[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`;
+      const timeLabel = d.toLocaleTimeString([], {
+        hour: "numeric",
+        minute: "2-digit",
+      });
+      return { dateLabel, timeLabel };
+    }
+  } catch {
+    // Ignore
+  }
+
+  return { dateLabel: "Timeline", timeLabel: dateStr };
+}
 
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
@@ -93,31 +183,138 @@ const Automation = () => {
 
   const [isSyncing, setIsSyncing] = useState(false);
   const [lastCheckText, setLastCheckText] = useState("2 min ago");
+  const [showAllActivity, setShowAllActivity] = useState(false);
+  const [filterType, setFilterType] = useState<
+    "all" | "response" | "reminder" | "completed"
+  >("all");
 
-  const [detectionEnabled, setDetectionEnabled] = useState(true);
-  const [remindersEnabled, setRemindersEnabled] = useState(true);
+  const { data: emails = [] } = useTrackedEmails(true);
 
-  const toggleDetection = () => {
-    const nextState = !detectionEnabled;
-    setDetectionEnabled(nextState);
-    triggerToast(
-      nextState
-        ? "Response Detection system resumed"
-        : "Response Detection system paused",
-      nextState ? "success" : "info",
-    );
-  };
+  const allEvents: GlobalActivityEvent[] = useMemo(() => {
+    const events: GlobalActivityEvent[] = [];
 
-  const toggleReminders = () => {
-    const nextState = !remindersEnabled;
-    setRemindersEnabled(nextState);
-    triggerToast(
-      nextState
-        ? "Automatic Reminders system resumed"
-        : "Automatic Reminders system paused",
-      nextState ? "success" : "info",
-    );
-  };
+    emails.forEach((email) => {
+      const sentTimeMs = parseToTimestampMs(
+        email.sent_date,
+        Date.now() - 86400000,
+      );
+
+      const totalRecips = email.recipients?.length || 0;
+
+      // 1. Dispatch Event
+      const sentParsed = parseDateTimeLabels(email.sent_date);
+      events.push({
+        id: `sent-${email.id}`,
+        emailId: email.id,
+        emailSubject: email.subject,
+        type: "sent",
+        dateLabel: sentParsed.dateLabel,
+        timeLabel: sentParsed.timeLabel,
+        title: "Campaign tracking initiated",
+        meta: `Outbound email with ${totalRecips} tracked ${totalRecips === 1 ? "recipient" : "recipients"}`,
+        badgeText: `${totalRecips} recipients`,
+        timestampMs: sentTimeMs,
+      });
+
+      // 2. Direct Recipient Response
+      email.recipients.forEach((r) => {
+        const hasResponded = r.has_responded;
+        if (hasResponded) {
+          const responseTimestampStr = r.response_at;
+          const hasName = Boolean(r.name && r.name.trim());
+          const displayName = hasName ? r.name!.trim() : r.email;
+          const respParsed = parseDateTimeLabels(responseTimestampStr);
+          const turnaround = calculateTurnaround(
+            email.sent_date,
+            responseTimestampStr,
+          );
+
+          const responseMs = parseToTimestampMs(
+            responseTimestampStr,
+            sentTimeMs,
+          );
+
+          events.push({
+            id: `resp-${email.id}-${r.email}`,
+            emailId: email.id,
+            emailSubject: email.subject,
+            type: "response",
+            dateLabel: respParsed.dateLabel,
+            timeLabel: respParsed.timeLabel,
+            title: `${displayName} responded`,
+            meta: hasName ? `${r.email}` : "Direct recipient reply",
+            recipientEmail: r.email,
+            recipientName: displayName,
+            duration: turnaround,
+            badgeText: `${turnaround} turnaround`,
+            timestampMs: responseMs,
+          });
+        }
+
+        // 3. Reminder
+        const lastReminder = r.last_reminder_sent;
+        if (lastReminder) {
+          const remParsed = parseDateTimeLabels(lastReminder);
+          const hasName = Boolean(r.name && r.name.trim());
+          const displayName = hasName ? r.name!.trim() : r.email;
+          const remMs = parseToTimestampMs(lastReminder, sentTimeMs + 86400000);
+
+          events.push({
+            id: `rem-${email.id}-${r.email}`,
+            emailId: email.id,
+            emailSubject: email.subject,
+            type: "reminder",
+            dateLabel: remParsed.dateLabel,
+            timeLabel: remParsed.timeLabel,
+            title: "Follow-up reminder sent",
+            meta: hasName
+              ? `Automated reminder to ${displayName} (${r.email})`
+              : `Automated reminder to ${r.email}`,
+            recipientEmail: r.email,
+            recipientName: displayName,
+            badgeText: "Follow-up sent",
+            timestampMs: remMs,
+          });
+        }
+      });
+
+      // 4. compiled milestone
+      const status = getTrackedEmailStatus(email.is_done, email.deadline);
+      const isCompleted = status === "Completed";
+
+      if (isCompleted) {
+        let latestRespMs = sentTimeMs;
+        email.recipients.forEach((r) => {
+          const respStr = r.response_at;
+          if (respStr) {
+            const t = parseToTimestampMs(respStr);
+            if (t > latestRespMs) latestRespMs = t;
+          }
+        });
+
+        const completedParsed = parseDateTimeLabels(
+          email.deadline.includes(",") ? email.deadline : email.sent_date,
+        );
+
+        events.push({
+          id: `completed-${email.id}`,
+          emailId: email.id,
+          emailSubject: email.subject,
+          type: "completed",
+          dateLabel: completedParsed.dateLabel,
+          timeLabel: completedParsed.timeLabel,
+          title: "Thread tracking completed",
+          meta: "All required recipients confirmed responses",
+          badgeText: "100% complete",
+          timestampMs: latestRespMs + 1000,
+        });
+      }
+    });
+
+    // newest event at the top
+    events.sort((a, b) => b.timestampMs - a.timestampMs);
+    return events;
+  }, [emails]);
 
   const handleManualSync = () => {
     if (isSyncing) return;
@@ -147,45 +344,6 @@ const Automation = () => {
           <p className="text-sm text-slate-500 font-normal leading-relaxed mt-1">
             Echomail is working in the background for you.
           </p>
-        </div>
-
-        <div className="flex flex-wrap items-center gap-3 shrink-0">
-          <div
-            className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full border text-xs font-semibold shadow-2xs transition-all ${
-              detectionEnabled && remindersEnabled
-                ? "bg-slate-50/90 border-slate-200 text-slate-700"
-                : "bg-amber-50/90 border-amber-200/90 text-amber-800"
-            }`}
-          >
-            <span
-              className={`w-2 h-2 rounded-full shrink-0 ${
-                detectionEnabled && remindersEnabled
-                  ? "bg-emerald-500 animate-pulse"
-                  : "bg-amber-500"
-              }`}
-            />
-            <span className="text-slate-800 font-medium">
-              {detectionEnabled && remindersEnabled
-                ? "All systems operational"
-                : !detectionEnabled && !remindersEnabled
-                  ? "Automation paused"
-                  : "Partial automation active"}
-            </span>
-          </div>
-
-          <button
-            onClick={handleManualSync}
-            disabled={isSyncing}
-            className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-slate-900 text-white hover:bg-slate-800 text-xs font-semibold transition-all cursor-pointer shadow-2xs hover:shadow-xs disabled:opacity-60"
-          >
-            <RefreshCw
-              size={13}
-              className={isSyncing ? "animate-spin text-indigo-300" : ""}
-            />
-            <span>
-              {isSyncing ? "Evaluating Engine..." : "Run Engine Check"}
-            </span>
-          </button>
         </div>
       </header>
 

@@ -101,7 +101,7 @@ scopes = [
 async def lifespan(app: FastAPI):
     # Startup: create tables and start the scheduler
     create_tables()
-    start_scheduler()
+    # start_scheduler()
     print(
         "Application started - Background scheduler is running to check emails every 10 minutes"
     )

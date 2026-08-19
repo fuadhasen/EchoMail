@@ -149,7 +149,8 @@ class EmailTrackerService:
 
         # Update association
         association.has_responded = True
-        association.response_id = response_id 
+        association.response_id = response_id
+        association.response_at = datetime.now()
         db.commit()
 
         # Check if tracked email is now done and update its status
@@ -213,6 +214,7 @@ class EmailTrackerService:
         # Update association
         association.has_responded = False
         association.response_id = None
+        association.response_at = None
         db.commit()
 
         # check if tracked_emails and make is_done = False
@@ -357,6 +359,7 @@ class EmailTrackerService:
                         "has_responded": assoc.has_responded,
                         "response_id": assoc.response_id,
                         "last_reminder_sent": assoc.last_reminder_sent,
+                        "response_at": assoc.response_at
                     }
                 )
 
@@ -376,6 +379,7 @@ class EmailTrackerService:
                                 "email": recipient.email,
                                 "name": recipient.name,
                                 "response_id": assoc.response_id,
+                                "response_at": assoc.response_at
                             }
                         )
                     else:
@@ -502,6 +506,7 @@ class EmailTrackerService:
         # Mark recipient as responded
         association.has_responded = True
         association.response_id = response_id
+        association.response_at = datetime.now()
         db.add(association)
 
         # Get the tracked email and update its status

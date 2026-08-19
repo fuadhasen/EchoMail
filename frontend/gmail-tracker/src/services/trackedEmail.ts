@@ -16,6 +16,8 @@ export interface TrackedRecipient {
 
   response_id: string | null;
   last_reminder_sent: string | null;
+
+  response_at: string | null;
 }
 
 export interface TrackedNewResponse {

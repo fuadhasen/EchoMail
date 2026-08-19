@@ -299,23 +299,9 @@ const RecipientTrackingTable = ({
                     {/* Name, Email & Requirement Badge */}
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <h4 className="text-xs sm:text-sm font-semibold text-slate-900 truncate">
-                          {recipient.name}
-                        </h4>
-                        {isRequired ? (
-                          <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-slate-100 text-slate-600">
-                            Required
-                          </span>
-                        ) : (
-                          <span className="px-1.5 py-0.5 rounded text-[10px] font-medium text-slate-400 bg-slate-50">
-                            Optional
-                          </span>
-                        )}
-                      </div>
-                      <div className="flex items-center gap-1.5 text-xs text-slate-400">
-                        <span className="truncate text-[11px]">
+                        <h4 className="text-xs sm:text-sm font-semibold truncate text-slate-600">
                           {recipient.email}
-                        </span>
+                        </h4>
                       </div>
                     </div>
                   </div>

@@ -12,7 +12,6 @@ import { Link } from "react-router";
 const TrackedEmails = () => {
   const [showDone, setShowDone] = useState(false);
   const { data: emails = [], isPending, error } = useTrackedEmails(showDone);
-  console.log(emails);
 
   const [isSyncing, setIsSyncing] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
