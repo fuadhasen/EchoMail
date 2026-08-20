@@ -1,20 +1,21 @@
 import LoadingScreen from "@/components/common/LoadingScreen";
 import useAuth from "@/hooks/useAuth";
+import Landing from "@/pages/Landing";
 import React from "react";
 import { Navigate } from "react-router";
 
-const AuthGuard = ({ children }: { children: React.ReactNode }) => {
+const RootRedirect = () => {
   const { status } = useAuth();
 
   if (status === "loading") {
     return <LoadingScreen />;
   }
 
-  if (status == "unauthenticated") {
-    return <Navigate to="/login" replace />;
+  if (status === "authenticated") {
+    return <Navigate to="/app" replace />;
   }
 
-  return children;
+  return <Landing />;
 };
 
-export default AuthGuard;
+export default RootRedirect;

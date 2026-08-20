@@ -171,7 +171,7 @@ const TrackNew = () => {
           );
 
           console.log(data);
-          navigate("/tracked");
+          navigate("/app/tracked");
         },
 
         onError: (error) => {

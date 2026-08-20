@@ -22,13 +22,17 @@ const SideBar = () => {
   const [isMobileProfileOpen, setIsMobileProfileOpen] = useState(false);
 
   const navItems = [
-    { name: "Dashboard", icon: Grid, path: "/" },
-    { name: "Tracked Emails", icon: Mail, path: "/tracked" },
-    { name: "Track New", icon: Plus, path: "/track_new" },
-    { name: "Automation", icon: Bell, path: "/automation" },
+    { name: "Dashboard", icon: Grid, path: "/app" },
+    { name: "Tracked Emails", icon: Mail, path: "/app/tracked" },
+    { name: "Track New", icon: Plus, path: "/app/track_new" },
+    { name: "Automation", icon: Bell, path: "/app/automation" },
   ];
 
-  const settingsItem = { name: "Settings", icon: Settings, path: "/settings" };
+  const settingsItem = {
+    name: "Settings",
+    icon: Settings,
+    path: "/app/settings",
+  };
 
   return (
     <>

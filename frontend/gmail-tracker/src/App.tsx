@@ -1,6 +1,7 @@
 import { Navigate, Route, Routes } from "react-router";
 import Layout from "./components/Layout";
 import AuthGuard from "./guards/AuthGuard";
+import RootRedirect from "./guards/RootRedirect";
 import Automation from "./pages/Automation";
 import EmailDetail from "./pages/EmailDetail";
 import Home from "./pages/Home";
@@ -8,16 +9,17 @@ import LoginWithHandler from "./pages/login";
 import Settings from "./pages/Settings";
 import TrackedEmails from "./pages/TrackedEmail";
 import TrackNew from "./pages/TrackNew";
-import useEchomailWebSocket from "./hooks/useEchomailWebSocket";
 
 const App = () => {
-  useEchomailWebSocket();
-
   return (
     <Routes>
+      {/* public routes */}
+      <Route path="/" element={<RootRedirect />} />
       <Route path="/login" element={<LoginWithHandler />} />
+
+      {/* protected application */}
       <Route
-        path="/"
+        path="/app"
         element={
           <AuthGuard>
             <Layout />
@@ -32,7 +34,7 @@ const App = () => {
         <Route path="automation" element={<Automation />} />
 
         {/* Fallback route: redirect back to Dashboared / Home */}
-        <Route path="*" element={<Navigate to="/" replace />} />
+        <Route path="*" element={<Navigate to="/app" replace />} />
       </Route>
     </Routes>
   );

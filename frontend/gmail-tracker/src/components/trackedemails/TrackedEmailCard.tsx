@@ -56,7 +56,7 @@ const TrackedEmailCard = ({ email, status }: TrackedEmailCardProps) => {
           {/* header section and status (mobile layout) */}
           <div className="flex items-start justify-between gap-3 mb-3">
             <Link
-              to={`/tracked/detail/${email.id}`}
+              to={`/app/tracked/detail/${email.id}`}
               className="font-sans text-base md:text-lg font-bold text-slate-900 group-hover:text-[#3525cd] transition-colors leading-snug line-clamp-1"
             >
               {email.subject}
@@ -97,7 +97,7 @@ const TrackedEmailCard = ({ email, status }: TrackedEmailCardProps) => {
           <div className="hidden md:block">{getStatusBadge()}</div>
 
           <Link
-            to={`/tracked/detail/${email.id}`}
+            to={`/app/tracked/detail/${email.id}`}
             className="inline-flex items-center gap-1.5  bg-[#f8f9ff] hover:bg-[#3525cd] text-[#3525cd] hover:text-white border border-[#3525cd]/20 hover:border-[#3525cd]  px-3.5 py-2 rounded-xl text-xs font-semibold transition-all shadow-2xs group/btn cursor-pointer"
           >
             <span>Open Details</span>

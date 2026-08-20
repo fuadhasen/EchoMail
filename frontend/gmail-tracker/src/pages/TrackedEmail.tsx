@@ -78,7 +78,7 @@ const TrackedEmails = () => {
             <span className="hidden sm:inline">Sync Outbox</span>
           </button>
           <Link
-            to={"/track_new"}
+            to={"/app/track_new"}
             className="bg-[#3525cd] hover:bg-[#281ca8] text-white px-4 py-2.5 rounded-xl  font-sans text-xs font-semibold tracking-wide flex items-center justify-center gap-2  shadow-2xs hover:shadow-xs transition-all cursor-pointer shrink-0 group "
           >
             <Plus size={15} className="stroke-2.5" />

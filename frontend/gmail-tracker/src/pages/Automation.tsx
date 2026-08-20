@@ -655,7 +655,7 @@ const Automation = () => {
             {/* time line stream */}
             <div className="relative pl-7 sm:pl-8 pt-1">
               <div
-                className="absolute left-3.25 top-3 bottom-3 w-px bg-slate-200/90"
+                className="absolute left-3.75 top-3 bottom-3 w-px bg-slate-200/90"
                 aria-hidden="true"
               />
 
@@ -670,7 +670,7 @@ const Automation = () => {
                       <div
                         key={event.id}
                         onClick={() =>
-                          navigate(`/tracked-emails/${event.emailId}`)
+                          navigate(`/app/tracked/detail/${event.emailId}`)
                         }
                         className="relative group transition-all cursor-pointer"
                       >
@@ -713,7 +713,7 @@ const Automation = () => {
                               <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">
                                 Thread
                               </span>
-                              <span className="text-[11px] font-semibold text-[#3525cd] hover:underline truncate max-w-[190px] sm:max-w-xs">
+                              <span className="text-[11px] font-semibold text-[#3525cd] hover:underline truncate max-w-47.5 sm:max-w-xs">
                                 {event.emailSubject}
                               </span>
                             </div>

@@ -78,7 +78,7 @@ const EmailHeader = ({
       <div className="px-5 sm:px-6 pt-4 sm:pt-5 pb-3 flex flex-wrap items-center justify-between  gap-3 border-b border-slate-100">
         <div className="flex items-center gap-2.5 text-xs">
           <Link
-            to={"/tracked"}
+            to={"/app/tracked"}
             className="inline-flex items-center gap-1.5 text-slate-500 hover:text-slate-900 font-medium transition-colors cursor-pointer group"
           >
             <ArrowLeft
