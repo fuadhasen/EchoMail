@@ -201,7 +201,7 @@ const EmailHeader = ({
               {replyMessages &&
                 (replyMessages.length > 0
                   ? replyMessages.length + " replies"
-                  : replyMessages.length + " reply")}
+                  : "")}
             </span>
           </button>
 

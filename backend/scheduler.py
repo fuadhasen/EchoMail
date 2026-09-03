@@ -165,6 +165,7 @@ async def check_email_responses():
                                 "type": "response_detected",
                                 "tracked_email_id": result["tracked_email_id"],
                                 "recipient_email": result["recipient_email"],
+                                "email_id": result["email_id"],
                                 "subject": result["subject"],
                             }
                          )
@@ -174,6 +175,7 @@ async def check_email_responses():
                             {
                                 "type": "tracking_completed",
                                 "tracked_email_id": result["tracked_email_id"],
+                                "email_id": result["email_id"],
                                 "subject": result["subject"],
                             }
                         )

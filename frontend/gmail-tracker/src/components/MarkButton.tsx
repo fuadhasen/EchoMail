@@ -2,7 +2,7 @@ import { Button } from "@radix-ui/themes";
 import { useMutation } from "@tanstack/react-query";
 import axios from "axios";
 import useUrlQuery from "../hooks/useUrlQuery";
-import Spinner from "./Spinner";
+import Spinner from "./common/Spinner";
 import { useNavigate } from "react-router";
 
 interface Props {

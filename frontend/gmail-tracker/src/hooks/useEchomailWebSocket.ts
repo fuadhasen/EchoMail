@@ -24,9 +24,9 @@ const useEchomailWebSocket = () => {
         console.log("WebSocket event:", data);
 
         if (data.type === "response_detected") {
-          // Keep your React Query data synchronized
+          // Keep your React Query data synchronized, using database id
           queryClient.invalidateQueries({
-            queryKey: ["tracked_emails", data.tracked_email_id],
+            queryKey: ["tracked-emails", data.tracked_email_id],
           });
 
           // Browser notification
@@ -43,7 +43,7 @@ const useEchomailWebSocket = () => {
 
         if (data.type === "tracking_completed") {
           queryClient.invalidateQueries({
-            queryKey: ["tracked_emails", data.tracked_email_id],
+            queryKey: ["tracked-emails", data.tracked_email_id],
           });
 
           if (Notification.permission === "default") {
@@ -84,7 +84,7 @@ const useEchomailWebSocket = () => {
     };
 
     // Initial connection
-    // connect();
+    connect();
 
     // Cleanup
     return () => {

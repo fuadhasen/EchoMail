@@ -15,7 +15,6 @@ import useTrackedDetail from "@/hooks/useTrackedDetail";
 import { useQueryClient } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-import { MessageSquare, Users } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 dayjs.extend(relativeTime);

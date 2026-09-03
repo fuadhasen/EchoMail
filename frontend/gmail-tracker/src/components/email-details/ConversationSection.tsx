@@ -49,7 +49,7 @@ const ConversationSection = ({
                 Thread Responses
               </h3>
               <span className="text-xs font-mono font-medium text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full">
-                {replyCount} {replyCount === 1 ? "reply" : "replies"}
+                {replyCount} {replyCount === 0 ? "reply" : "replies"}
               </span>
             </div>
           </div>

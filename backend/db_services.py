@@ -556,6 +556,7 @@ class EmailTrackerService:
             "response_detected": True,
             "tracking_completed": tracking_completed,
             "tracked_email_id": tracked_email.id,
+            "email_id": tracked_email.email_id,
             "recipient_email": sender_email,
             "subject": tracked_email.subject
         }
