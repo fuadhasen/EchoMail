@@ -1,6 +1,7 @@
 import { useToast } from "@/context/ToastContext";
 import type { TrackedEmailB } from "@/services/trackedEmail";
 import {
+  Activity,
   BellRing,
   CheckCircle2,
   Clock,
@@ -10,7 +11,7 @@ import {
   ShieldCheck,
   Sparkles,
 } from "lucide-react";
-import { Activity, useState } from "react";
+import { useState } from "react";
 
 interface AutomaticDetectionCardProps {
   email: TrackedEmailB;
@@ -47,9 +48,9 @@ const AutomaticDetectionCard = ({
   };
 
   return (
-    <div className="bg-white border border-slate-200/80 rounded-2xl p-4 sm:p-5 shadow-2xs space-y-4">
+    <div className="bg-white border border-slate-200/90 rounded-2xl p-5 shadow-xs space-y-4 font-sans text-left">
       {/* header and status indicator */}
-      <div className="flex items-center justify-between gap-2 pb-1 border-b border-slate-100">
+      <div className="flex items-center justify-between gap-2 pb-2 border-b border-slate-100">
         <div className="flex items-center gap-2 min-w-0">
           <span className="relative flex h-2 w-2 shrink-0">
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
@@ -64,7 +65,7 @@ const AutomaticDetectionCard = ({
           type="button"
           onClick={handleScanNow}
           disabled={isSyncing}
-          className="text-[11px] font-sans font-semibold text-[#3525cd] hover:text-[#281ca8] bg-indigo-50/80 hover:bg-indigo-100 border border-indigo-100 px-2.5 py-1 rounded-lg transition-all cursor-pointer flex items-center gap-1.5 shrink-0 disabled:opacity-50"
+          className="text-[11px] font-sans font-semibold text-[#3525cd] hover:text-[#281ca8] bg-indigo-50/80 hover:bg-indigo-100 border border-indigo-100 px-2.5 py-1 rounded-lg transition-all cursor-pointer flex items-center gap-1.5 shrink-0 disabled:opacity-50 active:scale-[0.98]"
           title="Re-scan outbox for recipient replies"
         >
           <RefreshCw
@@ -96,7 +97,7 @@ const AutomaticDetectionCard = ({
           />
           <span>Response Detection</span>
           <span
-            className={`text-[10px] font-mono px-1.5 py-0.2 rounded-md ${
+            className={`text-[10px] font-mono px-1.5 py-0.5 rounded-md ${
               activeTab === "detection"
                 ? "bg-emerald-50 text-emerald-700 font-bold border border-emerald-200/60"
                 : "bg-slate-200/70 text-slate-600"
@@ -123,7 +124,7 @@ const AutomaticDetectionCard = ({
           />
           <span>Auto Reminders</span>
           <span
-            className={`text-[10px] font-mono px-1.5 py-0.2 rounded-md ${
+            className={`text-[10px] font-mono px-1.5 py-0.5 rounded-md ${
               activeTab === "reminders"
                 ? "bg-amber-50 text-amber-700 font-bold border border-amber-200/60"
                 : "bg-slate-200/70 text-slate-600"
@@ -137,57 +138,8 @@ const AutomaticDetectionCard = ({
       {/* view 1: response detection detailed information */}
       {activeTab === "detection" && (
         <div className="space-y-3 pt-0.5">
-          {/* main status banner for detection */}
-          {/* <div className="bg-indigo-50/50 border border-indigo-200/70  rounded-xl p-3.5 flex items-center justify-between gap-3"> */}
-          {/* <div className="space-y-0.5 min-w-0">
-              <div className="flex items-center gap-2">
-                <Radio
-                  size={14}
-                  className={
-                    isDetectionPaused
-                      ? "text-amber-600 shrink-0"
-                      : "text-[#3525cd] shrink-0"
-                  }
-                />
-                <span className="text-xs font-bold text-slate-900 tracking-tight">
-                  {isDetectionPaused
-                    ? "Detection Engine Paused"
-                    : "Outbox Listener Active"}
-                </span>
-              </div>
-              <p className="text-[11px] text-slate-500 truncate">
-                {isDetectionPaused
-                  ? "Auto response listener is suspended. Replies will not auto-sync."
-                  : `Scanning outbox • ${responded} of ${total} responses captured`}
-              </p>
-            </div> */}
-
-          {/* <button
-              type="button"
-              onClick={handleToggelDetectionPause}
-              className={`text-[11px] font-semibold px-2.5 py-1 rounded-lg border transition-all cursor-pointer flex items-center gap-1.5 shrink-0 ${
-                isDetectionPaused
-                  ? "bg-indigo-100 text-indigo-900 border-indigo-300 hover:bg-indigo-200"
-                  : "bg-white text-slate-700 border-slate-200 hover:bg-slate-50 shadow-2xs"
-              }`}
-            >
-              {isDetectionPaused ? (
-                <>
-                  <Play size={11} className="fill-indigo-800 text-indigo-800" />
-                  <span>Resume</span>
-                </>
-              ) : (
-                <>
-                  <Pause size={11} className="text-slate-500" />
-                  <span>Pause</span>
-                </>
-              )}
-            </button> */}
-          {/* </div> */}
-
-          {/* Technical detection metadata */}
           <div className="bg-slate-50/80 border border-slate-200/60 rounded-xl p-3 space-y-2 text-xs font-sans">
-            <div className="flex items-center justify-between py-0.5 border-b border-slate-200/50">
+            <div className="flex items-center justify-between py-1 border-b border-slate-200/50">
               <span className="text-slate-500 flex items-center gap-1.5">
                 <Clock size={12} className="text-slate-400" />
                 Scan Loop
@@ -197,7 +149,7 @@ const AutomaticDetectionCard = ({
               </span>
             </div>
 
-            <div className="flex items-center justify-between py-0.5 border-b border-slate-200/50">
+            <div className="flex items-center justify-between py-1 border-b border-slate-200/50">
               <span className="text-slate-500 flex items-center gap-1.5">
                 <Cpu size={12} className="text-slate-400" />
                 Webhook Latency
@@ -207,7 +159,7 @@ const AutomaticDetectionCard = ({
               </span>
             </div>
 
-            <div className="flex items-center justify-between py-0.5">
+            <div className="flex items-center justify-between py-1">
               <span className="text-slate-500 flex items-center gap-1.5">
                 <ShieldCheck size={12} className="text-emerald-600" />
                 Detection Protocol
@@ -223,54 +175,8 @@ const AutomaticDetectionCard = ({
       {/* view 2: auto reminder detailed information */}
       {activeTab === "reminders" && (
         <div className="space-y-3 pt-0.5 font-sans">
-          {/* main status */}
-          {/* <div className="bg-amber-50/50 border border-amber-200/70 rounded-xl p-3.5 flex items-center justify-between gap-3"> */}
-          {/* <div className="space-y-0.5 min-w-0">
-              <div className="flex items-center gap-2">
-                <BellRing size={14} className="text-amber-600 shrink-0" />
-                <span className="text-xs font-bold text-slate-900 tracking-tight">
-                  {pending > 0
-                    ? `${pending} Reminders Queued`
-                    : "All Responses Received"}
-                </span>
-              </div>
-              <p className="text-[11px] text-slate-500 truncate">
-                {isQueuePaused
-                  ? "Queue is paused. Automatic reminder dispatches are suspended."
-                  : pending > 0
-                    ? "Next auto-dispatch scheduled for Today at 09:00 AM"
-                    : "Auto-reminder queue is complete and inactive."}
-              </p>
-            </div> */}
-
-          {/* {pending > 0 && (
-              <button
-                type="button"
-                onClick={handleTogglePause}
-                className={`text-[11px] font-semibold px-2.5 py-1 rounded-lg border transition-all cursor-pointer flex items-center gap-1.5 shrink-0 ${
-                  isQueuePaused
-                    ? "bg-amber-100 text-amber-900 border-amber-300 hover:bg-amber-200"
-                    : "bg-white text-slate-700 border-slate-200 hover:bg-slate-50 shadow-2xs"
-                }`}
-              >
-                {isQueuePaused ? (
-                  <>
-                    <Play size={11} className="fill-amber-800 text-amber-800" />
-                    <span>Resume</span>
-                  </>
-                ) : (
-                  <>
-                    <Pause size={11} className="text-slate-500" />
-                    <span>Pause</span>
-                  </>
-                )}
-              </button>
-            )} */}
-          {/* </div> */}
-
-          {/* Reminder Rule and cadence information */}
           <div className="bg-slate-50/80 border border-slate-200/60 rounded-xl p-3 space-y-2 text-xs font-sans">
-            <div className="flex items-center justify-between py-0.5 border-b border-slate-200/50">
+            <div className="flex items-center justify-between py-1 border-b border-slate-200/50">
               <span className="text-slate-500 flex items-center gap-1.5">
                 <Clock size={12} className="text-slate-400" />
                 Cadence Rule
@@ -280,7 +186,7 @@ const AutomaticDetectionCard = ({
               </span>
             </div>
 
-            <div className="flex items-center justify-between py-0.5 border-b border-slate-200/50">
+            <div className="flex items-center justify-between py-1 border-b border-slate-200/50">
               <span className="text-slate-500 flex items-center gap-1.5">
                 <CheckCircle2 size={12} className="text-emerald-600" />
                 Auto-Halt Trigger
@@ -290,7 +196,7 @@ const AutomaticDetectionCard = ({
               </span>
             </div>
 
-            <div className="flex items-center justify-between py-0.5">
+            <div className="flex items-center justify-between py-1">
               <span className="text-slate-500 flex items-center gap-1.5">
                 <Activity size={12} className="text-slate-400" />
                 Anti-Spam Frequency
@@ -303,7 +209,7 @@ const AutomaticDetectionCard = ({
         </div>
       )}
 
-      <div className="flex items-center justify-between text-[11px] font-sans text-slate-500 border-t border-slate-100 pt-2.5">
+      <div className="flex items-center justify-between text-[11px] font-sans text-slate-500 border-t border-slate-100 pt-3">
         <span className="flex items-center gap-1.5 truncate">
           <Sparkles size={12} className="text-[#3525cd] shrink-0" />
           <span className="truncate">Google Workspace OAuth Active</span>

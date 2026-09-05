@@ -1,18 +1,15 @@
 import type { TrackedRecipient } from "@/services/trackedEmail";
+import { formatSentDate } from "@/utils/dateFormatter";
 import {
-  ArrowUpDown,
   Check,
-  CheckCircle2,
   CheckSquare,
   Clock,
   Copy,
-  Info,
   Loader2,
   MinusSquare,
   RotateCcw,
   Search,
   Send,
-  Sparkles,
   Square,
   User,
   X,
@@ -30,7 +27,6 @@ interface RecipientTrackingTableProps {
   processingRecipient: string | null;
 }
 
-type SortField = "status" | "name" | "email" | "requirement";
 type StatusFilter = "all" | "pending" | "responded";
 
 const RecipientTrackingTable = ({
@@ -46,19 +42,8 @@ const RecipientTrackingTable = ({
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
 
-  const [sortBy, setSortBy] = useState<SortField>("status");
-  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
-
   // selection and dispatch states
   const [selectedEmails, setSelectedEmails] = useState<string[]>([]);
-
-  // const [isBulkSending, setIsBulkSending] = useState<boolean>(false);
-  // const [sendingProgress, setIsSendingProgress] = useState<{
-  //   current: number;
-  //   total: number;
-  // } | null>(null);
-
-  const [copiedToast, setCopiedToast] = useState<boolean>(false);
 
   const totalCount = recipients.length;
   const respondedCount = recipients.filter((r) => r.has_responded).length;
@@ -104,25 +89,10 @@ const RecipientTrackingTable = ({
     );
   };
 
-  const handleSortToggle = (field: SortField) => {
-    if (sortBy == field) {
-      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
-    } else {
-      setSortBy(field);
-      setSortOrder("asc");
-    }
-  };
-
-  // const handleBulkSendReminders = async () => {
-  //   // later u will check is that eligible or not
-  //   triggerToast("Bulk Reminder sent to all recipients", "info");
-  // };
-
   const handleCopySelectedEmails = () => {
     const text = selectedEmails.join(",");
     navigator.clipboard.writeText(text);
-    setCopiedToast(true);
-    setTimeout(() => setCopiedToast(false), 2000);
+    triggerToast("Selected recipient emails copied to clipboard.", "success");
   };
 
   return (
@@ -207,7 +177,7 @@ const RecipientTrackingTable = ({
               <button
                 type="button"
                 onClick={handleCopySelectedEmails}
-                className="bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 px-3 py-1.5 rounded-lg font-medium flex items-center gap-1.5 transition-all cursor-pointer"
+                className="bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 px-3 py-1.5 rounded-lg font-medium flex items-center gap-1.5 transition-all cursor-pointer shadow-2xs"
               >
                 <Copy size={12} />
                 <span>Copy</span>
@@ -225,7 +195,7 @@ const RecipientTrackingTable = ({
           </div>
         )}
 
-        {/* Enterprise table */}
+        {/* Recipients list */}
         <div className="p-4 sm:p-5 space-y-2.5 bg-slate-50/40">
           {filteredRecipients.length === 0 ? (
             <div className="py-12 px-4 text-center space-y-2 bg-white rounded-xl border border-slate-200/80">
@@ -248,6 +218,15 @@ const RecipientTrackingTable = ({
               const isSingleSending = sendingRecipient === recipient.email;
               const isMarking = processingRecipient === recipient.email;
 
+              const initials = recipient.name
+                ? recipient.name
+                    .split(/\s+/)
+                    .map((n) => n[0])
+                    .join("")
+                    .slice(0, 2)
+                    .toUpperCase()
+                : recipient.email.slice(0, 2).toUpperCase();
+
               return (
                 <div
                   key={recipient.email}
@@ -257,14 +236,14 @@ const RecipientTrackingTable = ({
                       : "border-slate-200/90 hover:border-slate-300 hover:shadow-xs"
                   }`}
                 >
-                  {/* Left: Checkbox + Avatar + Name + Email + Tag */}
+                  {/* Left: Checkbox + Avatar + Name + Email + Requirement */}
                   <div className="flex items-center gap-3 min-w-0 flex-1">
                     {/* Select Checkbox */}
                     <button
                       type="button"
                       onClick={() => handleToggleSelectOne(recipient.email)}
                       className="text-slate-400 hover:text-slate-700 cursor-pointer shrink-0"
-                      aria-label={`Select ${recipient.name}`}
+                      aria-label={`Select ${recipient.name || recipient.email}`}
                     >
                       {isSelected ? (
                         <CheckSquare size={16} className="text-[#3525cd]" />
@@ -276,7 +255,7 @@ const RecipientTrackingTable = ({
                       )}
                     </button>
 
-                    {/* Clean Initials Avatar with Live Status Dot */}
+                    {/* Avatar with Live Status Dot */}
                     <div className="relative shrink-0">
                       <div
                         className={`w-9 h-9 rounded-full flex items-center justify-center font-bold text-xs ${
@@ -285,7 +264,7 @@ const RecipientTrackingTable = ({
                             : "bg-indigo-50 text-[#3525cd] border border-indigo-100"
                         }`}
                       >
-                        {<User size={13} />}
+                        {initials}
                       </div>
                       <span
                         className={`absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full ring-2 ring-white ${
@@ -299,10 +278,30 @@ const RecipientTrackingTable = ({
                     {/* Name, Email & Requirement Badge */}
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <h4 className="text-xs sm:text-sm font-semibold truncate text-slate-600">
-                          {recipient.email}
+                        <h4 className="text-xs sm:text-sm font-semibold truncate text-slate-900">
+                          {recipient.name || recipient.email}
                         </h4>
+                        {isRequired ? (
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-semibold bg-indigo-50 text-[#3525cd] border border-indigo-100">
+                            Required
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-medium bg-slate-100 text-slate-500">
+                            Optional
+                          </span>
+                        )}
                       </div>
+                      {recipient.name && (
+                        <p className="text-xs text-slate-500 truncate font-sans mt-0.5">
+                          {recipient.email}
+                        </p>
+                      )}
+                      {recipient.has_responded && recipient.response_at && (
+                        <p className="text-[11px] text-emerald-600 font-medium mt-0.5 flex items-center gap-1">
+                          <Check size={11} className="stroke-[2.5]" />
+                          <span>Replied {formatSentDate(recipient.response_at)}</span>
+                        </p>
+                      )}
                     </div>
                   </div>
 
@@ -336,7 +335,7 @@ const RecipientTrackingTable = ({
                               {isSingleSending ? (
                                 <>
                                   <Loader2
-                                    size={10}
+                                    size={11}
                                     className="animate-spin text-white"
                                   />
                                   <span>Sending...</span>
@@ -370,20 +369,20 @@ const RecipientTrackingTable = ({
                           <button
                             type="button"
                             onClick={() => onToggleResponse(recipient.email)}
-                            className="bg-white hover:bg-slate-50 text-slate-600 hover:text-slate-900 border border-slate-200 py-1.5 px-2.5 rounded-lg font-medium text-xs flex items-center gap-1 transition-all cursor-pointer"
+                            className="bg-white hover:bg-slate-50 text-slate-700 hover:text-slate-900 border border-slate-200 py-1.5 px-2.5 rounded-lg font-medium text-xs flex items-center gap-1 transition-all cursor-pointer shadow-2xs"
                             title="Mark response as complete"
                           >
                             {isMarking ? (
                               <>
                                 <Loader2
                                   size={12}
-                                  className="animate-spin text-white"
+                                  className="animate-spin text-slate-600"
                                 />
                                 <span>Marking...</span>
                               </>
                             ) : (
                               <>
-                                <Check size={13} className="stroke-2.5" />
+                                <Check size={13} className="stroke-[2.5]" />
                                 <span className="hidden sm:inline">Done</span>
                               </>
                             )}
@@ -393,12 +392,12 @@ const RecipientTrackingTable = ({
                         <button
                           type="button"
                           onClick={() => onUndoResponded(recipient.email)}
-                          className="bg-white hover:bg-slate-50 text-slate-500 hover:text-slate-800 border border-slate-200 py-1.5 px-2.5 rounded-lg text-xs font-medium flex items-center gap-1 transition-all cursor-pointer"
+                          className="bg-white hover:bg-slate-50 text-slate-600 hover:text-slate-900 border border-slate-200 py-1.5 px-2.5 rounded-lg text-xs font-medium flex items-center gap-1 transition-all cursor-pointer shadow-2xs"
                           title="Revert to awaiting response"
                         >
                           {isMarking ? (
                             <>
-                              <Loader2 size={12} className="animate-spin" />
+                              <Loader2 size={12} className="animate-spin text-slate-600" />
                               <span>Undoing...</span>
                             </>
                           ) : (
@@ -419,25 +418,27 @@ const RecipientTrackingTable = ({
 
         {/* table footer */}
         <div className="px-4 sm:px-5 py-3 bg-slate-50/80 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={handleToggleSelectAll}
-              className="inline-flex items-center gap-1.5 font-medium text-slate-700 hover:text-slate-900 cursor-pointer select-none"
-            >
-              {allSelected ? (
-                <CheckSquare size={14} className="text-[#3525cd]" />
-              ) : isSomeSelected ? (
-                <MinusSquare size={14} className="text-[#3525cd]" />
-              ) : (
-                <Square
-                  size={14}
-                  className="text-slate-300 hover:text-slate-400"
-                />
-              )}
-              <span>Select all</span>
-            </button>
-          </div>
+          <button
+            type="button"
+            onClick={handleToggleSelectAll}
+            className="inline-flex items-center gap-1.5 font-medium text-slate-700 hover:text-slate-900 cursor-pointer select-none"
+          >
+            {allSelected ? (
+              <CheckSquare size={14} className="text-[#3525cd]" />
+            ) : isSomeSelected ? (
+              <MinusSquare size={14} className="text-[#3525cd]" />
+            ) : (
+              <Square
+                size={14}
+                className="text-slate-300 hover:text-slate-400"
+              />
+            )}
+            <span>Select all</span>
+          </button>
+
+          <span className="text-[11px] font-mono text-slate-400">
+            Showing {filteredRecipients.length} of {totalCount} recipients
+          </span>
         </div>
       </div>
     </>
