@@ -60,6 +60,7 @@ class GmailService:
                 # refresh_token
                 if self.creds and self.creds.expired and self.creds.refresh_token:
                     self.creds.refresh(Request())
+                    # this should be changed to database
                     with open(self.TOKEN_PATH, "w") as f:
                         f.write(self.creds.to_json())
                 

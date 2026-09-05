@@ -22,6 +22,29 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base = declarative_base()
 
+class GoogleAuth(Base):
+    """Stores Google OAuth credentials for the single Echomail User."""
+    __tablename__ = "google_auth"
+
+    id = Column(Integer, primary_key=True, index=True)
+    access_token = Column(Text, nullable=False)
+    refresh_token = Column(Text, nullable=True)
+    token_type = Column(String(50), nullable=True)
+    expires_at = Column(DateTime, nullable=True)
+
+    # Google Account information
+    email = Column(String(255), nullable=True)
+    name = Column(String(255), nullable=True)
+    picture = Column(Text, nullable=True)
+
+    created_at = Column(DateTime, default=func.now())
+    updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
+
+
+
+
+
+
 
 class TrackedEmailRecipient(Base):
     """Model for the association between TrackedEmail and Recipient with additional attributes."""
