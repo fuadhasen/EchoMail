@@ -15,12 +15,9 @@ from sqlalchemy.sql import func
 from config import Config
 
 
-# Create a SQLite database in the current directory
-# DATABASE_URL = "sqlite:///./email_tracker.db"
-# engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
-# SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-engine = create_engine(Config.DATABASE_URL)
+
+engine = create_engine(Config.DATABASE_URL, connect_args={"ssl": {}})
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base = declarative_base()
