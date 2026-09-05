@@ -202,7 +202,7 @@ async def auth_callback(code: str):
     user_info = gmail_service.get_user_info()
     gmail_service.save_user_info(user_info)
 
-    return RedirectResponse(url="http://localhost:5173")
+    return RedirectResponse(url=Config.FRONTEND_URL)
 
 
 @app.get("/auth/me")
