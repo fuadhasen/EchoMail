@@ -3,11 +3,7 @@ import { useToast } from "@/context/ToastContext";
 import useSentEmails from "@/hooks/useSentEmails";
 import useTrackNew from "@/hooks/useTrackNew";
 import type { SentEmail } from "@/type";
-import {
-  QueryClient,
-  QueryClientContext,
-  useQueryClient,
-} from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   AlertCircle,
   AlertTriangle,
@@ -29,7 +25,7 @@ import {
   X,
 } from "lucide-react";
 import { useState } from "react";
-import { Link, useNavigate } from "react-router";
+import { useNavigate } from "react-router";
 
 const TrackNew = () => {
   const navigate = useNavigate();

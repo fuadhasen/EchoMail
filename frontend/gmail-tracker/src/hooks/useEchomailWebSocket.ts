@@ -12,7 +12,9 @@ const useEchomailWebSocket = () => {
     const connect = () => {
       console.log("Connecting to EchoMail WebSocket...");
 
-      socket = new WebSocket("ws://localhost:8000/ws");
+      const wsUrl = import.meta.env.VITE_API_URL.replace(/^http/, "ws");
+
+      socket = new WebSocket(`${wsUrl}/ws`);
 
       socket.onopen = () => {
         console.log("EchoMail WebSocket connected");

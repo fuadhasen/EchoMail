@@ -1,5 +1,5 @@
+import api from "@/services/api";
 import { useQuery } from "@tanstack/react-query";
-import axios from "axios";
 import ms from "ms";
 
 interface Profile {
@@ -9,7 +9,7 @@ interface Profile {
 
 const useProfile = () => {
   const fetchProfile = async () => {
-    const res = await axios.get("http://localhost:8000/user_info");
+    const res = await api.get("/user_info");
     return res.data.user_info;
   };
 

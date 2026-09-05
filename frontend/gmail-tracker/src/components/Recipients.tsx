@@ -1,5 +1,4 @@
 import { CheckCircle2 } from "lucide-react";
-import React from "react";
 
 const Recipients = () => {
   return (

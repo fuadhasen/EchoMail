@@ -14,7 +14,7 @@ import {
   XCircle,
   Zap,
 } from "lucide-react";
-import React, { useState } from "react";
+import { useState } from "react";
 import { Link } from "react-router";
 
 const Landing = () => {

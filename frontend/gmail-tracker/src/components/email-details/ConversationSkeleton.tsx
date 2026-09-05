@@ -1,5 +1,3 @@
-import React from "react";
-
 const ConversationSkeleton = () => {
   return (
     <div className="bg-white border border-slate-200/80 rounded-2xl p-5 shadow-2xs space-y-4 animate-pulse">

@@ -1,5 +1,4 @@
 import { Mail, Plus, RotateCcw, SearchX } from "lucide-react";
-import React from "react";
 import { Link } from "react-router";
 
 interface TrackedEmailProps {

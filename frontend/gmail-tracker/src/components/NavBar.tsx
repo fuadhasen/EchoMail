@@ -1,10 +1,9 @@
-import React from "react";
 import { Input } from "./ui/input";
 // import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 import { Bell, Search, Settings } from "lucide-react";
-import { Button } from "./ui/button";
 import { Avatar, AvatarFallback } from "./ui/avatar";
+import { Button } from "./ui/button";
 
 const NavBar = () => {
   return (

@@ -1,7 +1,6 @@
 import LoadingScreen from "@/components/common/LoadingScreen";
 import useAuth from "@/hooks/useAuth";
 import Landing from "@/pages/Landing";
-import React from "react";
 import { Navigate } from "react-router";
 
 const RootRedirect = () => {

@@ -1,4 +1,3 @@
-import { useToast } from "@/context/ToastContext";
 import {
   AlertCircle,
   ArrowRight,
@@ -8,28 +7,25 @@ import {
   ChevronUp,
   Clock,
   Cpu,
-  Pause,
-  Play,
   Radio,
-  RefreshCw,
   Send,
   Users,
   Workflow,
   Zap,
 } from "lucide-react";
-import React, { useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import {
-  ResponsiveContainer,
-  AreaChart,
   Area,
+  AreaChart,
+  ResponsiveContainer,
+  Tooltip,
   XAxis,
   YAxis,
-  Tooltip,
 } from "recharts";
 
-import { useNavigate } from "react-router";
 import useTrackedEmails from "@/hooks/useTrackedEmails";
 import { getTrackedEmailStatus } from "@/utils/statusFilter";
+import { useNavigate } from "react-router";
 
 const activityData = [
   { day: "Mon", actions: 3, reminders: 2, responses: 1, completed: 0 },
@@ -183,10 +179,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 
 const Automation = () => {
   const navigate = useNavigate();
-  const { triggerToast } = useToast();
 
-  const [isSyncing, setIsSyncing] = useState(false);
-  const [lastCheckText, setLastCheckText] = useState("2 min ago");
   const [showAllActivity, setShowAllActivity] = useState(false);
   const [filterType, setFilterType] = useState<
     "all" | "response" | "reminder" | "completed"
@@ -339,24 +332,6 @@ const Automation = () => {
       completed: allEvents.filter((e) => e.type === "completed").length,
     };
   }, [allEvents]);
-
-  const handleManualSync = () => {
-    if (isSyncing) return;
-    setIsSyncing(true);
-    triggerToast(
-      "Evaluating EchoMail automation engine across 12 active threads...",
-      "info",
-    );
-
-    setTimeout(() => {
-      setIsSyncing(false);
-      setLastCheckText("Just now");
-      triggerToast(
-        "Automation check complete! All 12 email threads evaluated. Systems optimal.",
-        "success",
-      );
-    }, 1200);
-  };
 
   return (
     <div className="w-full space-y-5 font-sans text-left px-4 md:px-8 py-4 ">

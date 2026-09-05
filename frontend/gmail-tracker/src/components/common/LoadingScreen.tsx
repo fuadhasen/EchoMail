@@ -1,5 +1,3 @@
-import React from "react";
-
 const LoadingScreen = () => {
   return (
     <div className="h-screen flex flex-col items-center justify-center bg-[#f8f9ff]">

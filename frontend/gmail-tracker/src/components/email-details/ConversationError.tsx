@@ -1,5 +1,4 @@
 import { AlertCircle, RefreshCcw } from "lucide-react";
-import React from "react";
 
 export interface ConversationErrorStateProps {
   title?: string;

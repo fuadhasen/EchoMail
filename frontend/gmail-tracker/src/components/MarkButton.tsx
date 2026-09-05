@@ -1,9 +1,9 @@
+import api from "@/services/api";
 import { Button } from "@radix-ui/themes";
 import { useMutation } from "@tanstack/react-query";
-import axios from "axios";
+import { useNavigate } from "react-router";
 import useUrlQuery from "../hooks/useUrlQuery";
 import Spinner from "./common/Spinner";
-import { useNavigate } from "react-router";
 
 interface Props {
   status: boolean;
@@ -23,9 +23,7 @@ const MarkButton = ({ status }: Props) => {
   };
 
   const mark = async () => {
-    const res = await axios.post(
-      `http://localhost:8000/tracked-emails/${id}/mark-done`,
-    );
+    const res = await api.post(`/tracked-emails/${id}/mark-done`);
     return res.data;
   };
 
@@ -38,9 +36,7 @@ const MarkButton = ({ status }: Props) => {
   });
 
   const unmark = async () => {
-    const res = await axios.post(
-      `http://localhost:8000/tracked-emails/${id}/mark-undone`,
-    );
+    const res = await api.post(`/tracked-emails/${id}/mark-undone`);
     return res.data;
   };
 

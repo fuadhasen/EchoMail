@@ -1,5 +1,5 @@
-import React, { useState } from "react";
 import { Lock } from "lucide-react";
+import { useState } from "react";
 
 const login = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -7,16 +7,14 @@ const login = () => {
   const handleGoogleLogin = () => {
     setIsLoading(true);
     setTimeout(() => {
-      window.location.href = "http://localhost:8000/auth/google";
+      window.location.href = `${import.meta.env.VITE_API_URL}/auth/google`;
     }, 1000);
   };
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-[#fafafb] p-6 relative overflow-hidden">
-      {/* Background decorative accent 1: Minimalist premium micor-grid */}
       <div className="absolute inset-0 opacity-[0.03] pionter-events-none bg-[linear-gradient(to_right,#000_1px,transparent_1px),linear-gradient(to_bottom,#000_1px,transparent_1px)] bg-[size:24px_24px]" />
 
-      {/* Background decorative accent 2: Soft, organic ambient shapes in the distance background */}
       <div className="absolute top-[10%] left-[15%] w-[450px] h-[450px] bg-indigo-500/[0.03] rounded-full pointer-events-none blur-[130px] animate-pulse duration-[6s] " />
       <div className="absolute bottom-[10%] right-[15%] w-[500px] h-[500px] bg-violet-500/[0.02] rounded-full  blur-[140px] pointer-events-none animate-pulse duration-[8s]" />
 
@@ -26,11 +24,10 @@ const login = () => {
 
       {/* main login card */}
       <div className="w-full max-w-[440px] bg-white border border-zinc-200/60 rounded-[28px] p-10 md:p-14 shadow-[0_20px_50px_rgba(0,0,0,0.02),0_1px_3px_rgba(0,0,0,0.01),inset_0_1px_0_rgba(255,255,255,0.6)] relative z-10 transition-all duration-300 hover:shadow-[0_24px_60px_rgba(0,0,0,0.03)]">
-        {/* light bar on the top of card for premium hardware-like feel  */}
         <div className="absolute inset-x-12 -top-px h-0.5 bg-linear-to from-transparent via-indigo-500/25 to-transparent" />
 
         <div className="flex flex-col items-center text-center space-y-10">
-          {/* Echomail brand section */}
+          {/* brand section */}
           <div className="flex flex-col items-center gap-2.5 select-none animate-in fade-in slide-in-from-top-3 duration-300">
             <div className="w-10 h-10 bg-zinc-950 text-zinc-100 rounded-xl flex items-center justify-center font-sans font-black text-xs tracking-tighter shadow-[0_4px_12px_rgba(0,0,0,0.08)] hover:scale-105 transition-transform duration-200">
               E

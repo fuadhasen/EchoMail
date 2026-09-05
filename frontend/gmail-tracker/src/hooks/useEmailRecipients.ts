@@ -1,10 +1,10 @@
+import api from "@/services/api";
 import { useQuery } from "@tanstack/react-query";
-import axios from "axios";
 import ms from "ms";
 
 const useEmailRecipients = (id: string) => {
   const fetchRecipients = async () => {
-    const res = await axios.get(`http://localhost:8000/email_recipients/${id}`);
+    const res = await api.get(`/email_recipients/${id}`);
     return res.data.recipients;
   };
 
