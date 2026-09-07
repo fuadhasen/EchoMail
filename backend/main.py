@@ -264,12 +264,6 @@ async def get_current_user():
 
     if not gmail_service.is_authenticated():
         return {"authenticated": False, "user": None}
-
-    if not USER_PATH.exists():
-        return {
-            "authenticated": False,
-            "user": None
-        }
     
     db = SessionLocal()
 
