@@ -6,6 +6,8 @@ import re
 import base64
 import json
 from config import Config
+from models import GoogleAuth, SessionLocal
+from encryption import decrypt_token, encrypt_token
 from pathlib import Path
 from typing import List, Dict, Any, Optional, Union
 from config import USER_PATH
@@ -34,47 +36,61 @@ class GmailService:
         "https://www.googleapis.com/auth/userinfo.profile",
         "https://www.googleapis.com/auth/userinfo.email"
     ]
-    TOKEN_PATH = Path("token.json")
 
     def __init__(self):
         self.creds = None
         self.service = None
         self.error  = None
 
+        db = SessionLocal()
+
         # Attempt to initialize the service, handling the case of missing credentials
         try:
-            # Check if token file exists
-            if self.TOKEN_PATH.exists():
-                with open(self.TOKEN_PATH, "r") as f:
-                    token_data = json.load(f)
+            google_auth = db.query(GoogleAuth).first()
 
-                self.creds = Credentials(
-                    token=token_data.get("token") or token_data.get("access_token"),
-                    refresh_token=token_data.get("refresh_token"),
-                    token_uri=Config.TOKEN_URI,
-                    client_id=Config.CLIENT_ID,
-                    client_secret=Config.CLIENT_SECRET,
-                    scopes=self.SCOPES
+            if not google_auth:
+                self.error = "Google account not authenticated"
+                return
+
+            access_token = decrypt_token(google_auth.access_token)
+            refresh_token = None
+
+            if google_auth.refresh_token:
+                refresh_token = decrypt_token(
+                    google_auth.refresh_token
+                )
+            
+
+            self.creds = Credentials(
+                token=access_token,
+                refresh_token=refresh_token,
+                token_uri=Config.TOKEN_URI,
+                client_id=Config.CLIENT_ID,
+                client_secret=Config.CLIENT_SECRET,
+                scopes=self.SCOPES,
+            )
+
+            # refresh_token
+            if self.creds and self.creds.expired and self.creds.refresh_token:
+                self.creds.refresh(Request())
+
+                google_auth.access_token = encrypt_token(
+                    self.creds.token
                 )
 
-                # refresh_token
-                if self.creds and self.creds.expired and self.creds.refresh_token:
-                    self.creds.refresh(Request())
-                    # this should be changed to database
-                    with open(self.TOKEN_PATH, "w") as f:
-                        f.write(self.creds.to_json())
-                
-                self.service = build("gmail", "v1", credentials=self.creds)
+                google_auth.expires_at = self.creds.expiry
+                db.commit()
 
-            else:
-                self.error = "Token file not exist, user is not Authenticated"
-
+            self.service = build("gmail", "v1", credentials=self.creds)
+ 
         except RefreshError:
             self.error = "GMAIL_AUTH_EXPIRED"
         except HttpError as e:
             self.error = f"HTTP Error: {e}"
         except Exception as e:
             self.error = f"Initialization error: {e}"
+        finally:
+            db.close()
 
 
     def is_available(self):
@@ -91,7 +107,11 @@ class GmailService:
         Returns:
             bool: True if its authenticated , False otherwise
         """
-        return self.TOKEN_PATH.exists()
+        db = SessionLocal()
+        google_auth = db.query(GoogleAuth).first()
+        if google_auth:
+            return True
+        return False
 
 
     def get_credentials_error(self):
@@ -126,20 +146,23 @@ class GmailService:
             return []
     
     def save_user_info(self, user_info):
-        """save the authenticated user information
+        """save the authenticated user information in the DB.
         """
-        user = {
-            "name": user_info["names"][0]["displayName"],
-            "email": user_info["emailAddresses"][0]["value"],
-            "avatar": user_info["photos"][0]["url"]
-            if user_info.get("photos")
-            else None,
-        }
+        db = SessionLocal()
 
-        with open(USER_PATH, "w") as f:
-            json.dump(user, f)
-        
-        return user
+        try:
+            google_auth = db.query(GoogleAuth).first()
+
+            if not google_auth:
+                return
+
+            google_auth.name = user_info['names'][0]['displayName']
+            google_auth.email = user_info["emailAddresses"][0]["value"]
+            google_auth.picture = user_info["photos"][0]["url"]
+
+            db.commit()
+        finally:
+            db.close()
 
     def get_user_info(self):
         """Get user information (email_addresses, photos, names)

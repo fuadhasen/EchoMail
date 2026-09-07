@@ -10,6 +10,7 @@ class Settings(BaseSettings):
     REDIRECT_URI: str
     FRONTEND_URL: str
     TOKEN_URI: str
+    TOKEN_ENCRYPTION_KEY: str
 
     model_config = {
         "env_file": ".env",

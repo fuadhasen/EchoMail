@@ -1,7 +1,7 @@
-import { Lock } from "lucide-react";
+import { Check, Lock } from "lucide-react";
 import { useState } from "react";
 
-const login = () => {
+export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
 
   const handleGoogleLogin = () => {
@@ -12,66 +12,57 @@ const login = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-[#fafafb] p-6 relative overflow-hidden">
-      <div className="absolute inset-0 opacity-[0.03] pionter-events-none bg-[linear-gradient(to_right,#000_1px,transparent_1px),linear-gradient(to_bottom,#000_1px,transparent_1px)] bg-[size:24px_24px]" />
-
-      <div className="absolute top-[10%] left-[15%] w-[450px] h-[450px] bg-indigo-500/[0.03] rounded-full pointer-events-none blur-[130px] animate-pulse duration-[6s] " />
-      <div className="absolute bottom-[10%] right-[15%] w-[500px] h-[500px] bg-violet-500/[0.02] rounded-full  blur-[140px] pointer-events-none animate-pulse duration-[8s]" />
-
-      {/* decorative center ring overlay for visual layering and depth */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] border border-zinc-200/[0.15] rounded-full pointer-events-none" />
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] border border-zinc-200/[0.08] rounded-full pointer-events-none" />
-
-      {/* main login card */}
-      <div className="w-full max-w-[440px] bg-white border border-zinc-200/60 rounded-[28px] p-10 md:p-14 shadow-[0_20px_50px_rgba(0,0,0,0.02),0_1px_3px_rgba(0,0,0,0.01),inset_0_1px_0_rgba(255,255,255,0.6)] relative z-10 transition-all duration-300 hover:shadow-[0_24px_60px_rgba(0,0,0,0.03)]">
-        <div className="absolute inset-x-12 -top-px h-0.5 bg-linear-to from-transparent via-indigo-500/25 to-transparent" />
-
-        <div className="flex flex-col items-center text-center space-y-10">
-          {/* brand section */}
-          <div className="flex flex-col items-center gap-2.5 select-none animate-in fade-in slide-in-from-top-3 duration-300">
-            <div className="w-10 h-10 bg-zinc-950 text-zinc-100 rounded-xl flex items-center justify-center font-sans font-black text-xs tracking-tighter shadow-[0_4px_12px_rgba(0,0,0,0.08)] hover:scale-105 transition-transform duration-200">
+    <div
+      className="min-h-screen flex flex-col items-center justify-center bg-[#fafafb] p-6 relative overflow-hidden font-sans select-none"
+      id="echomail-login-root"
+    >
+      {/* Main Single-Column Premium Login Card (Extended Height & Balanced Hierarchy) */}
+      <div
+        className="w-full max-w-117.5 min-h-150 bg-white border border-slate-200/80 rounded-4xl p-8 sm:p-12 shadow-[0_24px_60px_rgba(0,0,0,0.04),0_1px_3px_rgba(0,0,0,0.01)] relative z-10 flex flex-col justify-between transition-all duration-300"
+        id="login-card"
+      >
+        <div className="flex flex-col items-center text-center space-y-7 my-auto animate-in fade-in duration-500">
+          {/* EchoMail Brand Logo */}
+          <div className="flex flex-col items-center gap-2 select-none">
+            <div className="w-12 h-12 bg-slate-900 text-white rounded-2xl flex items-center justify-center font-sans font-black text-base tracking-tighter shadow-xs hover:scale-105 transition-transform duration-200">
               E
             </div>
-            <div className="space-y-0.5">
-              <span className="font-sans text-[11px] font-black tracking-[0.25em] uppercase text-zinc-400">
-                EchoMail
-              </span>
-              <span className="block font-sans text-[8px] text-zinc-400 font-semibold tracking-wide">
-                v1.2.0
-              </span>
-            </div>
+            <span className="font-sans text-[11px] font-bold tracking-[0.22em] uppercase text-slate-400">
+              EchoMail
+            </span>
           </div>
 
-          {/* Typography heading and descriptions */}
-          <div className="space-y-4 animate-in fade-in slide-in-from-top-4 duration-700">
-            <h1 className="font-sans text-[24px] md:text-[27px] font-bold text-[#0b1c30] tracking-tight leading-[1.28] px-1">
-              Track your important emails and make sure conversations get
-              completed.
+          {/* Heading & Core Value Copy */}
+          <div className="space-y-3">
+            <h1 className="text-2xl sm:text-[28px] font-extrabold text-slate-900 tracking-tight leading-tight">
+              Welcome to EchoMail
             </h1>
-            <p className="font-sans text-xs text-zinc-400 leading-relaxed font-medium px-2">
-              EchoMail sits silently above your primary inbox to securely audit
-              outgoing threads and guarantee every critical send meets its
-              matching responses.
+            <p className="text-sm text-slate-500 leading-relaxed font-normal px-1">
+              Connect your account to let EchoMail quietly watch your sent
+              threads, detect replies in real-time, and flag overdue
+              conversations before they turn cold.
             </p>
           </div>
 
-          {/* Core login call */}
-          <div className="w-full space-y-4.5 pt-3 animate-in fade-in slide-in-from-top-5 duration-1000 ">
+          {/* Core Login Call to Action */}
+          <div className="w-full space-y-3.5 pt-1">
             <button
               type="button"
               onClick={handleGoogleLogin}
               disabled={isLoading}
-              className="w-full flex items-center justify-center gap-3 py-3.5 px-6 bg-zinc-950 hover:bg-zinc-900 active:scale-[0.98] rounded-xl font-sans text-xs font-bold text-white transition-all duration-150 shadow-[0_4px_12px_rgba(0,0,0,0.1),inset_0_1px_1px_rgba(255,255,255,0.15)] cursor-pointer focus:outline-none disabled:opacity-75 relative overflow-hidden group"
+              className="w-full flex items-center justify-center gap-3 py-3.5 px-6 bg-slate-950 hover:bg-slate-900 active:scale-[0.98] rounded-xl font-sans text-xs font-bold text-white transition-all duration-150 shadow-xs cursor-pointer focus:outline-none disabled:opacity-75 relative overflow-hidden group"
+              id="google-login-button"
             >
               {isLoading ? (
                 <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 border-2 border-zinc-500 border-t-white rounded-full animate-spin" />
-                  <span className="font-medium text-zinc-200">
-                    Connecting Securely...
+                  <div className="w-4 h-4 border-2 border-slate-400 border-t-white rounded-full animate-spin" />
+                  <span className="font-medium text-slate-200">
+                    Signing in...
                   </span>
                 </div>
               ) : (
                 <>
+                  {/* Google SVG Vector Graphic */}
                   <svg
                     className="w-4 h-4 shrink-0 transition-transform duration-200 group-hover:scale-105"
                     viewBox="0 0 24 24"
@@ -102,37 +93,65 @@ const login = () => {
               )}
             </button>
 
-            <div className="flex items-center justify-center gap-1.5 text-[10px] text-zinc-400 font-semibold select-none">
-              <Lock size={11} className="text-zinc-300" />
-              <span>
-                Fully compliant with Google OAuth 2.0 security policies
+            {/* Small trust/security micro-copy */}
+            <div className="flex items-center justify-center gap-1.5 text-[11px] text-slate-400 font-medium select-none">
+              <Lock size={11} className="text-slate-400" />
+              <span>Google OAuth 2.0 verified authentication</span>
+            </div>
+          </div>
+
+          {/* Simple, Monochromatic Feature Summary (Placed below the login button) */}
+          <div className="w-full pt-4 border-t border-slate-100 space-y-2.5 text-left">
+            <div className="flex items-center gap-3 text-xs text-slate-600">
+              <div className="w-4 h-4 rounded-full bg-slate-100 flex items-center justify-center shrink-0">
+                <Check size={11} className="text-slate-600 stroke-[2.5]" />
+              </div>
+              <span className="font-medium">
+                Direct inbox sync with zero extensions required
+              </span>
+            </div>
+
+            <div className="flex items-center gap-3 text-xs text-slate-600">
+              <div className="w-4 h-4 rounded-full bg-slate-100 flex items-center justify-center shrink-0">
+                <Check size={11} className="text-slate-600 stroke-[2.5]" />
+              </div>
+              <span className="font-medium">
+                Automated response alerts and follow-up reminders
+              </span>
+            </div>
+
+            <div className="flex items-center gap-3 text-xs text-slate-600">
+              <div className="w-4 h-4 rounded-full bg-slate-100 flex items-center justify-center shrink-0">
+                <Check size={11} className="text-slate-600 stroke-[2.5]" />
+              </div>
+              <span className="font-medium">
+                Read-only audit safety without altering messages
               </span>
             </div>
           </div>
         </div>
       </div>
 
-      <footer className="absolute bottom-10 text-[9.5px] text-zinc-400 font-bold font-sans tracking-wide space-x-4 select-none animate-in fade-in duration-1000">
-        <span>© 2026 ECHOMAIL CORP.</span>
-        <span className="text-zinc-300">•</span>
+      {/* Floating minimalistic footer */}
+      <footer className="absolute bottom-6 text-[11px] text-slate-400 font-medium font-sans space-x-3 select-none animate-in fade-in duration-1000">
+        <span>© 2026 EchoMail</span>
+        <span className="text-slate-300">•</span>
         <a
           href="#"
           onClick={(e) => e.preventDefault()}
-          className="hover:text-zinc-600 transition-colors"
+          className="hover:text-slate-600 transition-colors"
         >
-          PRIVACY POLICY
+          Privacy Policy
         </a>
-        <span className="text-zinc-300">•</span>
+        <span className="text-slate-300">•</span>
         <a
           href="#"
           onClick={(e) => e.preventDefault()}
-          className="hover:text-zinc-600 transition-colors"
+          className="hover:text-slate-600 transition-colors"
         >
-          SECURITY AUDIT
+          Terms of Service
         </a>
       </footer>
     </div>
   );
-};
-
-export default login;
+}

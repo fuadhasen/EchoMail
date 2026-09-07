@@ -24,6 +24,10 @@ from scheduler import start_scheduler, stop_scheduler, check_email_responses
 from pathlib import Path
 from fastapi.middleware.cors import CORSMiddleware
 from dependencies import get_email_service
+from datetime import datetime, timedelta
+from models import GoogleAuth, SessionLocal
+
+from encryption import encrypt_token
 
 
 # Pydantic models for request/response validation
@@ -194,12 +198,56 @@ async def auth_callback(code: str):
         res.raise_for_status()
         token_data = res.json()
 
-    with open(TOKEN_PATH, "w") as f:
-        json.dump(token_data, f)
+    # calculate when the access token expires
+    expires_at = datetime.now() + timedelta(
+        seconds=token_data.get("expires_in", 3600)
+    )
+
+    db = SessionLocal()
+
+    # save the encrypted token in the database
+    try:
+        google_auth = db.query(GoogleAuth).first()
+
+        if google_auth:
+            google_auth.access_token = encrypt_token(token_data["access_token"])
+
+            # Google may not return a refresh token every time.
+            if token_data.get("refresh_token"):
+                google_auth.refresh_token =  encrypt_token(
+                    token_data["refresh_token"]
+                )
+
+            google_auth.token_type = token_data.get("token_type")
+            google_auth.expires_at = expires_at
+        else:
+            google_auth = GoogleAuth(
+                access_token=encrypt_token(
+                    token_data["access_token"]
+                ),
+                refresh_token=(
+                    encrypt_token(token_data["refresh_token"])
+                    if token_data.get("refresh_token")
+                    else None
+                ),
+                token_type=token_data.get("token_type"),
+                expires_at=expires_at,
+            )
+
+            db.add(google_auth)
+
+        db.commit()
+        db.refresh(google_auth)
+
+    finally:
+        db.close()
+
     
     # make sure to save the authenticated user too
     gmail_service = GmailService()
     user_info = gmail_service.get_user_info()
+
+    # save it into DB
     gmail_service.save_user_info(user_info)
 
     return RedirectResponse(url=Config.FRONTEND_URL)
@@ -208,6 +256,8 @@ async def auth_callback(code: str):
 @app.get("/auth/me")
 async def get_current_user():
     """check status and return logged-in user"""
+
+    # here i need to call helper function in db service to check status
         
     # better to use dependecy injection here
     gmail_service = GmailService()
@@ -221,29 +271,49 @@ async def get_current_user():
             "user": None
         }
     
-    with open(USER_PATH, "r") as f:
-        user = json.load(f)
+    db = SessionLocal()
 
-    return {
-        "authenticated": True,
-        "user": user
-    }
-    
+    try:
+        google_auth = db.query(GoogleAuth).first()
+
+        if not google_auth:
+            return {
+                "authenticated": False,
+                "user": None
+            }
+
+        return {
+            "authenticated": True,
+            "user": {
+                "email": google_auth.email,
+                "name": google_auth.name,
+                "picture": google_auth.picture,
+            }
+        }
+
+    finally:
+        db.close()
+
 
 @app.post('/logout')
 async def logout():
     """user logout endpoint
     """
-    gmail_service = GmailService()
-    if not gmail_service.is_authenticated():
-        return {"status": "unauthenticated"}
+    db = SessionLocal()
 
     try:
-        os.remove(TOKEN_PATH)
-        os.remove(USER_PATH)
-    except Exception as e:
-        raise HTTPException(status_code=403, detail="logout Failed")
+        google_auth = db.query(GoogleAuth).first()
 
+        if not google_auth:
+            return {"status": "unauthenticated"}
+
+        db.delete(google_auth)
+        db.commit()
+
+        return {"status": "logged_out"}
+
+    finally:
+        db.close()
 
 
 @app.get("/search-sent-emails")
