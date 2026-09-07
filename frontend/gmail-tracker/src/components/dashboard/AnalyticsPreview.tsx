@@ -26,7 +26,7 @@ const AnalyticsPreview = ({ emails }: AnalyticsPreviewProps) => {
       ? Math.round((respondedRecipients / totalRecipients) * 100)
       : 100;
 
-  // radial progress calculation
+  // radial progress calculations
   const radius = 38;
   const circumference = 2 * Math.PI * radius;
   const responseStrokeDashoffset =
