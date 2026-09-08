@@ -202,7 +202,7 @@ def start_scheduler():
         # Check emails every 10 minutes
         scheduler.add_job(
             check_email_responses,
-            trigger=IntervalTrigger(minutes=5),  # Changed from 2 to 10 minutes
+            trigger=IntervalTrigger(minutes=1),  # Changed from 2 to 10 minutes
             id="check_email_responses",
             name="Check for email responses every 10 minutes",
             replace_existing=True,
