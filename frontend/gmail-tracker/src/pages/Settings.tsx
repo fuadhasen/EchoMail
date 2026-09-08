@@ -48,7 +48,7 @@ const Settings = () => {
         triggerHoursBefore: parsed.triggerHoursBefore ?? 24,
         templateMessage:
           parsed.templateMessage ||
-          "Hi {name},\n\nJust following up on my previous email to check if you've had a chance to review it. Let me know if you need anything else!\n\nBest,\nAlex",
+          "Hi {name},\n\nJust following up on my previous email to check if you've had a chance to review it. Let me know if you need anything else!\n\nBest,\nFuad",
         autoArchiveOnReply: parsed.autoArchiveOnReply ?? true,
       };
     }
