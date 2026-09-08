@@ -14,14 +14,12 @@ import {
   Hourglass,
   MessageSquare,
   Radio,
-  RotateCcw,
   User,
   Users,
 } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router";
 import MarkCompleteModal from "./MarkCompleteModal";
-import { useToast } from "@/context/ToastContext";
 
 export type WorkspaceViewMode = "recipients" | "conversation" | "timeline";
 
@@ -42,7 +40,6 @@ const EmailHeader = ({
   onSetStatus,
   replyMessages = [],
 }: EmailHeaderProps) => {
-  const { triggerToast } = useToast();
   const [isMarkCompleteModalOpen, setIsMarkCompleteModalOpen] = useState(false);
   const status = getTrackedEmailStatus(email.is_done, email.deadline);
   const displayStatus = status;
@@ -51,9 +48,6 @@ const EmailHeader = ({
   const respondedRecipients =
     email.recipients?.filter((r) => r.has_responded).length || 0;
 
-  const reopenThread = () => {
-    triggerToast("Email status updated to incomplete", "success");
-  };
   const getStatusBadge = () => {
     switch (displayStatus) {
       case "Completed":
