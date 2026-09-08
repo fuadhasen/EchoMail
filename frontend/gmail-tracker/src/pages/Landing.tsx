@@ -756,7 +756,10 @@ const Landing = () => {
       {/* ========================================================================= */}
       {/* 2. CAPABILITIES — UNIFIED PRODUCT SHOWCASE */}
       {/* ========================================================================= */}
-      <section className="py-20 sm:py-28 px-6 sm:px-8 max-w-5xl mx-auto border-t border-zinc-200/70">
+      <section
+        id="capabilities"
+        className="py-20 sm:py-28 px-6 sm:px-8 max-w-5xl mx-auto border-t border-zinc-200/70"
+      >
         {/* Header */}
         <div className="space-y-4 text-center max-w-2xl mx-auto mb-12 sm:mb-16">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white border border-zinc-200/90 shadow-2xs select-none">
@@ -1023,7 +1026,10 @@ const Landing = () => {
       {/* ========================================================================= */}
       {/* 3. WHY ECHOMAIL — PROBLEM VS SOLUTION */}
       {/* ========================================================================= */}
-      <section className="py-20 sm:py-24 px-6 sm:px-8 max-w-5xl mx-auto border-t border-zinc-200/70">
+      <section
+        id="problem-solution"
+        className="py-20 sm:py-24 px-6 sm:px-8 max-w-5xl mx-auto border-t border-zinc-200/70"
+      >
         <div className="space-y-3.5 text-center max-w-2xl mx-auto mb-14">
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-[#0b1c30] tracking-tight">
             The Lost Thread Dilema
@@ -1226,7 +1232,10 @@ const Landing = () => {
       {/* ========================================================================= */}
       {/* 5. SECURITY & PRIVACY FIRST */}
       {/* ========================================================================= */}
-      <section className="py-20 sm:py-24 px-6 sm:px-8 max-w-5xl mx-auto border-t border-zinc-200/70">
+      <section
+        id="security"
+        className="py-20 sm:py-24 px-6 sm:px-8 max-w-5xl mx-auto border-t border-zinc-200/70"
+      >
         <div className="bg-white border border-zinc-200/80 rounded-2xl sm:rounded-3xl p-8 sm:p-12 shadow-2xs space-y-8">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-zinc-100">
             <div className="space-y-1">
@@ -1283,7 +1292,10 @@ const Landing = () => {
       {/* ========================================================================= */}
       {/* 6. FREQUENTLY ASKED QUESTIONS (FAQ) */}
       {/* ========================================================================= */}
-      <section className="py-20 sm:py-24 px-6 sm:px-8 max-w-4xl mx-auto border-t border-zinc-200/70">
+      <section
+        id="faq"
+        className="py-20 sm:py-24 px-6 sm:px-8 max-w-4xl mx-auto border-t border-zinc-200/70"
+      >
         <div className="space-y-3.5 text-center max-w-xl mx-auto mb-12">
           <div className="inline-flex items-center gap-1.5 text-xs font-bold text-[#3525cd]">
             <HelpCircle size={14} />
