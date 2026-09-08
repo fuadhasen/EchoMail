@@ -25,7 +25,7 @@ from pathlib import Path
 from fastapi.middleware.cors import CORSMiddleware
 from dependencies import get_email_service
 from datetime import datetime, timedelta
-from models import GoogleAuth, SessionLocal
+from models import GoogleAuth, SessionLocal, TrackedEmail
 
 from encryption import encrypt_token
 
@@ -298,8 +298,12 @@ async def logout():
     try:
         google_auth = db.query(GoogleAuth).first()
 
+
         if not google_auth:
             return {"status": "unauthenticated"}
+
+        # bulk delete for single user
+        db.query(TrackedEmail).delete()
 
         db.delete(google_auth)
         db.commit()
