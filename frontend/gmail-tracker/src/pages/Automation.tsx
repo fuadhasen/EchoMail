@@ -5,7 +5,6 @@ import {
   CheckCircle2,
   ChevronDown,
   ChevronUp,
-  Clock,
   Cpu,
   Radio,
   Send,
@@ -21,10 +20,10 @@ import {
   YAxis,
 } from "recharts";
 
+import useActivityData from "@/hooks/useActivityData";
 import useTrackedEmails from "@/hooks/useTrackedEmails";
 import { getTrackedEmailStatus } from "@/utils/statusFilter";
 import { useNavigate } from "react-router";
-import useActivityData from "@/hooks/useActivityData";
 
 interface GlobalActivityEvent {
   id: string;
