@@ -722,16 +722,6 @@ const Automation = () => {
                           </div>
 
                           <div className="shrink-0 flex items-center gap-1.5 sm:justify-end">
-                            {event.type === "response" && event.duration && (
-                              <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[10px] font-mono font-medium text-slate-600 bg-slate-100 border border-slate-200/80">
-                                <Clock
-                                  size={10}
-                                  className="text-emerald-600 shrink-0"
-                                />
-                                <span>{event.duration}</span>
-                              </div>
-                            )}
-
                             {event.type === "sent" && (
                               <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[10px] font-mono font-medium text-slate-600 bg-slate-100 border border-slate-200/80">
                                 <Send
