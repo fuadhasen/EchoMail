@@ -688,7 +688,7 @@ const TrackNew = () => {
                           {/* Recipient Details */}
                           <div className="min-w-0">
                             <p
-                              className={`font-sans text-base font-bold truncate ${isSelected ? "text-[#0b1c30]" : "text-[#2a2938]"}`}
+                              className={`font-sans text-sm font-bold truncate ${isSelected ? "text-[#0b1c30]" : "text-[#2a2938]"}`}
                             >
                               {recipient.name}
                             </p>

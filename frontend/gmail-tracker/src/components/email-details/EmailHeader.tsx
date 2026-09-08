@@ -1,6 +1,10 @@
 import type { EmailReply } from "@/services/emailReply";
 import type { TrackedEmailB } from "@/services/trackedEmail";
-import { formatDeadline, formatSenderName, formatSentDate } from "@/utils/dateFormatter";
+import {
+  formatDeadline,
+  formatSenderName,
+  formatSentDate,
+} from "@/utils/dateFormatter";
 import { getTrackedEmailStatus } from "@/utils/statusFilter";
 import {
   ArrowLeft,
@@ -161,13 +165,7 @@ const EmailHeader = ({
                 <span>Mark Complete</span>
               </button>
             ) : (
-              <button
-                onClick={() => reopenThread()}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold text-slate-700 hover:text-slate-900 bg-white hover:bg-slate-50 border border-slate-200 active:scale-[0.98] transition-all cursor-pointer shadow-2xs"
-              >
-                <RotateCcw size={13} className="text-slate-500" />
-                <span>Re-open Thread</span>
-              </button>
+              ""
             )}
           </div>
         </div>
