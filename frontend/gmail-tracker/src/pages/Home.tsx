@@ -42,10 +42,9 @@ const Home = () => {
     return count;
   }, [emails]);
 
-  // Needs Attention list
+  // Needs Attention list, tracked email with more pending recipients
   const needsAttentionEmails = useMemo(() => {
     return emails.filter((e) => {
-      // if e.is_done ? for later
       if (e.is_done === true) return false;
       const pendingCount = e.recipients.filter((r) => !r.has_responded).length;
       return pendingCount > 0;
@@ -80,13 +79,16 @@ const Home = () => {
       <div className="grid grid-cols-12 gap-5">
         {/* left column section */}
         <div className="col-span-12 lg:col-span-8 space-y-8 flex flex-col justify-start">
-          <NeedsAttention emails={needsAttentionEmails} />
+          <NeedsAttention
+            emails={needsAttentionEmails}
+            totalTracked={totalTracked}
+          />
           <AnalyticsPreview emails={emails} />
         </div>
 
         {/* right column section */}
         <div className="col-span-12 lg:col-span-4 space-y-8 flex flex-col justify-start">
-          <UpcomingDeadlines emails={emails} />
+          <UpcomingDeadlines emails={emails} totalTracked={totalTracked} />
           <RecentActivity emails={emails} />
         </div>
       </div>

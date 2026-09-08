@@ -6,9 +6,10 @@ import { useNavigate } from "react-router";
 
 interface NeedsAttentionProps {
   emails: TrackedEmailB[];
+  totalTracked: number;
 }
 
-const NeedsAttention = ({ emails }: NeedsAttentionProps) => {
+const NeedsAttention = ({ emails, totalTracked }: NeedsAttentionProps) => {
   const navigate = useNavigate();
 
   // sorted using action urgency
@@ -43,17 +44,33 @@ const NeedsAttention = ({ emails }: NeedsAttentionProps) => {
 
       {/* compact content*/}
       {emails.length == 0 ? (
-        <div className="p-8 text-center flex flex-col items-center justify-center space-y-2">
-          <div className="w-9 h-9 rounded-xl  bg-emerald-50 text-emerald-600 border border-emerald-200/60  flex items-center justify-center">
-            <CheckCircle2 size={18} />
+        totalTracked === 0 ? (
+          // First-time user
+          <div className="p-8 text-center flex flex-col items-center justify-center space-y-2">
+            <div className="w-9 h-9 rounded-xl  bg-emerald-50 text-emerald-600 border border-emerald-200/60  flex items-center justify-center">
+              <CheckCircle2 size={18} />
+            </div>
+            <h4 className="font-sans text-xs font-bold text-slate-900">
+              Nothing to review
+            </h4>
+            <p className="font-sans text-xs text-slate-500">
+              Track an email to see conversations that need your attention.
+            </p>
           </div>
-          <h4 className="font-sans text-xs font-bold text-slate-900">
-            All caught up
-          </h4>
-          <p className="font-sans text-xs text-slate-500">
-            No emails currently require immediate attention.
-          </p>
-        </div>
+        ) : (
+          // Existing user, nothing needs attention
+          <div className="p-8 text-center flex flex-col items-center justify-center space-y-2">
+            <div className="w-9 h-9 rounded-xl  bg-emerald-50 text-emerald-600 border border-emerald-200/60  flex items-center justify-center">
+              <CheckCircle2 size={18} />
+            </div>
+            <h4 className="font-sans text-xs font-bold text-slate-900">
+              All caught up
+            </h4>
+            <p className="font-sans text-xs text-slate-500">
+              No emails currently require immediate attention.
+            </p>
+          </div>
+        )
       ) : (
         <div className="divide-y divide-[#c7c4d8]/15 flex flex-col">
           {displayEmails.map((email) => {

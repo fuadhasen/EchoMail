@@ -14,8 +14,8 @@ from sqlalchemy.orm import Session
 from pydantic import BaseModel, EmailStr, Field
 from contextlib import asynccontextmanager
 from config import Config
-from config import TOKEN_PATH
-from config import USER_PATH
+
+from sqlalchemy import func
 
 from gmail_services import GmailService
 from models import get_db, create_tables
@@ -131,22 +131,22 @@ app.add_middleware(
     allow_headers=["*"]
 )
 
-@app.websocket("/ws")
-async def websocket_route(websocket: WebSocket):
-    await websocket_endpoint(websocket)
+# @app.websocket("/ws")
+# async def websocket_route(websocket: WebSocket):
+#     await websocket_endpoint(websocket)
 
-    try:
-        while True:
-            # Keep the connection alive.
-            # We don't currently need messages from the frontend.
-            await websocket.receive_text()
+#     try:
+#         while True:
+#             # Keep the connection alive.
+#             # We don't currently need messages from the frontend.
+#             await websocket.receive_text()
 
-    except WebSocketDisconnect:
-        manager.disconnect(websocket)
+#     except WebSocketDisconnect:
+#         manager.disconnect(websocket)
 
-    except Exception as e:
-        print(f"WebSocket error: {e}")
-        manager.disconnect(websocket)
+#     except Exception as e:
+#         print(f"WebSocket error: {e}")
+#         manager.disconnect(websocket)
 
 
 @app.get("/")
@@ -694,6 +694,14 @@ async def send_automatic_reminders(db: Session = Depends(get_db)):
             )
 
     return {"success": True, "reminders_sent": sent_count, "details": reminders_sent}
+
+
+# automation activities endpoint
+@app.get("/automation/responses")
+async def get_daily_responses(db: Session = Depends(get_db)):
+    """automatic responses activity"""
+    results = EmailTrackerService.get_daily_activities(db)
+    return results
 
 
 if __name__ == "__main__":

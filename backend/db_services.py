@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 from typing import List, Optional, Dict, Any
 from datetime import datetime, timedelta, timezone
 from fastapi import HTTPException
+from sqlalchemy import func
 
 
 from models import TrackedEmail, TrackedEmailRecipient, Recipient, Reminder
@@ -544,9 +545,11 @@ class EmailTrackerService:
 
         # If all required recipients have responded, mark the email as done and notify the user?,
         if all_responded and not was_already_done:
-            tracked_email.is_done = True
-            db.add(tracked_email)
 
+            tracked_email.is_done = True
+            tracked_email.completed_at = datetime.now()
+            db.add(tracked_email)
+            
             tracking_completed = True
 
         # Commit changes
@@ -560,3 +563,67 @@ class EmailTrackerService:
             "recipient_email": sender_email,
             "subject": tracked_email.subject
         }
+
+    def get_daily_activities(db: Session):
+        """get daily activity history from the databases"""
+        responses = (
+            db.query(
+                func.date(TrackedEmailRecipient.response_at).label("day"),
+                func.count().label("responses")
+            )
+            .filter(TrackedEmailRecipient.response_at.isnot(None))
+            .group_by(func.date(TrackedEmailRecipient.response_at))
+            .order_by(func.date(TrackedEmailRecipient.response_at))
+            .all()
+        )
+
+        reminders = (
+            db.query(
+                func.date(Reminder.sent_at).label("day"),
+                func.count().label("reminders"),
+            )
+            .group_by(func.date(Reminder.sent_at))
+            .all()
+        )
+
+        completed = (
+            db.query(
+                func.date(TrackedEmail.completed_at).label("day"),
+                func.count().label("completed"),
+            )
+            .filter(TrackedEmail.completed_at.isnot(None))
+            .group_by(func.date(TrackedEmail.completed_at))
+            .all()
+        )
+
+        activity = {}
+        for row in responses:
+            activity[str(row.day)] = {
+                "day": str(row.day),
+                "responses": row.responses,
+                "reminders": 0,
+            }
+
+        for row in reminders:
+            if str(row.day) not in activity:
+                activity[str(row.day)] = {
+                    "day": str(row.day),
+                    "responses": 0,
+                    "reminders": 0,
+                }
+            
+            activity[str(row.day)]["reminders"] = row.reminders
+
+        for row in completed:
+            if str(row.day) not in activity:
+                activity[str(row.day)] = {
+                    "day": str(row.day),
+                    "responses": 0,
+                    "reminders": 0,
+                    "completed": 0,
+                }
+
+            activity[str(row.day)]["completed"] = row.completed
+
+        return sorted(activity.values(), key=lambda x: x["day"])
+

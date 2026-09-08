@@ -46,7 +46,7 @@ const TrackedEmailEmpty = ({ type, onResetFilter }: TrackedEmailProps) => {
         Start tracking an email to monitor responses automatically.
       </p>
       <Link
-        to={"/track_new"}
+        to={"/app/track_new"}
         className="bg-[#3525cd] text-white hover:bg-[#281ca8] py-2.5 px-4.5 rounded-xl font-sans text-xs font-semibold tracking-wide flex items-center gap-2 shadow-2xs transition-all cursor-pointer "
       >
         <Plus size={15} className="stroke-2.5" />

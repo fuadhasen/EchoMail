@@ -6,7 +6,7 @@ const SearchLoadingSkeleton = () => {
       <div className="flex items-center justify-between text-xs text-slate-400 font-medium px-1">
         <span className="flex items-center gap-2 font-mono">
           <RefreshCw size={12} className="animate-spin text-[#3525cd]" />
-          Querying Gmail Outbox API...
+          Querying Gmail Outbox Thread ...
         </span>
         <span className="font-mono text-[10px] bg-slate-100 px-2 py-0.5 rounded">
           200 OK

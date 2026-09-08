@@ -9,9 +9,7 @@ import {
   Cpu,
   Radio,
   Send,
-  Users,
   Workflow,
-  Zap,
 } from "lucide-react";
 import { useMemo, useState } from "react";
 import {
@@ -26,16 +24,7 @@ import {
 import useTrackedEmails from "@/hooks/useTrackedEmails";
 import { getTrackedEmailStatus } from "@/utils/statusFilter";
 import { useNavigate } from "react-router";
-
-const activityData = [
-  { day: "Mon", actions: 3, reminders: 2, responses: 1, completed: 0 },
-  { day: "Tue", actions: 5, reminders: 3, responses: 1, completed: 1 },
-  { day: "Wed", actions: 8, reminders: 4, responses: 3, completed: 1 },
-  { day: "Thu", actions: 4, reminders: 2, responses: 1, completed: 1 },
-  { day: "Fri", actions: 7, reminders: 4, responses: 2, completed: 1 },
-  { day: "Sat", actions: 2, reminders: 1, responses: 0, completed: 1 },
-  { day: "Sun", actions: 3, reminders: 2, responses: 1, completed: 0 },
-];
+import useActivityData from "@/hooks/useActivityData";
 
 interface GlobalActivityEvent {
   id: string;
@@ -179,6 +168,28 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 
 const Automation = () => {
   const navigate = useNavigate();
+
+  const { data: activityData } = useActivityData();
+
+  const totalActions = activityData?.reduce(
+    (total, day) => total + day.actions,
+    0,
+  );
+
+  const totalReminders = activityData?.reduce(
+    (total, day) => total + day.reminders,
+    0,
+  );
+
+  const totalResponses = activityData?.reduce(
+    (total, day) => total + day.responses,
+    0,
+  );
+
+  const totalCompleted = activityData?.reduce(
+    (total, day) => total + day.completed,
+    0,
+  );
 
   const [showAllActivity, setShowAllActivity] = useState(false);
   const [filterType, setFilterType] = useState<
@@ -374,7 +385,7 @@ const Automation = () => {
               </div>
 
               <div className="space-y-1 md:mt-2 flex-1">
-                <span className="text-[10px] font-mono font-extrabold tracking-wider text-[#3525cd] block">
+                <span className="text-base font-mono font-extrabold tracking-wider text-[#3525cd] block">
                   01
                 </span>
                 <h3 className="text-xs sm:text-sm font-bold text-slate-900 leading-snug">
@@ -386,7 +397,6 @@ const Automation = () => {
 
                 <div className="pt-0.5">
                   <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-slate-50 border border-slate-200/80 text-[10px] font-medium text-slate-600">
-                    <Clock size={10} className="text-slate-400" />
                     Every 5 min
                   </span>
                 </div>
@@ -402,7 +412,7 @@ const Automation = () => {
               </div>
 
               <div className="space-y-1 md:mt-2 flex-1">
-                <span className="text-[10px] font-mono font-extrabold tracking-wider text-slate-400 group-hover:text-[#3525cd] transition-colors block">
+                <span className="text-base font-mono font-extrabold tracking-wider text-slate-400 group-hover:text-[#3525cd] transition-colors block">
                   02
                 </span>
                 <h3 className="text-xs sm:text-sm font-bold text-slate-900 leading-snug">
@@ -413,7 +423,6 @@ const Automation = () => {
                 </p>
                 <div className="pt-0.5">
                   <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-slate-50 border border-slate-200/80 text-[10px] font-medium text-slate-600">
-                    <Users size={10} className="text-slate-400" />
                     12 recipients monitored
                   </span>
                 </div>
@@ -430,7 +439,7 @@ const Automation = () => {
               </div>
 
               <div className="space-y-1 md:mt-2 flex-1">
-                <span className="text-[10px] font-mono font-extrabold tracking-wider text-slate-400 group-hover:text-[#3525cd] transition-colors block">
+                <span className="text-base font-mono font-extrabold tracking-wider text-slate-400 group-hover:text-[#3525cd] transition-colors block">
                   03
                 </span>
                 <h3 className="text-xs sm:text-sm font-bold text-slate-900 leading-snug">
@@ -442,7 +451,6 @@ const Automation = () => {
                 </p>
                 <div className="pt-0.5">
                   <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-slate-50 border border-slate-200/80 text-[10px] font-medium text-slate-600">
-                    <Zap size={10} className="text-[#3525cd]" />
                     Evaluated automatically
                   </span>
                 </div>
@@ -460,7 +468,7 @@ const Automation = () => {
               </div>
 
               <div className="space-y-1 md:mt-2 flex-1">
-                <span className="text-[10px] font-mono font-extrabold tracking-wider text-slate-400 group-hover:text-[#3525cd] transition-colors block">
+                <span className="text-base font-mono font-extrabold tracking-wider text-slate-400 group-hover:text-[#3525cd] transition-colors block">
                   04
                 </span>
                 <h3 className="text-xs sm:text-sm font-bold text-slate-900 leading-snug">
@@ -472,7 +480,6 @@ const Automation = () => {
                 </p>
                 <div className="pt-0.5">
                   <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-slate-50 border border-slate-200/80 text-[10px] font-medium text-slate-600">
-                    <CheckCircle2 size={10} className="text-emerald-600" />
                     Automatic dispatch
                   </span>
                 </div>
@@ -499,7 +506,7 @@ const Automation = () => {
 
               <div className="text-right">
                 <span className="text-base sm:text-lg font-extrabold text-slate-900 leading-none block">
-                  32
+                  {totalActions}
                 </span>
 
                 <span className="text-[9px] font-medium text-slate-400 uppercase tracking-wider">
@@ -565,13 +572,9 @@ const Automation = () => {
 
             {/* Footer */}
             <div className="pt-2 border-t border-slate-100 flex flex-wrap items-center justify-between text-[11px] text-slate-500 gap-1">
-              <div className="flex items-center gap-1.5 font-bold text-slate-800">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#3525cd]" />
-                <span>32 automated actions</span>
-              </div>
-
-              <div className="font-mono text-slate-500 text-[10px]">
-                18 reminders · 9 responses · 5 completed
+              <div className="font-mono text-slate-500 text-sm">
+                {totalReminders} reminders · {totalResponses} responses ·{" "}
+                {totalCompleted} completed
               </div>
             </div>
           </section>
@@ -779,7 +782,7 @@ const Automation = () => {
               <span className="text-[11px] text-slate-400 font-medium">
                 {showAllActivity
                   ? `Showing all ${filteredEvents.length} events`
-                  : `Showing 4 of ${filteredEvents.length} events`}
+                  : `Showing ${Math.min(4, filteredEvents.length)}  of ${filteredEvents.length} events`}
               </span>
 
               {filteredEvents.length > 4 && (

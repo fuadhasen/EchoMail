@@ -20,11 +20,13 @@ const RecentActivity = ({ emails }: EfficiencyProps) => {
     });
   });
 
+  const hasFollowUpData = recipientsWithReminder > 0;
+
   // Follow-up efficiency: percentage of recipients with last_reminder_sent who responded
   const followUpEfficiency =
     recipientsWithReminder > 0
       ? Math.round((respondedWithReminder / recipientsWithReminder) * 100)
-      : 88;
+      : 0;
 
   // radial progress calculation
   const radius = 38;
@@ -76,7 +78,7 @@ const RecentActivity = ({ emails }: EfficiencyProps) => {
           </svg>
           <div className="absolute inset-0 flex flex-col items-center justify-center ">
             <span className="text-xl font-bold font-mono  text-purple-700 leading-none">
-              {followUpEfficiency}%
+              {hasFollowUpData ? `${followUpEfficiency}%` : "0"}
             </span>
           </div>
         </div>
@@ -85,20 +87,21 @@ const RecentActivity = ({ emails }: EfficiencyProps) => {
           <h4 className="font-sans text-xs font-bold text-slate-900">
             Reminder Success Rate
           </h4>
-          <p className="font-sans text-[11px] text-slate-500 leading-relaxed">
-            Follow-up reminders yield responses within{" "}
-            <strong className="text-slate-800 font-semibold">24 hours</strong>{" "}
-            on average.
-          </p>
+          {!hasFollowUpData ? (
+            <div>
+              <p className="font-sans text-[11px] text-slate-500 leading-relaxed">
+                Track an email and send a reminder to start measuring follow-up
+                efficiency.
+              </p>
+            </div>
+          ) : (
+            ""
+          )}
 
           <div className="inline-flex items-center gap-1 text-[10px] font-mono text-purple-700 pt-1 font-semibold">
             <Bell size={11} /> {recipientsWithReminder} Reminders Dispatched
           </div>
         </div>
-      </div>
-
-      <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] font-mono text-slate-500">
-        <span>Avg Response: 4.2h</span>
       </div>
     </div>
   );

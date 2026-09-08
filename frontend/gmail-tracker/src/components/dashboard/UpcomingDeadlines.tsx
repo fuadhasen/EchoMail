@@ -1,6 +1,6 @@
 import type { TrackedEmailB } from "@/services/trackedEmail";
 import { Card } from "@radix-ui/themes";
-import { Calendar, CalendarClock } from "lucide-react";
+import { Calendar, CalendarClock, Clock } from "lucide-react";
 import { useNavigate } from "react-router";
 import { CardContent, CardHeader, CardTitle } from "../ui/card";
 import { getTrackedEmailStatus } from "@/utils/statusFilter";
@@ -8,9 +8,10 @@ import { formatDeadline } from "@/utils/dateFormatter";
 
 export interface UpcomingDeadlineProps {
   emails: TrackedEmailB[];
+  totalTracked: number;
 }
 
-const UpcomingDeadlines = ({ emails }: UpcomingDeadlineProps) => {
+const UpcomingDeadlines = ({ emails, totalTracked }: UpcomingDeadlineProps) => {
   const navigate = useNavigate();
 
   // active non completed emails sorted by deadline urgency
@@ -64,9 +65,25 @@ const UpcomingDeadlines = ({ emails }: UpcomingDeadlineProps) => {
 
       <CardContent className="px-1 pb-1">
         {activeDeadlines.length === 0 ? (
-          <p className="text-xs text-slate-500 py-6 text-center">
-            No Upcoming deadlines. All active emails are up to date!
-          </p>
+          totalTracked === 0 ? (
+            <div className="p-8 text-center flex flex-col items-center justify-center space-y-2">
+              <div className="w-9 h-9 rounded-xl bg-slate-50 text-slate-500 border border-slate-200 flex items-center justify-center">
+                <Clock size={18} />
+              </div>
+
+              <h4 className="font-sans text-xs font-bold text-slate-900">
+                No deadlines to track
+              </h4>
+
+              <p className="font-sans text-xs text-slate-500">
+                Track an email to see upcoming response deadlines here.
+              </p>
+            </div>
+          ) : (
+            <p className="text-xs text-slate-500 py-6 text-center">
+              No Upcoming deadlines. All active emails are up to date!
+            </p>
+          )
         ) : (
           <div className="divide-y divide-slate-100">
             {displayDeadlines.map((email) => {

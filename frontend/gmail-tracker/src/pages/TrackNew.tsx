@@ -311,13 +311,13 @@ const TrackNew = () => {
         {selectedEmail && step > 1 && (
           <div className="mt-4 pt-3.5 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
             <div className="flex items-center gap-3 overflow-hidden">
-              <span className="text-[10px] uppercase font-mono font-bold text-[#777587] bg-slate-100 px-2 py-0.5 rounded shrink-0">
+              <span className="text-xs uppercase font-mono font-bold text-[#777587] bg-slate-100 px-2 py-0.5 rounded shrink-0">
                 Active Thread
               </span>
-              <span className="font-mono text-[11px] font-bold text-[#3525cd] shrink-0">
+              <span className="font-mono text-sm font-bold text-[#3525cd] shrink-0">
                 #{selectedEmail?.thread_id}
               </span>
-              <span className="font-sans font-bold text-[#0b1c30] truncate">
+              <span className="font-sans text-xs font-bold text-[#0b1c30] truncate">
                 {selectedEmail?.subject}
               </span>
             </div>
@@ -420,9 +420,8 @@ const TrackNew = () => {
                       tracking
                     </h4>
                     <p className="font-sans text-xs text-[#777587] leading-relaxed">
-                      Enter a subject keyword or select one of the suggested
-                      tags above. EchoMail will scan your outbox threads and map
-                      required respondents automatically.
+                      Enter a subject keyword, EchoMail will scan your outbox
+                      threads and map required respondents automatically.
                     </p>
                   </div>
 
@@ -689,7 +688,7 @@ const TrackNew = () => {
                           {/* Recipient Details */}
                           <div className="min-w-0">
                             <p
-                              className={`font-sans text-xs font-extrabold truncate ${isSelected ? "text-[#0b1c30]" : "text-[#2a2938]"}`}
+                              className={`font-sans text-base font-bold truncate ${isSelected ? "text-[#0b1c30]" : "text-[#2a2938]"}`}
                             >
                               {recipient.name}
                             </p>
@@ -711,7 +710,7 @@ const TrackNew = () => {
                   <strong>{selectedEmail.recipients.length}</strong>
                 </span>
                 {selectedRecipientEmails.length === 0 && (
-                  <span className="text-amber-600 font-bold text-xs flex items-center gap-1">
+                  <span className="text-amber-600 font-bold text-sm flex items-center gap-1">
                     <AlertCircle size={13} />
                     At least 1 recipient is required
                   </span>
@@ -804,7 +803,7 @@ const TrackNew = () => {
                 {/* Follow-up Reminder Cadence */}
                 <div className="space-y-3">
                   <label className="block text-xs font-extrabold text-[#777587] uppercase tracking-wider">
-                    2. Automated Reminder Cadence
+                    2. Automated Reminder
                   </label>
 
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
@@ -830,9 +829,9 @@ const TrackNew = () => {
                           }
                         />
                       </div>
-                      <p className="font-sans text-[11px] text-[#777587] leading-relaxed">
-                        Nudge unresponsive recipients every 24 hours until all
-                        reply.
+                      <p className="font-mono text-xs text-[#777587] leading-relaxed">
+                        Send a reminder every 24 hours to recipients who haven't
+                        replied.
                       </p>
                     </button>
 
@@ -858,9 +857,9 @@ const TrackNew = () => {
                           }
                         />
                       </div>
-                      <p className="font-sans text-[11px] text-[#777587] leading-relaxed">
-                        Nudge every 48 hours for standard non-urgent
-                        deliverables.
+                      <p className="font-mono text-xs text-[#777587] leading-relaxed">
+                        Send a reminder every 48 hours to recipients who haven't
+                        replied.
                       </p>
                     </button>
                     <button
@@ -885,9 +884,8 @@ const TrackNew = () => {
                           }
                         />
                       </div>
-                      <p className="font-sans text-[11px] text-[#777587] leading-relaxed">
-                        Send single reminder 12 hours prior to final SLA
-                        expiration.
+                      <p className="font-mono text-xs text-[#777587] leading-relaxed">
+                        Send one reminder 12 hours before the deadline.
                       </p>
                     </button>
                   </div>
@@ -903,12 +901,8 @@ const TrackNew = () => {
                       className="w-4 h-4 rounded text-[#3525cd] focus:ring-[#3525cd]/20 cursor-pointer"
                     />
                     <div className="text-left">
-                      <span className="text-xs font-bold text-[#0b1c30] block">
+                      <span className="text-xs font-bold text-[#0b1c30] block font-mono">
                         Instant Desktop & Email Notifications
-                      </span>
-                      <span className="text-[11px] text-[#777587] block">
-                        Alert me immediately as each recipient submits their
-                        reply in the thread.
                       </span>
                     </div>
                   </label>
@@ -958,7 +952,7 @@ const TrackNew = () => {
                   <Mail size={14} className="text-[#3525cd]" />
                   Thread Overview
                 </span>
-                <span className="font-mono text-[10px] font-bold text-[#3525cd] bg-indigo-50 px-2 py-0.5 rounded">
+                <span className="font-mono text-sm font-bold text-[#3525cd] bg-indigo-50 px-2 py-0.5 rounded">
                   {selectedEmail.thread_id}
                 </span>
               </div>
@@ -994,7 +988,7 @@ const TrackNew = () => {
 
                 <div className="pt-2 border-t border-slate-100">
                   <span className="text-[10px] font-extrabold uppercase text-[#777587] block mb-1.5">
-                    Target SLA Timeline
+                    Default Target SLA Timeline
                   </span>
                   <div className="p-3 bg-indigo-50/50 border border-indigo-100/80 rounded-xl space-y-1.5 font-mono text-[11px]">
                     <div className="flex justify-between text-[#0b1c30]">
@@ -1032,11 +1026,11 @@ const TrackNew = () => {
                   </div>
                   <div>
                     <p className="font-bold text-[#0b1c30]">
-                      Outbox Thread Audit
+                      Outbox Thread Tracking
                     </p>
-                    <p className="text-[#777587] text-[11px] mt-0.5">
-                      EchoMail hooks directly into your Gmail outbox to mirror
-                      active outgoing conversations.
+                    <p className="text-[#777587] text-xs mt-0.5">
+                      EchoMail connects to your Gmail outbox and keeps track of
+                      your active outgoing conversations.
                     </p>
                   </div>
                 </div>
@@ -1049,9 +1043,9 @@ const TrackNew = () => {
                     <p className="font-bold text-[#0b1c30]">
                       Selective Respondent Mapping
                     </p>
-                    <p className="text-[#777587] text-[11px] mt-0.5">
-                      Select specific team members or client contacts whose
-                      explicit reply is required to close the loop.
+                    <p className="text-[#777587] text-xs mt-0.5">
+                      Choose the team members or clients whose reply is required
+                      to complete the conversation.
                     </p>
                   </div>
                 </div>
@@ -1062,11 +1056,11 @@ const TrackNew = () => {
                   </div>
                   <div>
                     <p className="font-bold text-[#0b1c30]">
-                      Automated Nudges & Alerts
+                      Automatic Follow-Ups & Alerts
                     </p>
-                    <p className="text-[#777587] text-[11px] mt-0.5">
-                      If an SLA deadline passes, automated follow-up reminders
-                      notify delinquent recipients silently.
+                    <p className="text-[#777587] text-xs mt-0.5">
+                      When a deadline passes, EchoMail automatically sends
+                      follow-up reminders to recipients who haven’t replied.
                     </p>
                   </div>
                 </div>
@@ -1085,23 +1079,23 @@ const TrackNew = () => {
 
             <div className="space-y-2 text-xs font-sans">
               <div className="flex justify-between py-1 border-b border-slate-200/60 text-[11px]">
-                <span className="text-[#777587]">Response Protocol</span>
+                <span className="text-[#777587]">Email Integration</span>
                 <span className="font-mono font-bold text-[#0b1c30]">
-                  Gmail Webhook v2
+                  Gmail API
                 </span>
               </div>
 
               <div className="flex justify-between py-1 border-b border-slate-200/60 text-[11px]">
-                <span className="text-[#777587]">Max Reminders</span>
+                <span className="text-[#777587]">Response Detection</span>
                 <span className="font-mono font-bold text-[#0b1c30]">
-                  3 per recipient
+                  Background
                 </span>
               </div>
 
               <div className="flex justify-between py-1 text-[11px]">
-                <span className="text-[#777587]">Encryption</span>
+                <span className="text-[#777587]">Follow-Ups</span>
                 <span className="font-mono font-bold text-[#0b1c30]">
-                  TLS / OAuth 2.0
+                  Automated
                 </span>
               </div>
             </div>

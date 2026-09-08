@@ -13,6 +13,7 @@ from sqlalchemy.orm import relationship, sessionmaker
 from sqlalchemy.orm import joinedload
 from sqlalchemy.sql import func
 from config import Config
+from datetime import datetime
 
 
 
@@ -39,11 +40,6 @@ class GoogleAuth(Base):
 
     created_at = Column(DateTime, default=func.now())
     updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
-
-
-
-
-
 
 
 class TrackedEmailRecipient(Base):
@@ -82,6 +78,9 @@ class TrackedEmail(Base):
     created_at = Column(DateTime, default=func.now())
     updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
 
+    # completed_at?
+    completed_at = Column(DateTime, nullable=True)
+
     # Relationships
     recipient_associations = relationship(
         "TrackedEmailRecipient", backref="tracked_email", cascade="all, delete-orphan"
@@ -89,6 +88,8 @@ class TrackedEmail(Base):
     reminders = relationship(
         "Reminder", back_populates="tracked_email", cascade="all, delete-orphan"
     )
+
+
 
     def get_pending_recipients(self, db):
         """Get list of recipients who still need to respond."""
@@ -124,7 +125,17 @@ class TrackedEmail(Base):
 
     def update_status(self, db):
         """Update the is_done status based on recipient responses."""
+        # here completed_at ?
+        was_done = self.is_done
         self.is_done = self.check_if_done(db)
+
+        if (self.is_done) and not was_done:
+            # just become completed
+            self.completed_at = datetime.now()
+        elif not self.is_done and was_done:
+            # became incomplete again
+            self.completed_at = None
+
 
 
 class Recipient(Base):

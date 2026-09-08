@@ -33,7 +33,11 @@ const SummaryCards = ({
       title: "Awaiting Responses",
       value: awaitingResponses?.toLocaleString(),
       badge:
-        awaitingResponses > 0 ? `${awaitingResponses} pending` : "All clear",
+        awaitingResponses > 0
+          ? `${awaitingResponses} pending`
+          : totalTracked == 0
+            ? "Nothing pending"
+            : "All clear",
       badgeType: awaitingResponses > 0 ? "warning" : "success",
       icon: Clock,
       iconBg: "bg-amber-50 text-amber-700 border border-amber-200/50",
@@ -47,7 +51,7 @@ const SummaryCards = ({
       badge:
         totalTracked > 0
           ? `${Math.round((completedThreads / Math.max(totalTracked, 1)) * 100)}% done`
-          : "100% rate",
+          : "No completions",
       badgeType: "success",
       icon: CheckCircle2,
       iconBg: "bg-emerald-50 text-emerald-600 border border-emerald-200/50",
@@ -58,7 +62,12 @@ const SummaryCards = ({
       id: "reminders-dispatched",
       title: "Reminders Dispatched",
       value: remindersDispatched.toLocaleString(),
-      badge: "Active Follow-ups",
+      badge:
+        totalTracked === 0
+          ? "None sent"
+          : remindersDispatched > 0
+            ? "Active Follow-ups"
+            : "None sent",
       badgeType: "info",
       icon: BellRing,
       iconBg: "bg-purple-50 text-purple-600 border border-purple-200/50",

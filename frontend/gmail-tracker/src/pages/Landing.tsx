@@ -1147,7 +1147,10 @@ const Landing = () => {
       {/* ========================================================================= */}
       {/* 4. HOW IT WORKS — STEP BY STEP */}
       {/* ========================================================================= */}
-      <section className="py-20 sm:py-24 px-6 sm:px-8 max-w-5xl mx-auto border-t border-zinc-200/70">
+      <section
+        id="how-it-works"
+        className="py-20 sm:py-24 px-6 sm:px-8 max-w-5xl mx-auto border-t border-zinc-200/70"
+      >
         <div className="space-y-3.5 text-center max-w-xl mx-auto mb-14">
           <span className="text-xs font-mono font-bold text-[#3525cd] uppercase tracking-wider">
             Workflow

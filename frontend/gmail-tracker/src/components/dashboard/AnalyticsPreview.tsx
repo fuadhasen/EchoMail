@@ -1,5 +1,5 @@
 import type { TrackedEmailB } from "@/services/trackedEmail";
-import { ArrowUpRight, BarChart3, CheckCircle2, Target } from "lucide-react";
+import { ArrowUpRight, BarChart3, Target } from "lucide-react";
 
 interface AnalyticsPreviewProps {
   emails: TrackedEmailB[];
@@ -21,10 +21,11 @@ const AnalyticsPreview = ({ emails }: AnalyticsPreviewProps) => {
   });
 
   const awaitingRecipients = totalRecipients - respondedRecipients;
+
   const responseRate =
     totalRecipients > 0
       ? Math.round((respondedRecipients / totalRecipients) * 100)
-      : 100;
+      : 0;
 
   // radial progress calculations
   const radius = 38;
@@ -63,7 +64,9 @@ const AnalyticsPreview = ({ emails }: AnalyticsPreviewProps) => {
               <div className="h-3.5 w-full bg-slate-100 rounded-full overflow-hidden p-0.5 border border-slate-200/60">
                 <div
                   className="h-full bg-[#3525cd] rounded-full transition-all duration-500 shadow-2xs"
-                  style={{ width: `${responseRate}%` }}
+                  style={{
+                    width: `${totalRecipients > 0 ? responseRate : 0}%`,
+                  }}
                 />
               </div>
             </div>
@@ -82,7 +85,9 @@ const AnalyticsPreview = ({ emails }: AnalyticsPreviewProps) => {
               <div className="h-3.5 w-full bg-slate-100 rounded-full overflow-hidden p-0.5 border border-slate-200/60">
                 <div
                   className="h-full bg-amber-500 rounded-full transition-all duration-500 shadow-2xs"
-                  style={{ width: `${100 - responseRate}%` }}
+                  style={{
+                    width: `${totalRecipients > 0 ? 100 - responseRate : 0}%`,
+                  }}
                 />
               </div>
             </div>
@@ -106,9 +111,6 @@ const AnalyticsPreview = ({ emails }: AnalyticsPreviewProps) => {
             <span className="font-sans font-bold text-base text-slate-900 flex items-center gap-1.5">
               <Target size={14} className="text-[#3525cd]" />
               Response Rate
-            </span>
-            <span className="text-[10px] font-mono text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200 flex items-center gap-0.5 font-bold">
-              <ArrowUpRight size={10} /> +3.2%
             </span>
           </div>
 
@@ -143,7 +145,7 @@ const AnalyticsPreview = ({ emails }: AnalyticsPreviewProps) => {
               </svg>
               <div className="absolute inset-0 flex flex-col items-center justify-center">
                 <span className="text-xl font-bold font-mono text-slate-900 leading-none">
-                  {responseRate}%
+                  {totalRecipients > 0 ? `${responseRate}%` : "0"}
                 </span>
               </div>
             </div>
@@ -153,22 +155,31 @@ const AnalyticsPreview = ({ emails }: AnalyticsPreviewProps) => {
                 Overall Response Rate
               </h4>
               <p className="font-sans text-[11px] text-slate-500 leading-relaxed">
-                {" "}
-                <strong className="text-slate-800 font-semibold">
-                  {respondedRecipients} of {totalRecipients}
-                </strong>{" "}
-                recipients have responded across active threads.
+                {totalRecipients > 0 ? (
+                  <>
+                    <strong className="text-slate-800 font-semibold">
+                      {respondedRecipients} of {totalRecipients}
+                    </strong>{" "}
+                    recipients have responded across active threads.
+                  </>
+                ) : (
+                  "Track an email to start measuring your response rate."
+                )}
               </p>
-
-              <div className="inline-flex items-center gap-1 text-[10px] font-mono text-emerald-700 pt-1 font-semibold">
-                <CheckCircle2 size={11} /> High Engagement
-              </div>
             </div>
           </div>
 
           <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] font-mono text-slate-500">
             <span>Target: 80%</span>
-            <span className="text-slate-800 font-bold">Status: Optimal</span>
+            <span className="text-slate-800 font-bold">
+              <span className="text-slate-800 font-bold">
+                {totalRecipients === 0
+                  ? "Status: —"
+                  : responseRate >= 80
+                    ? "Status: On Target"
+                    : "Status: Below Target"}
+              </span>
+            </span>
           </div>
         </div>
       </div>
