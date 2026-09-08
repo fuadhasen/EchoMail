@@ -131,22 +131,22 @@ app.add_middleware(
     allow_headers=["*"]
 )
 
-# @app.websocket("/ws")
-# async def websocket_route(websocket: WebSocket):
-#     await websocket_endpoint(websocket)
+@app.websocket("/ws")
+async def websocket_route(websocket: WebSocket):
+    await websocket_endpoint(websocket)
 
-#     try:
-#         while True:
-#             # Keep the connection alive.
-#             # We don't currently need messages from the frontend.
-#             await websocket.receive_text()
+    try:
+        while True:
+            # Keep the connection alive.
+            # We don't currently need messages from the frontend.
+            await websocket.receive_text()
 
-#     except WebSocketDisconnect:
-#         manager.disconnect(websocket)
+    except WebSocketDisconnect:
+        manager.disconnect(websocket)
 
-#     except Exception as e:
-#         print(f"WebSocket error: {e}")
-#         manager.disconnect(websocket)
+    except Exception as e:
+        print(f"WebSocket error: {e}")
+        manager.disconnect(websocket)
 
 
 @app.get("/")

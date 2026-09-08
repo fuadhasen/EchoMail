@@ -1,5 +1,5 @@
 import type { TrackedEmailB } from "@/services/trackedEmail";
-import { ArrowUpRight, BarChart3, Target } from "lucide-react";
+import { BarChart3, Target } from "lucide-react";
 
 interface AnalyticsPreviewProps {
   emails: TrackedEmailB[];
