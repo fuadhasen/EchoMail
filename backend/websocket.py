@@ -30,7 +30,7 @@ class ConnectionManager:
             try:
                 await connection.send_json(message)
             except Exception as e:
-                print(f"❌ Failed to send WebSocket message: {e}")
+                print(f"Failed to send WebSocket message: {e}")
                 disconnected.append(connection)
 
         for websocket in disconnected:
