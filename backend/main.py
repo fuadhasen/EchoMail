@@ -131,7 +131,7 @@ app.add_middleware(
     allow_headers=["*"]
 )
 
-@app.websocket("/ws")
+@app.websocket("/wss")
 async def websocket_route(websocket: WebSocket):
     await websocket_endpoint(websocket)
 
