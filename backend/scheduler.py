@@ -118,7 +118,7 @@ async def check_email_responses():
     This function is called by the scheduler and should handle any exceptions gracefully
     to prevent the application from crashing.
     """
-    print('scheduler: check email responses is excuting')
+    print('scheduler: check email responses is excuting regularly')
     try:
         # Initialize the Gmail service
         gmail_service = GmailService()
