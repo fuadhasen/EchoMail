@@ -136,7 +136,7 @@ app = FastAPI(lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "https://echo-mail-pley.vercel.app"],
+    allow_origins=["http://localhost:5173", Config.FRONTEND_URL ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"]
@@ -292,7 +292,7 @@ async def auth_callback(code: str):
         value=access_token,
         httponly=True,
         secure=Config.COOKIE_SECURE,
-        samesite="lax",
+        samesite="none",
     )
 
     return response
