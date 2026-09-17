@@ -320,7 +320,12 @@ async def logout():
     """
     response = JSONResponse(content={"status": "logged_out"})
 
-    response.delete_cookie(key="access_token")
+    response.delete_cookie(
+        key="access_token",
+        path="/",
+        secure=Config.COOKIE_SECURE,
+        samesite="none",
+    )
     return response
 
 @app.get('/settings')
