@@ -10,6 +10,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.interval import IntervalTrigger
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 import notifiers
+from requests import Session
 
 from gmail_services import GmailService
 from models import SessionLocal
@@ -117,27 +118,35 @@ async def check_email_responses():
 
     This function is called by the scheduler and should handle any exceptions gracefully
     to prevent the application from crashing.
+    
     """
+    db_session = None
     try:
-        # Initialize the Gmail service
-        gmail_service = GmailService()
-
-        # Check if Gmail service is properly initialized
-        if not gmail_service.is_available():
-            print(
-                f"Gmail service not available: {gmail_service.get_credentials_error()}"
-            )
-            return
-
         db_session = get_db_session()
         print('scheduler is excuting')
 
         # Get all unfinished tracked emails
         tracked_emails = EmailTrackerService.get_pending_tracked_emails(db_session)
+        gmail_services = {}
 
         # For each email, check if there are new responses
         for email in tracked_emails:
             try:
+                user_id = email.user_id
+
+                if user_id not in gmail_services:
+                    gmail_service = GmailService(user_id)
+                    if not gmail_service.is_available():
+                        print(
+                            f"Gmail service not available for user {user_id}: "
+                            f"{gmail_service.get_credentials_error()}"
+                        )
+                        continue
+
+                    gmail_services[user_id] = gmail_service
+
+                gmail_service = gmail_services[user_id]
+
                 # Get the responses from Gmail API
                 responses = gmail_service.get_email_responses_with_details(
                     msg_id=email.email_id
@@ -160,36 +169,94 @@ async def check_email_responses():
                     )
 
                     if result["response_detected"]:
-                         await manager.broadcast(
-                             {
+                        await manager.send_to_user(
+                            user_id=user_id,
+                            message={
                                 "type": "response_detected",
                                 "tracked_email_id": result["tracked_email_id"],
                                 "recipient_email": result["recipient_email"],
                                 "email_id": result["email_id"],
                                 "subject": result["subject"],
-                            }
-                         )
+                            },
+                        )
 
                     if (result["tracking_completed"]):
-                        await manager.broadcast(
-                            {
+                        await manager.send_to_user(
+                            user_id=user_id,
+                            message={
                                 "type": "tracking_completed",
                                 "tracked_email_id": result["tracked_email_id"],
                                 "email_id": result["email_id"],
                                 "subject": result["subject"],
-                            }
+                            },
                         )
 
             except Exception as e:
                 print(f"Error checking responses for email {email.id}: {str(e)}")
                 continue
 
-            finally:
-                db_session.close()
-
     except Exception as e:
         print(f"Error in check_email_responses: {str(e)}")
+    finally:
+        db_session.close()
 
+
+
+def sent_automatic_reminders(db: Session):
+    reminders = EmailTrackerService.get_automatic_reminders_due(db)
+
+    sent_count = 0
+
+    for reminder_info in reminders:
+        email = reminder_info["email"]
+        recipient = reminder_info["recipient"]
+        user = reminder_info["user"]
+
+        try:
+            gmail_service = GmailService(email.user_id)
+
+            if not gmail_service.is_available():
+                print(
+                    f"Skipping {recipient.email}: "
+                    f"Gmail service unavailable for user {user.email}"
+                )
+                continue
+
+            reminder = EmailTrackerService.add_reminder(
+                db=db,
+                tracked_email_id=email.id,
+                user_id=email.user_id,
+                recipient_email=recipient.email,
+                content=user.reminder_template,
+                gmail_service=gmail_service,
+            )
+
+            if reminder:
+                sent_count += 1
+        except Exception as e:
+            print(
+                f"Failed automatic reminder for "
+                f"{recipient.email}: {e}"
+            )
+            continue
+
+    return sent_count
+
+
+def run_automatic_reminders():
+    db = SessionLocal()
+    try:
+        sent_count = sent_automatic_reminders(db)
+        logger.info(
+            f"Automatic reminder job completed. "
+            f"Reminders sent: {sent_count}"
+        )
+    except Exception as e:
+        logger.error(
+            f"Automatic reminder job failed: {e}"
+        )
+    finally:
+        db.close()
 
 # Create and configure the scheduler
 scheduler = AsyncIOScheduler()
@@ -207,7 +274,18 @@ def start_scheduler():
             name="Check for email responses every 10 minutes",
             replace_existing=True,
         )
+
+        # auto reminder ?, now is the time
+        scheduler.add_job(
+            run_automatic_reminders,
+            trigger=IntervalTrigger(minutes=60),
+            id="automatic_reminders",
+            name="Send automatic reminders every 1 minute",
+            replace_existing=True,
+        )
+
         scheduler.start()
+
         logger.info(
             "Scheduler started - will check for email responses every 10 minutes"
         )

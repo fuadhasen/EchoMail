@@ -2,4 +2,18 @@
 @import "shadcn/tailwind.css";
 @import "@fontsource-variable/geist";
 
-@import "tailwindcss"
+@import "tailwindcss";
+
+.time-input::-webkit-calendar-picker-indicator {
+  width: 15px;
+  height: 15px;
+  padding: 4px;
+  cursor: pointer;
+}
+
+.date-input::-webkit-calendar-picker-indicator {
+  width: 15px;
+  height: 15px;
+  padding: 4px;
+  cursor: pointer;
+}

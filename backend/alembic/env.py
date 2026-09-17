@@ -15,6 +15,7 @@ from config import Config
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
+print("alembic db url", Config.DATABASE_URL)
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
@@ -66,6 +67,7 @@ def run_migrations_online() -> None:
     """
     connectable = create_engine(
         Config.DATABASE_URL,
+        connect_args={"ssl": {}},
         poolclass=pool.NullPool,
     )
 

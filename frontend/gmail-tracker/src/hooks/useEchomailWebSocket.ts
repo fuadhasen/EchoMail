@@ -1,7 +1,7 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
 
-const useEchomailWebSocket = () => {
+const useEchomailWebSocket = (notifyOnResponse: boolean) => {
   const queryClient = useQueryClient();
 
   useEffect(() => {
@@ -31,12 +31,16 @@ const useEchomailWebSocket = () => {
             queryKey: ["tracked-emails", data.tracked_email_id],
           });
 
+          queryClient.invalidateQueries({
+            queryKey: ["email-responses", data.email_id],
+          });
+
           // Browser notification
           if (Notification.permission === "default") {
             await Notification.requestPermission();
           }
 
-          if (Notification.permission === "granted") {
+          if (notifyOnResponse && Notification.permission === "granted") {
             new Notification("EchoMail — New Response", {
               body: `${data.recipient_email} responded to "${data.subject}"`,
             });
@@ -52,7 +56,7 @@ const useEchomailWebSocket = () => {
             await Notification.requestPermission();
           }
 
-          if (Notification.permission === "granted") {
+          if (notifyOnResponse && Notification.permission === "granted") {
             new Notification("EchoMail — Tracking Complete", {
               body: `Everyone has responded to "${data.subject}".`,
             });
@@ -100,7 +104,7 @@ const useEchomailWebSocket = () => {
         socket.close();
       }
     };
-  }, [queryClient]);
+  }, [queryClient, notifyOnResponse]);
 };
 
 export default useEchomailWebSocket;

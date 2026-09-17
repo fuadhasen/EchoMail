@@ -1,3 +1,5 @@
+"""Main Application Entry Point"""
+
 import uvicorn
 import httpx
 import json
@@ -14,11 +16,15 @@ from sqlalchemy.orm import Session
 from pydantic import BaseModel, EmailStr, Field
 from contextlib import asynccontextmanager
 from config import Config
+from oauth import create_access_token, get_current_user, get_current_websocket_user
+from fastapi.responses import JSONResponse
+from google.oauth2.credentials import Credentials
+from googleapiclient.discovery import build
 
 from sqlalchemy import func
 
 from gmail_services import GmailService
-from models import get_db, create_tables
+from models import get_db, create_tables, User
 from db_services import EmailTrackerService
 from scheduler import start_scheduler, stop_scheduler, check_email_responses
 from pathlib import Path
@@ -29,6 +35,10 @@ from models import GoogleAuth, SessionLocal, TrackedEmail
 
 from encryption import encrypt_token
 
+
+class SettingsUpdate(BaseModel):
+    notify_on_response: bool
+    reminder_template: str
 
 # Pydantic models for request/response validation
 class SentEmailSearchCriteria(BaseModel):
@@ -97,7 +107,8 @@ class UserResponse(BaseModel):
 scopes = [
         "https://www.googleapis.com/auth/gmail.readonly",
         "https://www.googleapis.com/auth/userinfo.profile",
-        "https://www.googleapis.com/auth/userinfo.email"
+        "https://www.googleapis.com/auth/userinfo.email",
+        "https://www.googleapis.com/auth/gmail.send"
     ]
 
 
@@ -105,7 +116,7 @@ scopes = [
 async def lifespan(app: FastAPI):
     # Startup: create tables and start the scheduler
     create_tables()
-    # start_scheduler()
+    start_scheduler()
     print(
         "Application started - Background scheduler is running to check emails every 10 minutes"
     )
@@ -133,25 +144,34 @@ app.add_middleware(
 
 @app.websocket("/ws")
 async def websocket_route(websocket: WebSocket):
-    await websocket_endpoint(websocket)
+    db = SessionLocal()
+    user = None
 
     try:
+        user = get_current_websocket_user(websocket, db)
+
+        await manager.connect(websocket, user.id)
         while True:
-            # Keep the connection alive.
-            # We don't currently need messages from the frontend.
             await websocket.receive_text()
 
     except WebSocketDisconnect:
-        manager.disconnect(websocket)
+        if user:
+            manager.disconnect(websocket, user.id)
+
+    except HTTPException:
+        await websocket.close(code=1008)
 
     except Exception as e:
         print(f"WebSocket error: {e}")
-        manager.disconnect(websocket)
 
+        if user:
+            manager.disconnect(websocket, user.id)
+    finally:
+        db.close()
 
 @app.get("/")
 async def root():
-    return {"message": "Welcome to my very first Fullstack app"}
+    return {"message": "Welcome to Echomail"}
 
 @app.post("/test_websocket")
 async def test_websocket():
@@ -173,7 +193,7 @@ async def google_login():
         "response_type": "code",
         "scope": " ".join(scopes),
         "access_type": "offline",
-        "prompt": "consent",
+        # "prompt": "consent",
     }
 
     url = f"{google_auth_url}?{urlencode(params)}"
@@ -184,6 +204,7 @@ async def google_login():
 @app.get("/auth/callback")
 async def auth_callback(code: str):
     "Google redirect url"
+    # creat user, jwt, set cookies and redirect
     token_url = Config.TOKEN_URI
     data = {
         "code": code,
@@ -198,6 +219,19 @@ async def auth_callback(code: str):
         res.raise_for_status()
         token_data = res.json()
 
+    # at this time credentials are not saved, cant build gmail service so lets use token_data
+    credentials = Credentials(
+        token=token_data["access_token"],
+        refresh_token=token_data.get("refresh_token"),
+        token_uri=Config.TOKEN_URI,
+        client_id=Config.CLIENT_ID,
+        client_secret=Config.CLIENT_SECRET,
+        scopes=GmailService.SCOPES,
+    )
+
+    user_info = GmailService.get_user_info(credentials)
+    print(user_info)
+
     # calculate when the access token expires
     expires_at = datetime.now() + timedelta(
         seconds=token_data.get("expires_in", 3600)
@@ -205,10 +239,14 @@ async def auth_callback(code: str):
 
     db = SessionLocal()
 
-    # save the encrypted token in the database
     try:
-        google_auth = db.query(GoogleAuth).first()
+        # Find user, or create it
+        user = db.query(User).filter(User.email == user_info["email"]).first()
+        if not user:
+            user = EmailTrackerService.create_user(db, user_info)
 
+        # find google token belonging to this user
+        google_auth = db.query(GoogleAuth).filter(GoogleAuth.user_id == user.id).first()
         if google_auth:
             google_auth.access_token = encrypt_token(token_data["access_token"])
 
@@ -222,6 +260,7 @@ async def auth_callback(code: str):
             google_auth.expires_at = expires_at
         else:
             google_auth = GoogleAuth(
+                user_id = user.id,
                 access_token=encrypt_token(
                     token_data["access_token"]
                 ),
@@ -239,79 +278,76 @@ async def auth_callback(code: str):
         db.commit()
         db.refresh(google_auth)
 
+        # Jwt access token
+        access_token = create_access_token({"user_id": user.id})
     finally:
         db.close()
 
-    
-    # make sure to save the authenticated user too
-    gmail_service = GmailService()
-    user_info = gmail_service.get_user_info()
+    response = RedirectResponse(
+        url=Config.FRONTEND_URL
+    )
 
-    # save it into DB
-    gmail_service.save_user_info(user_info)
+    response.set_cookie(
+        key="access_token",
+        value=access_token,
+        httponly=True,
+        secure=Config.COOKIE_SECURE,
+        samesite="lax",
+    )
 
-    return RedirectResponse(url=Config.FRONTEND_URL)
+    return response
 
 
 @app.get("/auth/me")
-async def get_current_user():
+async def check_status(
+    current_user: User = Depends(get_current_user)
+):
     """check status and return logged-in user"""
 
-    # here i need to call helper function in db service to check status
-        
-    # better to use dependecy injection here
-    gmail_service = GmailService()
-
-    if not gmail_service.is_authenticated():
-        return {"authenticated": False, "user": None}
-    
-    db = SessionLocal()
-
-    try:
-        google_auth = db.query(GoogleAuth).first()
-
-        if not google_auth:
-            return {
-                "authenticated": False,
-                "user": None
-            }
-
-        return {
-            "authenticated": True,
-            "user": {
-                "email": google_auth.email,
-                "name": google_auth.name,
-                "picture": google_auth.picture,
-            }
+    return {
+        "authenticated": True,
+        "user": {
+            "email": current_user.email,
+            "name": current_user.name,
+            "picture": current_user.picture,
         }
-
-    finally:
-        db.close()
+    }
 
 
 @app.post('/logout')
 async def logout():
     """user logout endpoint
     """
-    db = SessionLocal()
+    response = JSONResponse(content={"status": "logged_out"})
 
-    try:
-        google_auth = db.query(GoogleAuth).first()
+    response.delete_cookie(key="access_token")
+    return response
 
+@app.get('/settings')
+def get_settings(
+    current_user: User = Depends(get_current_user),
+):
+    return {
+        "notify_on_response": current_user.notify_on_response,
+        "reminder_template": current_user.reminder_template,
+    }
 
-        if not google_auth:
-            return {"status": "unauthenticated"}
+@app.put('/settings')
+def update_settings(
+    settings: SettingsUpdate,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    current_user.notify_on_response = settings.notify_on_response
+    current_user.reminder_template = settings.reminder_template
 
-        # bulk delete for single user
-        db.query(TrackedEmail).delete()
+    db.commit()
+    db.refresh(current_user)
 
-        db.delete(google_auth)
-        db.commit()
-
-        return {"status": "logged_out"}
-
-    finally:
-        db.close()
+    return {
+        "notify_on_response": current_user.notify_on_response,
+        "reminder_template": current_user.reminder_template,
+    }
 
 
 @app.get("/search-sent-emails")
@@ -338,6 +374,7 @@ async def search_sent_emails_endpoint(
     for email in emails:
         msg_id = email["id"]
         details = {
+            # original message id is here
             "id": msg_id,
             "subject": gmail_service.get_email_subject(msg_id=msg_id),
             "sender": gmail_service.get_email_sender(msg_id=msg_id),
@@ -377,18 +414,21 @@ async def get_email_responses(
 # Email tracking endpoints
 @app.post("/emails/{email_id}/track")
 async def track_email(
-    email_id: str, track_request: TrackEmailRequest, db: Session = Depends(get_db)
+    email_id: str,
+    track_request: TrackEmailRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
 ):
     """
     Start tracking an email for responses from selected recipients.
     """
-    # First, check if this email is already tracked
-    existing = EmailTrackerService.get_tracked_email(db, email_id)
+    # First, check if this email is already tracked, can get its own tracked email only
+    existing = EmailTrackerService.get_tracked_email(db, email_id, current_user.id)
     if existing:
         return {"message": "Email already tracked", "tracked_email_id": existing.id}
 
-    # Get email details from Gmail
-    gmail_service = GmailService()
+    # Get email details from Gmail for authenticated user
+    gmail_service = GmailService(current_user.id)
     email_details = gmail_service.get_email_details(msg_id=email_id)
 
     if not email_details:
@@ -416,6 +456,7 @@ async def track_email(
     # Track the email
     tracked_email = EmailTrackerService.track_email(
         db=db,
+        user_id=current_user.id,
         email_id=email_id,
         thread_id=thread_id,
         subject=subject,
@@ -427,7 +468,7 @@ async def track_email(
     )
 
     # Get recipient details for response
-    recipients_info = EmailTrackerService.get_recipients_for_email(db, tracked_email.id)
+    recipients_info = EmailTrackerService.get_recipients_for_email(db, tracked_email.id, current_user.id)
 
     return {
         "tracked_email_id": tracked_email.id,
@@ -448,18 +489,19 @@ async def get_tracked_emails(
     limit: int = 100,
     show_done: bool = False,
     db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ):
     """
-    Get all tracked emails with their current status.
+    Get all tracked emails with their current status for specific user.
     """
     if show_done:
-        emails = EmailTrackerService.get_all_tracked_emails(db, skip, limit)
+        emails = EmailTrackerService.get_all_tracked_emails(db, current_user.id, skip, limit)
     else:
-        emails = EmailTrackerService.get_pending_tracked_emails(db, skip, limit)
+        emails = EmailTrackerService.get_pending_tracked_emails_for_user(db, current_user.id, skip, limit)
 
     result = []
     for email in emails:
-        recipients_info = EmailTrackerService.get_recipients_for_email(db, email.id)
+        recipients_info = EmailTrackerService.get_recipients_for_email(db, email.id, current_user.id)
         result.append(
             {
                 "id": email.id,
@@ -480,15 +522,20 @@ async def get_tracked_emails(
 
 
 @app.get("/tracked-emails/{tracked_email_id}")
-async def get_tracked_email(tracked_email_id: int, db: Session = Depends(get_db)):
+async def get_tracked_email(
+    tracked_email_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+
+    ):
     """
     Get details of a specific tracked email.
     """
-    email = EmailTrackerService.get_tracked_email_by_id(db, tracked_email_id)
+    email = EmailTrackerService.get_tracked_email_by_id(db, tracked_email_id, current_user.id)
     if not email:
         raise HTTPException(status_code=404, detail="Tracked email not found")
 
-    recipients_info = EmailTrackerService.get_recipients_for_email(db, email.id)
+    recipients_info = EmailTrackerService.get_recipients_for_email(db, email.id, current_user.id)
 
     return {
         "id": email.id,
@@ -509,12 +556,15 @@ async def get_tracked_email(tracked_email_id: int, db: Session = Depends(get_db)
 
 @app.post("/tracked-emails/{tracked_email_id}/mark-responded")
 async def mark_recipient_responded(
-    tracked_email_id: int, request: MarkRespondedRequest, db: Session = Depends(get_db)
+    tracked_email_id: int,
+    request: MarkRespondedRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
 ):
     """
     Mark a recipient as having responded to a tracked email.
     """
-    email = EmailTrackerService.get_tracked_email_by_id(db, tracked_email_id)
+    email = EmailTrackerService.get_tracked_email_by_id(db, tracked_email_id, current_user.id)
     if not email:
         raise HTTPException(status_code=404, detail="Tracked email not found")
 
@@ -522,6 +572,7 @@ async def mark_recipient_responded(
         db=db,
         tracked_email_id=tracked_email_id,
         recipient_email=request.recipient_email,
+        user_id=current_user.id,
         response_id=request.response_id,
     )
 
@@ -531,7 +582,7 @@ async def mark_recipient_responded(
         )
 
     # Check if email is now complete
-    email = EmailTrackerService.get_tracked_email_by_id(db, tracked_email_id)
+    email = EmailTrackerService.get_tracked_email_by_id(db, tracked_email_id, current_user.id)
 
     return {
         "success": True,
@@ -542,18 +593,22 @@ async def mark_recipient_responded(
 
 @app.post("/tracked-emails/{tracked_email_id}/mark-unresponded")
 async def mark_recipient_unresponded(
-    tracked_email_id: int, request: MarkUnRespondedRequest, db: Session = Depends(get_db)
+    tracked_email_id: int,
+    request: MarkUnRespondedRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
 ):
     """
     Mark a recipient as having unresponded to a tracked email.
     """
-    email = EmailTrackerService.get_tracked_email_by_id(db, tracked_email_id)
+    email = EmailTrackerService.get_tracked_email_by_id(db, tracked_email_id, current_user.id)
     if not email:
         raise HTTPException(status_code=404, detail="Tracked email not found")
 
     success = EmailTrackerService.mark_recipient_unresponded(
         db=db,
         tracked_email_id=tracked_email_id,
+        user_id=current_user.id,
         recipient_email=request.recipient_email,
     )
 
@@ -571,11 +626,15 @@ async def mark_recipient_unresponded(
 
 
 @app.post("/tracked-emails/{tracked_email_id}/mark-done")
-async def mark_email_done(tracked_email_id: int, db: Session = Depends(get_db)):
+async def mark_email_done(
+    tracked_email_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+    ):
     """
     Manually mark a tracked email as done.
     """
-    success = EmailTrackerService.mark_email_as_done(db, tracked_email_id)
+    success = EmailTrackerService.mark_email_as_done(db, tracked_email_id, current_user.id)
     if not success:
         raise HTTPException(status_code=404, detail="Tracked email not found")
 
@@ -583,11 +642,15 @@ async def mark_email_done(tracked_email_id: int, db: Session = Depends(get_db)):
 
 
 @app.post("/tracked-emails/{tracked_email_id}/mark-undone")
-async def mark_email_undone(tracked_email_id: int, db: Session = Depends(get_db)):
+async def mark_email_undone(
+    tracked_email_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+    ):
     """
     Mark a tracked email as not done.
     """
-    success = EmailTrackerService.mark_email_as_undone(db, tracked_email_id)
+    success = EmailTrackerService.mark_email_as_undone(db, tracked_email_id, current_user.id)
     if not success:
         raise HTTPException(status_code=404, detail="Tracked email not found")
 
@@ -596,12 +659,16 @@ async def mark_email_undone(tracked_email_id: int, db: Session = Depends(get_db)
 
 @app.post("/tracked-emails/{tracked_email_id}/send-reminders")
 async def send_reminders(
-    tracked_email_id: int, request: SendReminderRequest, db: Session = Depends(get_db)
+    tracked_email_id: int,
+    request: SendReminderRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+    gmail_service: GmailService = Depends(get_email_service)
 ):
     """
     Send reminders to specific recipients manually, 24 hour cooldown should be respected.
     """
-    email = EmailTrackerService.get_tracked_email_by_id(db, tracked_email_id)
+    email = EmailTrackerService.get_tracked_email_by_id(db, tracked_email_id, current_user.id)
     if not email:
         raise HTTPException(status_code=404, detail="Tracked email not found")
 
@@ -614,9 +681,11 @@ async def send_reminders(
     for recipient_email in request.recipient_emails:
         reminder = EmailTrackerService.add_reminder(
             db=db,
+            user_id=current_user.id,
             tracked_email_id=tracked_email_id,
             recipient_email=recipient_email,
             content=request.custom_message,
+            gmail_service=gmail_service,
         )
 
         if reminder:
@@ -633,14 +702,14 @@ async def send_reminders(
 
 # Manual trigger to check for email responses (for testing/debugging)
 @app.post("/check-responses")
-async def manually_check_responses():
+async def manually_check_responses(current_user: User = Depends(get_current_user)):
     """
     Manually trigger the email response checking process.
     Useful for testing or immediate checks.
     """
     try:
         # First check if Gmail service is available
-        gmail_service = GmailService()
+        gmail_service = GmailService(current_user.id)
         if not gmail_service.is_available():
             error_message = (
                 gmail_service.get_credentials_error() or "Gmail service not available"
@@ -660,13 +729,15 @@ async def manually_check_responses():
 # In a production app, you would have a background task for automatic reminders
 # This endpoint simulates that for demonstration purposes
 @app.post("/automatic-reminders")
-async def send_automatic_reminders(db: Session = Depends(get_db)):
+async def send_automatic_reminders(
+    db: Session = Depends(get_db),
+):
     """
     Send automatic reminders to recipients who haven't responded.
     In a real app, this would be run by a scheduled task. yeah 24h, or 12h reminder cadence
     we need also reminder template here
     """
-    reminders_to_send = EmailTrackerService.get_reminders_needing_sending(db)
+    reminders_to_send = EmailTrackerService.get_automatic_reminders_due(db)
 
     sent_count = 0
     reminders_sent = []
@@ -676,11 +747,9 @@ async def send_automatic_reminders(db: Session = Depends(get_db)):
         recipient = reminder_info["recipient"]
         days_remaining = reminder_info["days_remaining"]
 
-        # In a real app, send an actual email here
-        # For now, just record that a reminder was sent
-
         reminder = EmailTrackerService.add_reminder(
             db=db,
+            user_id=email.user_id,
             tracked_email_id=email.id,
             recipient_email=recipient.email,
             content=f"Automatic reminder: Please respond to the email '{email.subject}'. {days_remaining} days remaining until deadline.",
@@ -702,9 +771,12 @@ async def send_automatic_reminders(db: Session = Depends(get_db)):
 
 # automation activities endpoint
 @app.get("/automation/responses")
-async def get_daily_responses(db: Session = Depends(get_db)):
+async def get_daily_responses(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
     """automatic responses activity"""
-    results = EmailTrackerService.get_daily_activities(db)
+    results = EmailTrackerService.get_daily_activities(db, current_user.id)
     return results
 
 

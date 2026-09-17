@@ -2,6 +2,7 @@
 
 from pydantic_settings import BaseSettings
 from pathlib import Path
+import os
 
 class Settings(BaseSettings):
     DATABASE_URL: str
@@ -11,9 +12,13 @@ class Settings(BaseSettings):
     FRONTEND_URL: str
     TOKEN_URI: str
     TOKEN_ENCRYPTION_KEY: str
+    SECRET_KEY: str
+    ALGORITHM: str
+    ACCESS_TOKEN_EXPIRE_MINUTES: int
+    COOKIE_SECURE: bool
 
     model_config = {
-        "env_file": ".env",
+        "env_file": os.getenv("ENV_FILE", ".env"),
         "extra": "ignore"
     }
 

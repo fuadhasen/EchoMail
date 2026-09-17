@@ -422,7 +422,7 @@ const Automation = () => {
                 </p>
                 <div className="pt-0.5">
                   <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-slate-50 border border-slate-200/80 text-[10px] font-medium text-slate-600">
-                    12 recipients monitored
+                    {totalResponses} responses monitored
                   </span>
                 </div>
               </div>

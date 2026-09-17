@@ -3,10 +3,11 @@ from datetime import datetime, timedelta
 from typing import List, Optional, Dict, Any
 from datetime import datetime, timedelta, timezone
 from fastapi import HTTPException
-from sqlalchemy import func
+from sqlalchemy import func, or_
 
 
-from models import TrackedEmail, TrackedEmailRecipient, Recipient, Reminder
+from gmail_services import GmailService
+from models import TrackedEmail, TrackedEmailRecipient, Recipient, Reminder, SessionLocal, User
 
 COOLDOWN = timedelta(hours=24)
 
@@ -15,21 +16,28 @@ class EmailTrackerService:
     """Service for managing tracked emails and their responses."""
 
     @staticmethod
-    def get_tracked_email(db: Session, email_id: str) -> Optional[TrackedEmail]:
+    def get_tracked_email(db: Session, email_id: str, user_id: int) -> Optional[TrackedEmail]:
         """Get a tracked email by its Gmail message ID(email_id)."""
-        return db.query(TrackedEmail).filter(TrackedEmail.email_id == email_id).first()
+        return (
+            db.query(TrackedEmail)
+            .filter(
+                TrackedEmail.email_id == email_id,
+                TrackedEmail.user_id == user_id
+            )
+            .first()
+        )
 
     @staticmethod
-    def get_tracked_email_by_id(db: Session, id: int) -> Optional[TrackedEmail]:
+    def get_tracked_email_by_id(db: Session, id: int, user_id: int) -> Optional[TrackedEmail]:
         """Get a tracked email by its internal database ID."""
-        return db.query(TrackedEmail).filter(TrackedEmail.id == id).first()
+        return db.query(TrackedEmail).filter(TrackedEmail.id == id, TrackedEmail.user_id == user_id).first()
 
     @staticmethod
     def get_all_tracked_emails(
-        db: Session, skip: int = 0, limit: int = 100
+        db: Session, user_id: int, skip: int = 0, limit: int = 100, 
     ) -> List[TrackedEmail]:
         """Get all tracked emails."""
-        return db.query(TrackedEmail).offset(skip).limit(limit).all()
+        return db.query(TrackedEmail).filter(TrackedEmail.user_id == user_id).offset(skip).limit(limit).all()
 
     @staticmethod
     def get_pending_tracked_emails(
@@ -45,8 +53,24 @@ class EmailTrackerService:
         )
 
     @staticmethod
+    def get_pending_tracked_emails_for_user(db: Session, user_id: int, skip: int = 0, limit: int = 100):
+        """Get tracked emails that are not marked as done for single user."""
+        return (
+            db.query(TrackedEmail)
+            .filter(
+                TrackedEmail.user_id == user_id,
+                ~TrackedEmail.is_done,
+            )
+            .offset(skip)
+            .limit(limit)
+            .all()
+        )
+
+
+    @staticmethod
     def track_email(
         db: Session,
+        user_id: int,
         email_id: str,
         thread_id: str,
         subject: str,
@@ -79,6 +103,7 @@ class EmailTrackerService:
 
         # Create new tracked email
         tracked_email = TrackedEmail(
+            user_id=user_id,
             email_id=email_id,
             thread_id=thread_id,
             subject=subject,
@@ -92,9 +117,12 @@ class EmailTrackerService:
 
         # Create if the recipient of this email was not created before or get recipients and associate them with the tracked email
         for email in recipient_emails:
-            recipient = db.query(Recipient).filter(Recipient.email == email).first()
+            recipient = db.query(Recipient).filter(Recipient.email == email, Recipient.user_id == user_id).first()
             if not recipient:
-                recipient = Recipient(email=email)
+                recipient = Recipient(
+                    email=email,
+                    user_id=user_id
+                )
                 db.add(recipient)
                 db.flush()
 
@@ -114,7 +142,11 @@ class EmailTrackerService:
 
     @staticmethod
     def mark_recipient_responded(
-        db: Session, tracked_email_id: int, recipient_email: str, response_id: str | None = None
+        db: Session,
+        tracked_email_id: int,
+        recipient_email: str,
+        user_id: int,
+        response_id: str | None = None,
     ) -> bool:
         """
         Mark a recipient as having responded to a tracked email (log response).
@@ -128,9 +160,14 @@ class EmailTrackerService:
         Returns:
             True if successful, False otherwise
         """
-        # Get recipient
+        # Get recipient of current user
         recipient = (
-            db.query(Recipient).filter(Recipient.email == recipient_email).first()
+            db.query(Recipient)
+            .filter(
+                Recipient.email == recipient_email,
+                Recipient.user_id == user_id
+            )
+            .first()
         )
         if not recipient:
             return False
@@ -156,7 +193,12 @@ class EmailTrackerService:
 
         # Check if tracked email is now done and update its status
         tracked_email = (
-            db.query(TrackedEmail).filter(TrackedEmail.id == tracked_email_id).first()
+            db.query(TrackedEmail)
+            .filter(
+                TrackedEmail.id == tracked_email_id,
+                TrackedEmail.user_id == user_id
+            )
+            .first()
         )
         if not tracked_email:
             return False
@@ -172,7 +214,10 @@ class EmailTrackerService:
 
     @staticmethod
     def mark_recipient_unresponded(
-        db: Session, tracked_email_id: int, recipient_email: str
+        db: Session,
+        tracked_email_id: int,
+        recipient_email: str,
+        user_id: int
     ) -> bool:
         """
         Mark a recipient as having un-responded to a tracked email (log response).
@@ -188,7 +233,7 @@ class EmailTrackerService:
         """
         # Get recipient
         recipient = (
-            db.query(Recipient).filter(Recipient.email == recipient_email).first()
+            db.query(Recipient).filter(Recipient.email == recipient_email, Recipient.user_id == user_id).first()
         )
         if not recipient:
             print("Recipient not found:", recipient_email)
@@ -220,7 +265,7 @@ class EmailTrackerService:
 
         # check if tracked_emails and make is_done = False
         tracked_email = (
-            db.query(TrackedEmail).filter(TrackedEmail.id == tracked_email_id).first()
+            db.query(TrackedEmail).filter(TrackedEmail.id == tracked_email_id, TrackedEmail.user_id == user_id).first()
         )        
         if not tracked_email:
             return False
@@ -232,10 +277,10 @@ class EmailTrackerService:
         return True
 
     @staticmethod
-    def mark_email_as_done(db: Session, tracked_email_id: int) -> bool:
+    def mark_email_as_done(db: Session, tracked_email_id: int, user_id: int) -> bool:
         """Manually mark an email as done."""
         tracked_email = (
-            db.query(TrackedEmail).filter(TrackedEmail.id == tracked_email_id).first()
+            db.query(TrackedEmail).filter(TrackedEmail.id == tracked_email_id, TrackedEmail.user_id == user_id).first()
         )
         if not tracked_email:
             return False
@@ -246,10 +291,10 @@ class EmailTrackerService:
         return True
 
     @staticmethod
-    def mark_email_as_undone(db: Session, tracked_email_id: int) -> bool:
+    def mark_email_as_undone(db: Session, tracked_email_id: int, user_id) -> bool:
         """Mark an email as not done."""
         tracked_email = (
-            db.query(TrackedEmail).filter(TrackedEmail.id == tracked_email_id).first()
+            db.query(TrackedEmail).filter(TrackedEmail.id == tracked_email_id, TrackedEmail.user_id == user_id).first()
         )
         if not tracked_email:
             return False
@@ -263,8 +308,10 @@ class EmailTrackerService:
     def add_reminder(
         db: Session,
         tracked_email_id: int,
+        user_id: int,
         recipient_email: str,
         content: Optional[str] = None,
+        gmail_service: GmailService = None,
     ) -> Optional[Reminder]:
         """
         Add a record of a reminder sent to single recipient.
@@ -279,7 +326,12 @@ class EmailTrackerService:
             Newly created Reminder object or None if failed
         """
         recipient = (
-            db.query(Recipient).filter(Recipient.email == recipient_email).first()
+            db.query(Recipient)
+            .filter(
+                Recipient.email == recipient_email,
+                Recipient.user_id == user_id
+            )
+            .first()
         )
         if not recipient:
             return None
@@ -295,6 +347,18 @@ class EmailTrackerService:
 
         if not assoc:
             return None
+
+        tracked_email = (
+            db.query(TrackedEmail)
+            .filter(
+                TrackedEmail.id == tracked_email_id,
+                TrackedEmail.user_id == user_id,
+            )
+            .first()
+        )
+
+        if not tracked_email:
+            return None
         
         # COOLDOWN Restriction
         if assoc.last_reminder_sent:
@@ -305,7 +369,33 @@ class EmailTrackerService:
                 status_code=429,
                 detail="Reminder can only be sent once every 24 hours.",
             )
-        
+
+        if not content:
+            user = db.query(User).filter(User.id == user_id).first()
+
+            if not user:
+                return None
+
+            content = user.reminder_template
+
+        # Replace the recipient name placeholder
+        content = content.replace("{name}", recipient.name or recipient.email)
+        # send the actual gmail
+        try:
+            gmail_service.send_reply(
+                recipient_email=recipient.email,
+                subject=f"Re: {tracked_email.subject}",
+                body=content,
+                thread_id=tracked_email.thread_id,
+                original_message_id=tracked_email.email_id,
+            )
+        except Exception as e:
+            print(f"Failed to send reminder: {e}")
+            raise HTTPException(
+                status_code=500,
+                detail="Failed to send reminder email.",
+            )
+
 
         reminder = Reminder(
             tracked_email_id=tracked_email_id,
@@ -313,8 +403,10 @@ class EmailTrackerService:
             content=content,
             sent_at=datetime.now(),
         )
+
         db.add(reminder)
 
+        # cool down restriction
         if assoc:
             assoc.last_reminder_sent = datetime.now()
             db.add(assoc)
@@ -324,7 +416,7 @@ class EmailTrackerService:
         return reminder
 
     @staticmethod
-    def get_recipients_for_email(db: Session, tracked_email_id: int) -> Dict[str, Any]:
+    def get_recipients_for_email(db: Session, tracked_email_id: int, user_id: int) -> Dict[str, Any]:
         """
         Get lists of all recipients, required recipients, and those who have/haven't responded.
 
@@ -337,7 +429,12 @@ class EmailTrackerService:
         # Get all associations for this email (1 email to many recipients)
         associations = (
             db.query(TrackedEmailRecipient)
-            .filter(TrackedEmailRecipient.tracked_email_id == tracked_email_id)
+            .join(TrackedEmail)
+            .filter(
+                TrackedEmailRecipient.tracked_email_id == tracked_email_id,
+                # check the user ownership for this email
+                TrackedEmail.user_id == user_id
+            )
             .all()
         )
 
@@ -348,7 +445,7 @@ class EmailTrackerService:
 
         for assoc in associations:
             recipient = (
-                db.query(Recipient).filter(Recipient.id == assoc.recipient_id).first()
+                db.query(Recipient).filter(Recipient.id == assoc.recipient_id, Recipient.user_id == user_id).first()
             )
             if recipient:
                 all_recipients.append(
@@ -401,23 +498,27 @@ class EmailTrackerService:
         }
 
     @staticmethod
-    def get_reminders_needing_sending(db: Session) -> List[Dict[str, Any]]:
+    def get_automatic_reminders_due(db: Session) -> List[Dict[str, Any]]:
         """
         Get a list of recipients who need reminders sent, based on the rules:
         - Email is not marked as done
         - Recipient is required to respond and hasn't yet
-        - No reminder sent in the last 12 hours
+        - No reminder sent in the last 24 hours
+        - sent only 12 hour before the deadline
         """
         now = datetime.now()
-        reminder_threshold = now - timedelta(hours=12)
+        reminder_threshold = now - timedelta(hours=24)
 
-        # Get all tracked emails that aren't done and haven't pass the deadline
+        reminder_window = now + timedelta(hours=12)
+
+        # Get all tracked emails that aren't done and haven't pass the deadline, for all users
         tracked_emails = (
             db.query(TrackedEmail)
             .filter(
                 ~TrackedEmail.is_done,  # Using SQLAlchemy's negate operator instead of is_done == False
                 TrackedEmail.deadline
                 > now,  # Only remind for emails that haven't passed their deadline
+                TrackedEmail.deadline <= reminder_window,
             )
             .all()
         )
@@ -432,13 +533,10 @@ class EmailTrackerService:
                     TrackedEmailRecipient.tracked_email_id == email.id,
                     TrackedEmailRecipient.must_respond,  # Removed == True for cleaner code
                     ~TrackedEmailRecipient.has_responded,  # Using SQLAlchemy's negate operator
-                    (
-                        (TrackedEmailRecipient.last_reminder_sent is None)
-                        | (
-                            TrackedEmailRecipient.last_reminder_sent
-                            < reminder_threshold
-                        )
-                    ),
+                    or_(
+                        TrackedEmailRecipient.last_reminder_sent.is_(None),
+                        TrackedEmailRecipient.last_reminder_sent < reminder_threshold,
+                    )
                 )
                 .all()
             )
@@ -449,13 +547,21 @@ class EmailTrackerService:
                     .filter(Recipient.id == assoc.recipient_id)
                     .first()
                 )
+
                 if recipient:
+                    user = (
+                        db.query(User)
+                        .filter(User.id == email.user_id)
+                        .first()
+                    )
+                    
                     reminders_to_send.append(
                         {
                             "email": email,
                             "recipient": recipient,
-                            "days_remaining": (email.deadline - now).days,
+                            "time_remaining": (email.deadline - now),
                             "association": assoc,
+                            "user": user,
                         }
                     )
 
@@ -464,7 +570,7 @@ class EmailTrackerService:
     @staticmethod
     def check_and_mark_responded(
         db: Session, tracked_email_id: int, sender_email: str, response_id: str
-    ) -> bool:
+    ) -> Dict[str, Any]:
         """
         Check if a sender is a tracked recipient and mark them as responded if so.
         This method is used by the automatic response checking process.
@@ -482,7 +588,10 @@ class EmailTrackerService:
         # Try to find a recipient with this email address
         recipient = db.query(Recipient).filter(Recipient.email == sender_email).first()
         if not recipient:
-            return False
+            return {
+                "response_detected": False,
+                "tracking_completed": False,
+            }
 
         # Check if this recipient is associated with the tracked email
         association = (
@@ -564,14 +673,35 @@ class EmailTrackerService:
             "subject": tracked_email.subject
         }
 
-    def get_daily_activities(db: Session):
+    def create_user(db: Session, user_info):
+        """save the authenticated user information in the DB.
+        """
+        user = User(
+            email=user_info["email"],
+            name=user_info.get("name"),
+            picture=user_info.get("picture"),
+        )
+        db.add(user)
+        db.commit()
+        db.refresh(user)
+
+        return user
+
+    def get_daily_activities(db: Session, user_id: int):
         """get daily activity history from the databases"""
         responses = (
             db.query(
                 func.date(TrackedEmailRecipient.response_at).label("day"),
                 func.count().label("responses")
             )
-            .filter(TrackedEmailRecipient.response_at.isnot(None))
+            .join(
+                TrackedEmail,
+                TrackedEmail.id == TrackedEmailRecipient.tracked_email_id
+            )
+            .filter(
+                TrackedEmailRecipient.response_at.isnot(None),
+                TrackedEmail.user_id == user_id,
+            )
             .group_by(func.date(TrackedEmailRecipient.response_at))
             .order_by(func.date(TrackedEmailRecipient.response_at))
             .all()
@@ -582,6 +712,13 @@ class EmailTrackerService:
                 func.date(Reminder.sent_at).label("day"),
                 func.count().label("reminders"),
             )
+            .join(
+                TrackedEmail,
+                TrackedEmail.id == Reminder.tracked_email_id
+            )
+            .filter(
+                TrackedEmail.user_id == user_id
+            )   
             .group_by(func.date(Reminder.sent_at))
             .all()
         )
@@ -591,7 +728,10 @@ class EmailTrackerService:
                 func.date(TrackedEmail.completed_at).label("day"),
                 func.count().label("completed"),
             )
-            .filter(TrackedEmail.completed_at.isnot(None))
+            .filter(
+                TrackedEmail.completed_at.isnot(None),
+                TrackedEmail.user_id == user_id
+            )
             .group_by(func.date(TrackedEmail.completed_at))
             .all()
         )

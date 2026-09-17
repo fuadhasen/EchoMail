@@ -14,20 +14,56 @@ from sqlalchemy.orm import joinedload
 from sqlalchemy.sql import func
 from config import Config
 from datetime import datetime
+from sqlalchemy import UniqueConstraint
 
 
 
-
+# prod db require ssl
 engine = create_engine(Config.DATABASE_URL, connect_args={"ssl": {}})
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base = declarative_base()
+
+
+class User(Base):
+    """Multiple user support table"""
+    __tablename__ = "users"
+
+    id = Column(Integer, primary_key=True, index=True)
+    email = Column(String(255), unique=True, nullable=False, index=True)
+    name = Column(String(255), nullable=True)
+    picture = Column(Text, nullable=True)
+
+    notify_on_response = Column(Boolean, default=True, nullable=False)
+    reminder_template = Column(
+        Text, nullable=False,
+        default=(
+            "Hi {name},\n\n"
+            "Just following up on my previous email as the response deadline "
+            "is approaching. Please let me know if you've had a chance to "
+            "review it.\n\n"
+            "Best,\n"
+            "Fuad"
+        ),
+    )
+
+    created_at = Column(DateTime, default=func.now())
+    updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
+
+    # relationships , nikkah is better btw :)
+    google_auth = relationship('GoogleAuth', back_populates='user')
+    tracked_emails = relationship('TrackedEmail', back_populates='user', cascade='all, delete-orphan')
+    recipients = relationship('Recipient', back_populates='user', cascade='all, delete-orphan')
+
 
 class GoogleAuth(Base):
     """Stores Google OAuth credentials for the single Echomail User."""
     __tablename__ = "google_auth"
 
     id = Column(Integer, primary_key=True, index=True)
+
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, unique=True)
+
     access_token = Column(Text, nullable=False)
     refresh_token = Column(Text, nullable=True)
     token_type = Column(String(50), nullable=True)
@@ -40,6 +76,9 @@ class GoogleAuth(Base):
 
     created_at = Column(DateTime, default=func.now())
     updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
+
+    # relationship (1:1)
+    user = relationship('User', back_populates="google_auth")
 
 
 class TrackedEmailRecipient(Base):
@@ -60,6 +99,7 @@ class TrackedEmailRecipient(Base):
 
     # Relationship
     recipient = relationship("Recipient", back_populates="email_associations")
+    tracked_email = relationship('TrackedEmail', back_populates='recipient_associations')
 
 
 class TrackedEmail(Base):
@@ -68,6 +108,9 @@ class TrackedEmail(Base):
     __tablename__ = "tracked_emails"
 
     id = Column(Integer, primary_key=True, index=True)
+    # if there is no unique FK, its 1 to many
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+
     email_id = Column(String(255), unique=True, index=True)  # Gmail message ID
     thread_id = Column(String(255), index=True)  # Gmail thread ID
     subject = Column(String(255))
@@ -83,12 +126,12 @@ class TrackedEmail(Base):
 
     # Relationships
     recipient_associations = relationship(
-        "TrackedEmailRecipient", backref="tracked_email", cascade="all, delete-orphan"
+        "TrackedEmailRecipient", back_populates="tracked_email", cascade="all, delete-orphan"
     )
     reminders = relationship(
         "Reminder", back_populates="tracked_email", cascade="all, delete-orphan"
     )
-
+    user = relationship('User', back_populates='tracked_emails')
 
 
     def get_pending_recipients(self, db):
@@ -144,13 +187,21 @@ class Recipient(Base):
     __tablename__ = "recipients"
 
     id = Column(Integer, primary_key=True, index=True)
-    email = Column(String(255), unique=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    email = Column(String(255), index=True)
     name = Column(String(255), nullable=True)
+
+    # email should be unique with in a user not globally for all users
+    __table_args__ = (
+        UniqueConstraint("user_id", "email"),
+    )
 
     # Relationships
     email_associations = relationship(
         "TrackedEmailRecipient", back_populates="recipient", cascade="all, delete-orphan"
     )
+    user = relationship('User', back_populates='recipients')
+
 
 
 class Reminder(Base):
@@ -160,7 +211,7 @@ class Reminder(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     tracked_email_id = Column(Integer, ForeignKey("tracked_emails.id", ondelete="CASCADE"))
-    recipient_id = Column(Integer, ForeignKey("recipients.id"))
+    recipient_id = Column(Integer, ForeignKey("recipients.id", ondelete="CASCADE"))
     sent_at = Column(DateTime, default=func.now())
     content = Column(Text, nullable=True)  # Content of the reminder
 

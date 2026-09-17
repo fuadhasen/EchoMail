@@ -3,30 +3,42 @@ from fastapi import WebSocket, WebSocketDisconnect
 
 class ConnectionManager:
     def __init__(self):
-        self.active_connections: list[WebSocket] = []
+        self.active_connections: dict[int, list[WebSocket]] = {}
 
-    async def connect(self, websocket: WebSocket):
+    async def connect(self, websocket: WebSocket, user_id: int):
         await websocket.accept()
-        self.active_connections.append(websocket)
+
+        if user_id not in self.active_connections:
+            self.active_connections[user_id] = []
+
+        self.active_connections[user_id].append(websocket)
+
 
         print(
-            f"WebSocket connected. "
-            f"Active connections: {len(self.active_connections)}"
+            f"WebSocket connected for user {user_id}. "
+            f"Active connections: {len(self.active_connections[user_id])}"
         )
 
-    def disconnect(self, websocket: WebSocket):
-        if websocket in self.active_connections:
-            self.active_connections.remove(websocket)
+    def disconnect(self, websocket: WebSocket, user_id: int):
+        if user_id in self.active_connections:
+            if websocket in self.active_connections[user_id]:
+                self.active_connections[user_id].remove(websocket)
+
+            if not self.active_connections[user_id]:
+                del self.active_connections[user_id]
 
         print(
             f"WebSocket disconnected. "
             f"Active connections: {len(self.active_connections)}"
         )
 
-    async def broadcast(self, message: dict):
-        disconnected = []
+    async def send_to_user(self, user_id: int, message: dict):
+        if user_id not in self.active_connections:
+            return
 
-        for connection in self.active_connections:
+        disconnected = []
+    
+        for connection in self.active_connections[user_id]:
             try:
                 await connection.send_json(message)
             except Exception as e:
@@ -34,7 +46,7 @@ class ConnectionManager:
                 disconnected.append(connection)
 
         for websocket in disconnected:
-            self.disconnect(websocket)
+            self.disconnect(websocket, user_id)
 
 manager = ConnectionManager()
 

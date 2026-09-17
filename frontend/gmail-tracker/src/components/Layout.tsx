@@ -1,12 +1,28 @@
 import { Outlet } from "react-router";
 // import NavBar from "./NavBar";
+import useEchomailWebSocket from "@/hooks/useEchomailWebSocket";
+import { getSettings } from "@/services/settings";
+import { useQuery } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
 import ToastContainer from "./common/ToastContainer";
 import SideBar from "./SideBar";
-import useEchomailWebSocket from "@/hooks/useEchomailWebSocket";
 
 const Layout = () => {
   // websocket connection for authenticated users only
-  useEchomailWebSocket();
+  const [notifyOnResponse, setNotifyOnResponse] = useState(true);
+  const { data: settings } = useQuery({
+    queryKey: ["settings"],
+    queryFn: getSettings,
+  });
+
+  // database is the only source of truth
+  useEffect(() => {
+    if (settings) {
+      setNotifyOnResponse(settings.notify_on_response);
+    }
+  }, [settings]);
+
+  useEchomailWebSocket(notifyOnResponse);
 
   return (
     <>

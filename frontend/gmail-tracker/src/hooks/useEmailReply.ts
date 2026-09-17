@@ -6,6 +6,8 @@ const useEmailReply = (email_id?: string) => {
     queryKey: ["email-responses", email_id],
     queryFn: () => getEmailReply(email_id),
     enabled: !!email_id,
+
+    staleTime: 1000 * 60 * 1,
   });
 };
 

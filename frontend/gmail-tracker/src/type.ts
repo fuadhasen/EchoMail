@@ -27,6 +27,7 @@ export interface SentEmailSender {
 }
 
 export interface SentEmail {
+  // email_id
   id: string;
   thread_id: string;
   sender: SentEmailSender;
@@ -34,11 +35,4 @@ export interface SentEmail {
   sentDate: string;
   snippet: string;
   recipients: SentEmailRecipient[];
-}
-
-export interface ActivityData {
-  day: string;
-  responses: number;
-  reminders: number;
-  completed: number;
 }

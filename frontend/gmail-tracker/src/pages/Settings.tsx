@@ -1,67 +1,49 @@
 import LoadingScreen from "@/components/common/LoadingScreen";
 import { useToast } from "@/context/ToastContext";
 import useAuth from "@/hooks/useAuth";
-import { Check, CheckSquare, Loader2, RefreshCw, Square } from "lucide-react";
+import { getSettings, updateSettings } from "@/services/settings";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { Check, Loader2, RefreshCw } from "lucide-react";
 import React, { useEffect, useState } from "react";
 
-interface ProfileSettings {
-  // name should be editable
-  fullName: string;
-}
-
 interface ReminderSettings {
-  defaultDurationDays: number;
-  triggerHoursBefore: number;
   templateMessage: string;
-  autoArchiveOnReply: boolean;
 }
 
 const Settings = () => {
   const { triggerToast } = useToast();
 
-  const { user, isPending } = useAuth();
+  const { user } = useAuth();
 
   const [isSaving, setIsSaving] = useState(false);
   const [isSyncingGmail, setIsSyncingGmail] = useState(false);
 
-  // profile state, we can get this for useAuth hoook
-  const [profile, setProfile] = useState<ProfileSettings>(() => {
-    return {
-      fullName: "",
-    };
-  });
-
-  // whenever the user change, update the profile
-  useEffect(() => {
-    if (user) {
-      setProfile({ fullName: user.name });
-    }
-  }, [user]);
-
+  const [notifyOnResponse, setNotifyOnResponse] = useState(true);
   // reminder preference state
-  const [reminders, setReminder] = useState<ReminderSettings>(() => {
-    const saved = localStorage.getItem("echomail_reminder_policies");
-    if (saved) {
-      const parsed = JSON.parse(saved);
-      return {
-        defaultDurationDays: parsed.defaultDurationDays ?? 3,
-        triggerHoursBefore: parsed.triggerHoursBefore ?? 24,
-        templateMessage:
-          parsed.templateMessage ||
-          "Hi {name},\n\nJust following up on my previous email to check if you've had a chance to review it. Let me know if you need anything else!\n\nBest,\nFuad",
-        autoArchiveOnReply: parsed.autoArchiveOnReply ?? true,
-      };
-    }
-    return {
-      defaultDurationDays: 3,
-      triggerHoursBefore: 24,
-      templateMessage:
-        "Hi {name},\n\nJust following up on my previous email to check if you've had a chance to review it. Let me know if you need anything else!\n\nBest,\nAlex",
-      autoArchiveOnReply: true,
-    };
+  const [reminders, setReminder] = useState<ReminderSettings>({
+    templateMessage: "",
   });
 
-  if (isPending) return <LoadingScreen />;
+  const { data: settings, isLoading: isLoadingSettings } = useQuery({
+    queryKey: ["settings"],
+    queryFn: getSettings,
+  });
+
+  useEffect(() => {
+    if (settings) {
+      setNotifyOnResponse(settings.notify_on_response);
+      setReminder((prev) => ({
+        ...prev,
+        templateMessage: settings.reminder_template,
+      }));
+    }
+  }, [settings, setNotifyOnResponse]);
+
+  const { mutateAsync: saveSettings } = useMutation({
+    mutationFn: updateSettings,
+  });
+
+  if (isLoadingSettings) return <LoadingScreen />;
 
   // handle gmail reconnect
   const handleReconnectGmail = () => {
@@ -74,20 +56,24 @@ const Settings = () => {
   };
 
   // handle save
-  const handleSave = (e: React.FormEvent) => {
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSaving(true);
-    setTimeout(() => {
-      localStorage.setItem("echomail_profile", JSON.stringify(profile));
-      localStorage.setItem(
-        "echomail_reminder_policies",
-        JSON.stringify(reminders),
-      );
+
+    try {
+      await saveSettings({
+        notify_on_response: notifyOnResponse,
+        reminder_template: reminders.templateMessage,
+      });
 
       setIsSaving(false);
       triggerToast("Settings saved successfully.", "success");
-      window.dispatchEvent(new Event("storage"));
-    }, 600);
+    } catch (error) {
+      console.error("Failed to save settings:", error);
+
+      setIsSaving(false);
+      triggerToast("Failed to save settings.", "info");
+    }
   };
   // w-full max-w-7xl px-2 sm:px-4 text-left py-4 space-y-8
   return (
@@ -125,7 +111,7 @@ const Settings = () => {
                   rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-slate-900
                   font-medium transition-colors"
                   >
-                    {profile.fullName}
+                    {user?.name || ""}
                   </p>
                 </div>
                 <div>
@@ -198,76 +184,22 @@ const Settings = () => {
                 Reminder Preferences
               </h2>
               <div className="bg-white border border-slate-200/80 rounded-2xl p-6 shadow-2xs space-y-5">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                  <div>
-                    <label className="block text-xs sm:text-sm font-semibold text-slate-800 mb-1.5">
-                      Default Follow-up Window
-                    </label>
-                    <select
-                      value={reminders.defaultDurationDays}
-                      onChange={(e) =>
-                        setReminder({
-                          ...reminders,
-                          defaultDurationDays: Number(e.target.value),
-                        })
-                      }
-                      className="w-full bg-slate-50/80 border border-slate-200 focus:border-[#3525cd] focus:bg-white focus:outline-none  rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-slate-800 font-medium transition-colors cursor-pointer"
-                    >
-                      <option value={2}>2 Days</option>
-                      <option value={3}>3 Days (Default)</option>
-                      <option value={5}>5 Days</option>
-                      <option value={7}>7 Days</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-xs sm:text-sm font-semibold text-slate-800 mb-1.5">
-                      Reminder Alert Timing
-                    </label>
-                    <select
-                      value={reminders.triggerHoursBefore}
-                      onChange={(e) =>
-                        setReminder({
-                          ...reminders,
-                          triggerHoursBefore: Number(e.target.value),
-                        })
-                      }
-                      className="w-full bg-slate-50/80 border border-slate-200 focus:border-[#3525cd] focus:bg-white focus:outline-none rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-slate-800 font-medium transition-colors cursor-pointer"
-                    >
-                      <option value={12}>12 hours before deadline</option>
-                      <option value={24}>24 hours before deadline</option>
-                      <option value={48}>48 hours before deadline</option>
-                    </select>
-                  </div>
-                </div>
-
                 <div className="pt-3 border-t border-slate-100 flex items-center justify-between gap-4">
-                  <div>
-                    <h4 className="text-xs sm:text-sm font-semibold text-slate-900">
-                      Auto-complete on reply
-                    </h4>
-                    <p className="text-xs text-slate-500 mt-0.5">
-                      Automatically mark tracked emails as completed when a
-                      recipient responds
-                    </p>
+                  <div className="pt-2 w-full">
+                    <label className="flex items-center gap-3 cursor-pointer p-3.5 bg-slate-50/80 border border-slate-200/80 rounded-xl">
+                      <input
+                        type="checkbox"
+                        checked={notifyOnResponse}
+                        onChange={(e) => setNotifyOnResponse(e.target.checked)}
+                        className="w-4 h-4 rounded text-[#3525cd] focus:ring-[#3525cd]/20 cursor-pointer"
+                      />
+                      <div className="text-left">
+                        <span className="text-xs font-bold text-[#0b1c30] block font-mono">
+                          Instant Desktop Notifications
+                        </span>
+                      </div>
+                    </label>
                   </div>
-
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setReminder({
-                        ...reminders,
-                        autoArchiveOnReply: !reminders.autoArchiveOnReply,
-                      })
-                    }
-                    className="text-[#3525cd] cursor-pointer focus:outline-none shrink-0"
-                  >
-                    {reminders.autoArchiveOnReply ? (
-                      <CheckSquare size={20} className="text-[#3525cd]" />
-                    ) : (
-                      <Square size={20} className="text-slate-300" />
-                    )}
-                  </button>
                 </div>
 
                 <div>
@@ -283,7 +215,7 @@ const Settings = () => {
                         templateMessage: e.target.value,
                       })
                     }
-                    className="w-full bg-slate-50/80 border border-slate-200 focus:border-[#3525cd] rounded-xl p-3.5 text-xs sm:text-sm text-slate-800 leading-relaxed font-sans transition-colors resize-none"
+                    className="w-full h-40 bg-slate-50/80 border border-slate-200 focus:border-[#3525cd] rounded-xl p-3.5 text-xs sm:text-sm text-slate-800 leading-relaxed font-sans transition-colors resize-none"
                   />
                 </div>
               </div>

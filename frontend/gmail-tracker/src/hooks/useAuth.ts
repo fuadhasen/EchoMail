@@ -1,5 +1,6 @@
 import api from "@/services/api";
 import { useQuery } from "@tanstack/react-query";
+import axios from "axios";
 
 export type Status = "loading" | "authenticated" | "unauthenticated";
 
@@ -16,8 +17,18 @@ interface AuthResponse {
 
 const useAuth = () => {
   const checkStatus = async (): Promise<AuthResponse> => {
-    const res = await api.get("/auth/me");
-    return res.data;
+    try {
+      const res = await api.get("/auth/me");
+      return res.data;
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response?.status === 401) {
+        return {
+          authenticated: false,
+          user: null,
+        };
+      }
+      throw error;
+    }
   };
 
   const { data, isPending, error } = useQuery({

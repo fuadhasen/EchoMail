@@ -108,16 +108,6 @@ const RightPanel = ({
               {formatSentDate(email.sent_date)}
             </span>
           </div>
-
-          <div className="flex items-center justify-between text-slate-600 py-1">
-            <span className="text-slate-500 flex items-center gap-1.5">
-              <Hash size={12} className="text-slate-400" />
-              Tracked ID
-            </span>
-            <span className="font-mono text-[11px] text-slate-500">
-              #{email.id}
-            </span>
-          </div>
         </div>
       </div>
     </div>

@@ -41,9 +41,9 @@ const Landing = () => {
         "Never. EchoMail tracks response statuses per individual recipient. When follow-ups are triggered, reminders are sent exclusively to non-responders in the thread. The instant someone replies, pending reminders for that person are immediately cancelled.",
     },
     {
-      question: "Can I customize the follow-up message and schedule?",
+      question: "Can I send follow-up reminders manually or automatically?",
       answer:
-        "Yes! You have complete control over cadence (e.g. every 24h, 48h, or 72h), maximum number of reminders, and the custom follow-up message template. Reminders are sent directly within the original email thread so all conversation history remains intact.",
+        "Yes! You can send a manual reminder at any time, with a 24-hour cooldown between reminders. EchoMail can also automatically send a reminder when 12 hours or less remain before the deadline. If a reminder has already been sent within the previous 24 hours, EchoMail will skip the automatic reminder to avoid sending duplicate follow-ups. Reminders are sent directly within the original email thread, so the conversation history stays intact.",
     },
     {
       question:

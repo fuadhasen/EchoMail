@@ -6,13 +6,14 @@ import re
 import base64
 import json
 from config import Config
-from models import GoogleAuth, SessionLocal
+from models import GoogleAuth, SessionLocal, User
 from encryption import decrypt_token, encrypt_token
 from pathlib import Path
 from typing import List, Dict, Any, Optional, Union
 from config import USER_PATH
 from datetime import datetime, timezone
 
+from email.mime.text import MIMEText
 
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
@@ -34,10 +35,11 @@ class GmailService:
     SCOPES = [
         "https://www.googleapis.com/auth/gmail.readonly",
         "https://www.googleapis.com/auth/userinfo.profile",
-        "https://www.googleapis.com/auth/userinfo.email"
+        "https://www.googleapis.com/auth/userinfo.email",
+        "https://www.googleapis.com/auth/gmail.send"
     ]
 
-    def __init__(self):
+    def __init__(self, user_id: int):
         self.creds = None
         self.service = None
         self.error  = None
@@ -46,7 +48,7 @@ class GmailService:
 
         # Attempt to initialize the service, handling the case of missing credentials
         try:
-            google_auth = db.query(GoogleAuth).first()
+            google_auth = db.query(GoogleAuth).filter(GoogleAuth.user_id == user_id).first()
 
             if not google_auth:
                 self.error = "Google account not authenticated"
@@ -70,9 +72,15 @@ class GmailService:
                 scopes=self.SCOPES,
             )
 
+            print("Granted scopes:", self.creds.scopes)
+
             # refresh_token
             if self.creds and self.creds.expired and self.creds.refresh_token:
+                print("Refreshing Google token...")
+
                 self.creds.refresh(Request())
+                print("Granted scopes:", self.creds.scopes)
+                print("Refresh token exists:", bool(self.creds.refresh_token))
 
                 google_auth.access_token = encrypt_token(
                     self.creds.token
@@ -144,36 +152,22 @@ class GmailService:
         except HttpError as error:
             print(f"An error occurred: {error}")
             return []
-    
-    def save_user_info(self, user_info):
-        """save the authenticated user information in the DB.
-        """
-        db = SessionLocal()
 
-        try:
-            google_auth = db.query(GoogleAuth).first()
-
-            if not google_auth:
-                return
-
-            google_auth.name = user_info['names'][0]['displayName']
-            google_auth.email = user_info["emailAddresses"][0]["value"]
-            google_auth.picture = user_info["photos"][0]["url"]
-
-            db.commit()
-        finally:
-            db.close()
-
-    def get_user_info(self):
+    @staticmethod
+    def get_user_info(people_credential):
         """Get user information (email_addresses, photos, names)
         """
         
         try:
-            people_service = build("people", "v1", credentials=self.creds)
+            people_service = build("people", "v1", credentials=people_credential)
             user_info = (
                 people_service.people().get(resourceName='people/me', personFields='names,emailAddresses,photos').execute()
             )
-            return user_info
+            return {
+                "email": user_info["emailAddresses"][0]["value"],
+                "name": user_info["names"][0]["displayName"],
+                "picture": user_info["photos"][0]["url"],
+            }
         
         except RefreshError as error:
             print(f"Token refresh error: {error}")
@@ -343,6 +337,7 @@ class GmailService:
             message = (
                 self.service.users().messages().get(userId=user_id, id=msg_id).execute()
             )
+
             return message
         except HttpError as error:
             print(f"An error occurred: {error}")
@@ -650,6 +645,77 @@ class GmailService:
 
         return body.strip()
 
+    def get_message_header(
+        self,
+        message: dict,
+        header_name: str
+    ) -> Optional[str]:
+        headers = message.get("payload", {}).get("headers", [])
+
+        for header in headers:
+            if header.get("name", "").lower() == header_name.lower():
+                return header.get("value")
+
+        return None
+  
+
+    def send_reply(
+        self,
+        recipient_email: str,
+        subject: str,
+        body: str,
+        thread_id: str,
+        # email_id, msg_id 
+        original_message_id: str
+    ):
+        """send reply email"""
+        if not self.is_available():
+            raise Exception(
+                self.error or "Gmail service unavailable"
+            )
+    
+        original_message = self.get_email_details(
+            msg_id=original_message_id
+        )
+
+
+       # 2. Extract the Message-ID header, specific reply to original sent email
+        message_id = self.get_message_header(
+            original_message,
+            "Message-ID"
+        )
+
+        # 3. Check that we actually found it
+        if not message_id:
+            raise Exception("Original Message-ID header not found")
+
+        # 4. Build the reply
+        message = MIMEText(body)
+
+        # only to this recipient
+        message["To"] = recipient_email
+        message["Subject"] = subject
+        message["In-Reply-To"] = message_id
+        message["References"] = message_id
+
+        raw_message = base64.urlsafe_b64encode(
+            message.as_bytes()
+        ).decode()
+
+        gmail_message = {
+            "raw": raw_message,
+            "threadId": thread_id,
+        }
+
+        return (
+            self.service.users()
+            .messages()
+            .send(
+                userId="me",
+                body=gmail_message,
+            )
+            .execute()
+        )
 
 def _get_body_content(payload: Dict[str, Any]) -> str:
     """Helper function to extract the body content from the email payload."""

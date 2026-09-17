@@ -145,7 +145,7 @@ const AutomaticDetectionCard = ({
                 Scan Loop
               </span>
               <span className="font-mono text-[11px] font-semibold text-slate-800">
-                Every 5 minutes (Last: {lastSyncText})
+                Every 5 minutes
               </span>
             </div>
 

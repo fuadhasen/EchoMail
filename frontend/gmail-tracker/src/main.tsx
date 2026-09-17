@@ -6,8 +6,8 @@ import { BrowserRouter } from "react-router";
 import { Theme } from "@radix-ui/themes";
 import "@radix-ui/themes/styles.css";
 import App from "./App.tsx";
-import "./index.css";
 import { ToastProvider } from "./context/ToastContext.tsx";
+import "./index.css";
 
 const queryClient = new QueryClient();
 

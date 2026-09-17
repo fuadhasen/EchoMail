@@ -24,13 +24,16 @@ import {
   UserCheck,
   X,
 } from "lucide-react";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useNavigate } from "react-router";
 
 const TrackNew = () => {
   const navigate = useNavigate();
   const { triggerToast } = useToast();
   const queryClient = useQueryClient();
+
+  const dateInputRef = useRef<HTMLInputElement>(null);
+  const timeInputRef = useRef<HTMLInputElement>(null);
 
   // workflow step state (1 to 4)
   const [step, setStep] = useState<1 | 2 | 3>(1);
@@ -63,10 +66,6 @@ const TrackNew = () => {
     return d.toISOString().split("T")[0];
   });
   const [deadlineTime, setDeadlineTime] = useState("17:00"); //5 pm
-  const [reminderInterval, setReminderInterval] = useState<
-    "24h" | "48h" | "12h_before"
-  >("24h");
-  const [notifyOnResponse, setNotifyOnResponse] = useState(true);
 
   const handleExecuteSearch = (queryToSearch?: string) => {
     const term = queryToSearch !== undefined ? queryToSearch : searchInput;
@@ -773,13 +772,17 @@ const TrackNew = () => {
                       </label>
                       <div className="relative">
                         <Calendar className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
-                        <input
-                          type="date"
-                          value={deadlineDate}
-                          onChange={(e) => setDeadlineDate(e.target.value)}
-                          min={new Date().toISOString().split("T")[0]}
-                          className="w-full bg-[#f8f9ff] border  border-[#c7c4d8]/30 rounded-xl pl-10 pr-4 py-3 text-xs text-[#0b1c30] focus:outline-none focus:ring-1 focus:ring-[#3525cd] font-bold font-sans cursor-pointer"
-                        />
+                        <div>
+                          <input
+                            ref={dateInputRef}
+                            type="date"
+                            value={deadlineDate}
+                            onChange={(e) => setDeadlineDate(e.target.value)}
+                            min={new Date().toISOString().split("T")[0]}
+                            onClick={() => dateInputRef.current?.showPicker()}
+                            className="date-input w-full bg-[#f8f9ff] border  border-[#c7c4d8]/30 rounded-xl pl-10 pr-4 py-3 text-xs text-[#0b1c30] focus:outline-none focus:ring-1 focus:ring-[#3525cd] font-bold font-sans cursor-pointer"
+                          />
+                        </div>
                       </div>
                     </div>
 
@@ -790,10 +793,12 @@ const TrackNew = () => {
                       <div className="relative">
                         <Clock className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
                         <input
+                          ref={timeInputRef}
                           type="time"
                           value={deadlineTime}
+                          onClick={() => timeInputRef.current?.showPicker()}
                           onChange={(e) => setDeadlineTime(e.target.value)}
-                          className="w-full bg-[#f8f9ff] border border-[#c7c4d8]/30 rounded-xl pl-10 pr-4 py-3 text-xs text-[#0b1c30] focus:outline-none focus:ring-1 focus:ring-[#3525cd] font-sans cursor-pointer"
+                          className="time-input w-full bg-[#f8f9ff] border border-[#c7c4d8]/30 rounded-xl pl-10 pr-4 py-3 text-xs text-[#0b1c30] focus:outline-none focus:ring-1 focus:ring-[#3525cd] font-sans cursor-pointer"
                         />
                       </div>
                     </div>
@@ -806,106 +811,22 @@ const TrackNew = () => {
                     2. Automated Reminder
                   </label>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
-                    <button
-                      type="button"
-                      onClick={() => setReminderInterval("24h")}
-                      className={`p-4 rounded-xl border text-left transition-all cursor-pointer ${
-                        reminderInterval === "24h"
-                          ? "border-[#3525cd] bg-indigo-50/50 ring-2 ring-[#3525cd]/10 shadow-2xs"
-                          : "border-slate-200 bg-white hover:border-slate-300"
-                      }`}
-                    >
-                      <div className="flex items-center justify-between mb-1.5">
-                        <span className="font-sans text-xs font-black text-[#0b1c30]">
-                          Daily Cadence
-                        </span>
-                        <Bell
-                          size={13}
-                          className={
-                            reminderInterval === "24h"
-                              ? "text-[#3525cd]"
-                              : "text-slate-400"
-                          }
-                        />
-                      </div>
-                      <p className="font-mono text-xs text-[#777587] leading-relaxed">
-                        Send a reminder every 24 hours to recipients who haven't
-                        replied.
-                      </p>
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => setReminderInterval("48h")}
-                      className={`p-4 rounded-xl border text-left transition-all cursor-pointer ${
-                        reminderInterval === "48h"
-                          ? "border-[#3525cd] bg-indigo-50/50 ring-2 ring-[#3525cd]/10 shadow-2xs"
-                          : "border-slate-200 bg-white hover:border-slate-300"
-                      }`}
-                    >
-                      <div className="flex items-center justify-between mb-1.5">
-                        <span className="font-sans text-xs font-black text-[#0b1c30]">
-                          Standard (48h)
-                        </span>
-                        <Bell
-                          size={13}
-                          className={
-                            reminderInterval === "48h"
-                              ? "text-[#3525cd]"
-                              : "text-slate-400"
-                          }
-                        />
-                      </div>
-                      <p className="font-mono text-xs text-[#777587] leading-relaxed">
-                        Send a reminder every 48 hours to recipients who haven't
-                        replied.
-                      </p>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setReminderInterval("12h_before")}
-                      className={`p-4 rounded-xl border text-left transition-all cursor-pointer ${
-                        reminderInterval === "12h_before"
-                          ? "border-[#3525cd] bg-indigo-50/50 ring-2 ring-[#3525cd]/10 shadow-2xs"
-                          : "border-slate-200 bg-white hover:border-slate-300"
-                      }`}
-                    >
-                      <div className="flex items-center justify-between mb-1.5">
-                        <span className="font-sans text-xs font-black text-[#0b1c30]">
-                          Due Warning Only
-                        </span>
-                        <Bell
-                          size={13}
-                          className={
-                            reminderInterval === "12h_before"
-                              ? "text-[#3525cd]"
-                              : "text-slate-400"
-                          }
-                        />
-                      </div>
-                      <p className="font-mono text-xs text-[#777587] leading-relaxed">
-                        Send one reminder 12 hours before the deadline.
-                      </p>
-                    </button>
-                  </div>
-                </div>
-
-                {/* Notification setting toggle*/}
-                <div className="pt-2">
-                  <label className="flex items-center gap-3 cursor-pointer p-3.5 bg-slate-50/80 border border-slate-200/80 rounded-xl">
-                    <input
-                      type="checkbox"
-                      checked={notifyOnResponse}
-                      onChange={(e) => setNotifyOnResponse(e.target.checked)}
-                      className="w-4 h-4 rounded text-[#3525cd] focus:ring-[#3525cd]/20 cursor-pointer"
-                    />
-                    <div className="text-left">
-                      <span className="text-xs font-bold text-[#0b1c30] block font-mono">
-                        Instant Desktop & Email Notifications
+                  <div className="p-4 rounded-xl border border-[#3525cd]/20 bg-indigo-50/40">
+                    <div className="flex items-center justify-between mb-1.5">
+                      <span className="font-mono text-sm font-bold text-[#0b1c30]">
+                        12-Hour Deadline Reminder
                       </span>
+
+                      <Bell size={13} className="text-[#3525cd]" />
                     </div>
-                  </label>
+
+                    <p className="font-mono text-xs text-[#777587] leading-relaxed">
+                      EchoMail will automatically send one reminder when 12
+                      hours or less remain before the deadline, as long as no
+                      manual reminder has been sent within the previous 24
+                      hours.
+                    </p>
+                  </div>
                 </div>
               </div>
 
@@ -1000,10 +921,8 @@ const TrackNew = () => {
                       <span className="font-bold">{deadlineTime}</span>
                     </div>
                     <div className="flex justify-between text-[#3525cd]">
-                      <span className="text-slate-500">Cadence</span>
-                      <span className="font-bold uppercase">
-                        {reminderInterval}
-                      </span>
+                      <span className="text-slate-500">Automatic Cadence:</span>
+                      <span className="font-bold">12 hour</span>
                     </div>
                   </div>
                 </div>
