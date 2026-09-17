@@ -257,7 +257,9 @@ class GmailService:
     ) -> List[Dict[str, Any]]:
         """Search specifically for sent emails by subject, body content, or recipient.
 
-        This is a specialized search method focused on sent emails with simple filtering.
+        This is a specialized search method focused on sent emails with simple filtering, and
+        excluding replies.
+        .
 
         Args:
             user_id (str): The user's email address. The special value "me"
@@ -297,7 +299,33 @@ class GmailService:
             )
 
             messages = results.get("messages", [])
-            return messages
+
+            original_messages = []
+
+            for message in messages:
+                message_id = message.get("id")
+
+                # Get full message details so we can inspect headers
+                details = self.get_email_details(
+                    user_id=user_id,
+                    msg_id=message_id,
+                )
+
+                headers = details.get("payload", {}).get("headers", [])
+
+                # Convert headers into an easier-to-search dictionary
+                header_map = {
+                    header["name"].lower(): header["value"]
+                    for header in headers
+                }
+
+                # Replies normally contain In-Reply-To or References
+                if "in-reply-to" in header_map or "references" in header_map:
+                    continue
+
+                original_messages.append(message)
+            return original_messages
+
         except HttpError as error:
             print(f"An error occurred: {error}")
             return []
