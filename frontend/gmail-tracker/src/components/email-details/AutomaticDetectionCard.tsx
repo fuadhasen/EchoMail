@@ -28,7 +28,6 @@ const AutomaticDetectionCard = ({
   );
 
   const [isSyncing, setIsSyncing] = useState(false);
-  const [lastSyncText, setLastSyncText] = useState("2m ago");
 
   const total = email.recipients.length;
   const responded = email.recipients.filter((r) => r.has_responded).length;
@@ -39,7 +38,6 @@ const AutomaticDetectionCard = ({
     if (onSync) onSync();
     setTimeout(() => {
       setIsSyncing(false);
-      setLastSyncText("Just now");
       triggerToast(
         "Gmail outbox re-scanned. Response detection & reminder status updated.",
         "info",

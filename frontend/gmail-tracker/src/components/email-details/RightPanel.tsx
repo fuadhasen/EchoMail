@@ -1,7 +1,7 @@
 import type { TrackedEmailB } from "@/services/trackedEmail";
 import { formatDeadline, formatSentDate } from "@/utils/dateFormatter";
 import { getTrackedEmailStatus } from "@/utils/statusFilter";
-import { CheckCircle2, Clock, Hash, Send, ShieldCheck } from "lucide-react";
+import { CheckCircle2, Clock, Send, ShieldCheck } from "lucide-react";
 
 interface RightPanelProps {
   email: TrackedEmailB;
