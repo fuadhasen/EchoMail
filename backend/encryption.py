@@ -10,3 +10,4 @@ def encrypt_token(token: str):
 def decrypt_token(encrypted_token: str) -> str:
     """Decrypt an OAuth token retrieved from the database."""
     return cipher.decrypt(encrypted_token.encode()).decode()
+    

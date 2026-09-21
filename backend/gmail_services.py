@@ -5,12 +5,11 @@ This module provides a set of functions to communicate with Gmail API
 import re
 import base64
 import json
-from config import Config
-from models import GoogleAuth, SessionLocal, User
+from backend.config import Config
+from backend.models import GoogleAuth, SessionLocal, User
 from encryption import decrypt_token, encrypt_token
 from pathlib import Path
 from typing import List, Dict, Any, Optional, Union
-from config import USER_PATH
 from datetime import datetime, timezone
 
 from email.mime.text import MIMEText

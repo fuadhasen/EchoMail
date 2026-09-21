@@ -4,6 +4,9 @@ from pydantic_settings import BaseSettings
 from pathlib import Path
 import os
 
+ENV_FILE = Path(__file__).resolve().parent / ".env"
+
+
 class Settings(BaseSettings):
     DATABASE_URL: str
     CLIENT_ID: str
@@ -16,13 +19,12 @@ class Settings(BaseSettings):
     ALGORITHM: str
     ACCESS_TOKEN_EXPIRE_MINUTES: int
     COOKIE_SECURE: bool
+    SAMESITE: str
 
     model_config = {
-        "env_file": os.getenv("ENV_FILE", ".env"),
+        "env_file": ENV_FILE,
         "extra": "ignore"
     }
 
-USER_PATH=Path("user.json")
-TOKEN_PATH=Path("token.json")
 
 Config = Settings()

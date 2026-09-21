@@ -292,7 +292,7 @@ async def auth_callback(code: str):
         value=access_token,
         httponly=True,
         secure=Config.COOKIE_SECURE,
-        samesite="none",
+        samesite=Config.SAMESITE,
     )
 
     return response

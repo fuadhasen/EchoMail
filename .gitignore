@@ -5,3 +5,5 @@ token.json
 .env.local
 .env.development
 .env.production
+
+.venv

@@ -12,7 +12,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, sessionmaker
 from sqlalchemy.orm import joinedload
 from sqlalchemy.sql import func
-from config import Config
+from backend.config import Config
 from datetime import datetime
 from sqlalchemy import UniqueConstraint
 
