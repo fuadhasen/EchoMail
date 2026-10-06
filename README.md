@@ -21,7 +21,7 @@ The agent can:
 **Frontend:** React, TypeScript, Vite, Tailwind CSS  
 **Backend:** FastAPI, Python, SQLAlchemy, MySQL, Gmail API  
 **AI:** Google ADK, Gemini, LiteLLM, Tool Calling  
-**Other:** OAuth 2.0, WebSockets, APScheduler, Docker
+**Other:** OAuth 2.0, WebSockets, APScheduler
 
 ## Architecture
 
