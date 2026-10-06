@@ -23,59 +23,6 @@ The agent can:
 **AI:** Google ADK, Gemini, LiteLLM, Tool Calling  
 **Other:** OAuth 2.0, WebSockets, APScheduler
 
-## Architecture
-
-```text
-             Gmail
-               │
-          Gmail API / OAuth
-               │
-               ▼
-        ┌───────────────┐
-        │    FastAPI    │
-        │    Backend    │
-        └───────┬───────┘
-                │
-        ┌───────┴────────┐
-        ▼                ▼
-      MySQL          AI Agent
-                         │
-                  ┌──────┴──────┐
-                  │    Tools     │
-                  ├──────────────┤
-                  │ Search Email │
-                  │ Track Email  │
-                  │ Get Replies  │
-                  │ Draft Follow │
-                  │ Send Follow  │
-                  └──────────────┘
-                         │
-                         ▼
-                  React Frontend
-```
-
-## Project Structure
-
-```text
-EchoMail/
-├── backend/
-│   ├── agents/
-│   ├── routes/
-│   ├── services/
-│   ├── models/
-│   └── ...
-│
-├── frontend/
-│   └── gmail-tracker/
-│       ├── src/
-│       │   ├── components/
-│       │   ├── pages/
-│       │   ├── hooks/
-│       │   └── ...
-│       └── ...
-│
-└── README.md
-```
 
 ## Getting Started
 
