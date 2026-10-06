@@ -4,7 +4,7 @@
 
 EchoMail helps users track important sent emails, monitor recipient responses, understand what still needs attention, and follow up without manually checking Gmail.
 
-### 🤖 AI Agent
+### AI Agent
 
 The agent can:
 
@@ -102,6 +102,6 @@ npm run dev
 
 ### Demo
 
-🎥 **[Watch the EchoMail Demo](YOUR_LOOM_LINK)**
+🎥 **[Watch the EchoMail Demo](https://www.loom.com/share/49d228be155c43f38f6f34a8d6c71c34)**
 
 Built by **Fuad Hassen**.
