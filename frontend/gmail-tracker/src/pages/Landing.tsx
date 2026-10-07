@@ -63,6 +63,34 @@ const Landing = () => {
     },
   ];
 
+  const aiWorkflowSteps = [
+    {
+      num: "01",
+      title: "UNDERSTAND",
+      desc: "Understand the user's request and the email they're referring to.",
+    },
+    {
+      num: "02",
+      title: "FIND",
+      desc: "Find the right email, tracking information, replies, and recipients.",
+    },
+    {
+      num: "03",
+      title: "ANALYZE",
+      desc: "Understand the current state of the conversation, deadline, replies, and pending recipients.",
+    },
+    {
+      num: "04",
+      title: "ASSIST",
+      desc: "Help with the next step, including creating a contextual follow-up draft.",
+    },
+    {
+      num: "05",
+      title: "ACT",
+      desc: "Take action when the user explicitly asks, such as sending the follow-up.",
+    },
+  ];
+
   return (
     <div className="min-h-screen bg-[#fafafb] text-slate-900 font-sans relative overflow-x-hidden  selection:bg-indigo-100 selection:text-indigo-900">
       {/* subtle micro-grid pattern */}
@@ -98,16 +126,16 @@ const Landing = () => {
               Capabilities
             </a>
             <a
+              href="#ai-agent"
+              className="hover:text-zinc-950 transition-colors"
+            >
+              AI Agent
+            </a>
+            <a
               href="#how-it-works"
               className="hover:text-zinc-950 transition-colors"
             >
               How It Works
-            </a>
-            <a
-              href="#problem-solution"
-              className="hover:text-zinc-950 transition-colors"
-            >
-              Why EchoMail
             </a>
             <a
               href="#security"
@@ -1024,129 +1052,92 @@ const Landing = () => {
       </section>
 
       {/* ========================================================================= */}
-      {/* 3. WHY ECHOMAIL — PROBLEM VS SOLUTION */}
+      {/* AI AGENT WORKFLOW — UNDERSTAND -> FIND -> ANALYZE -> ASSIST -> ACT       */}
       {/* ========================================================================= */}
       <section
-        id="problem-solution"
-        className="py-20 sm:py-24 px-6 sm:px-8 max-w-5xl mx-auto border-t border-zinc-200/70"
+        id="ai-agent"
+        className="py-20 sm:py-28 px-6 sm:px-8 max-w-6xl mx-auto border-t border-zinc-200/70"
       >
-        <div className="space-y-3.5 text-center max-w-2xl mx-auto mb-14">
+        {/* Header */}
+        <div className="space-y-4 text-center max-w-2xl mx-auto mb-14 sm:mb-20">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white border border-zinc-200/90 shadow-2xs select-none">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#3525cd]" />
+            <span className="text-xs font-mono font-bold text-zinc-700 uppercase tracking-wider">
+              EchoMail AI
+            </span>
+          </div>
+
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-[#0b1c30] tracking-tight">
-            The Lost Thread Dilema
+            What EchoMail AI Can Do
           </h2>
+
           <p className="text-sm sm:text-base text-zinc-500 font-normal leading-relaxed">
-            Important sent emails quickly get buried in recipient inboxes.
-            Manually checking back drains hours every single week.
+            EchoMail doesn't just search emails. It understands what you need,
+            finds the right email, understands what's happening, helps you
+            respond, and takes action when you ask.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 items-stretch">
-          {/* old way */}
-          <div className="p-7 rounded-2xl bg-white border border-rose-200/80 shadow-2xs space-y-5 flex flex-col justify-between">
-            <div className="space-y-4">
-              <div className="flex items-center justify-between pb-3 border-b border-rose-100">
-                <span className="text-xs font-mono font-bold text-rose-600 uppercase tracking-wider">
-                  Without EchoMail
+        {/* Desktop: Connected 5-Stage Horizontal Progression */}
+        <div className="hidden lg:grid grid-cols-5 rounded-3xl bg-white border border-zinc-200/90 shadow-[0_20px_50px_-16px_rgba(0,0,0,0.05),0_1px_2px_rgba(0,0,0,0.02)] divide-x divide-zinc-200/80 overflow-hidden">
+          {aiWorkflowSteps.map((step, idx) => (
+            <div
+              key={step.num}
+              className="p-8 xl:p-9 flex flex-col justify-between text-left group hover:bg-zinc-50/50 transition-colors"
+            >
+              <div>
+                <div className="flex items-center justify-between mb-8">
+                  <span className="font-mono text-3xl xl:text-4xl font-black text-zinc-300 group-hover:text-[#3525cd] transition-colors">
+                    {step.num}
+                  </span>
+                  {idx < 4 ? (
+                    <ArrowRight
+                      size={16}
+                      className="text-zinc-300 group-hover:text-[#3525cd] group-hover:translate-x-1 transition-all"
+                    />
+                  ) : (
+                    <span className="w-2.5 h-2.5 rounded-full bg-[#3525cd]" />
+                  )}
+                </div>
+
+                <h3 className="font-sans text-lg xl:text-xl font-extrabold text-zinc-900 tracking-tight uppercase group-hover:text-[#3525cd] transition-colors">
+                  {step.title}
+                </h3>
+
+                <p className="text-sm xl:text-[15px] text-zinc-600 leading-relaxed font-normal mt-3">
+                  {step.desc}
+                </p>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Mobile & Tablet: Connected Vertical Workflow Progression */}
+        <div className="lg:hidden rounded-3xl bg-white border border-zinc-200/90 shadow-[0_20px_50px_-16px_rgba(0,0,0,0.05),0_1px_2px_rgba(0,0,0,0.02)] p-6 sm:p-10 divide-y divide-zinc-100">
+          {aiWorkflowSteps.map((step, idx) => (
+            <div
+              key={step.num}
+              className="py-6 first:pt-0 last:pb-0 flex items-start gap-4 sm:gap-6 text-left"
+            >
+              <div className="flex flex-col items-center shrink-0">
+                <span className="font-mono text-2xl sm:text-3xl font-black text-[#3525cd]">
+                  {step.num}
                 </span>
-                <XCircle size={16} className="text-rose-500" />
+                {idx < 4 && (
+                  <div className="w-0.5 h-12 sm:h-10 bg-zinc-200 my-2" />
+                )}
               </div>
 
-              <h3 className="text-lg font-bold text-zinc-900">
-                Manual Searching & Inbox Anxiety
-              </h3>
-              <ul className="space-y-3 text-xs sm:text-sm text-zinc-600">
-                <li className="flex items-start gap-2.5">
-                  <span className="text-rose-500 font-bold shrink-0">✕</span>
-                  <span>
-                    Writing manual calendar reminders like "Check if Dave
-                    replied"
-                  </span>
-                </li>
-                <li className="flex items-start gap-2.5">
-                  <span className="text-rose-500 font-bold shrink-0">✕</span>
-                  <span>
-                    Scouring sent folders to reconstruct who responded on
-                    multi-person threads
-                  </span>
-                </li>
-                <li className="flex items-start gap-2.5">
-                  <span className="text-rose-500 font-bold shrink-0">✕</span>
-                  <span>
-                    Awkwardly re-emailing people who already responded via
-                    separate channel
-                  </span>
-                </li>
-                <li className="flex items-start gap-2.5">
-                  <span className="text-rose-500 font-bold shrink-0">✕</span>
-                  <span>
-                    Critical project deadlines slipping unnoticed due to silence
-                  </span>
-                </li>
-              </ul>
-            </div>
-
-            <div className="p-3.5 rounded-xl bg-rose-50/60 border border-rose-100 text-xs text-rose-800 font-medium">
-              Result: 3.5+ hours wasted weekly on manual follow-up
-              administrative work.
-            </div>
-          </div>
-
-          {/* what echomail brings to the table */}
-          <div className="p-7 rounded-2xl bg-white border border-emerald-200/90 shadow-2xs space-y-5 flex flex-col justify-between">
-            <div className="space-y-4">
-              <div className="flex items-center justify-between pb-3 border-b border-emerald-100">
-                <span className="text-xs font-mono font-bold text-emerald-700 uppercase tracking-wider">
-                  With EchoMail
-                </span>
-                <CheckCircle2 size={16} className="text-emerald-600" />
+              <div className="pt-0.5 flex-1 min-w-0">
+                <h3 className="font-sans text-lg sm:text-xl font-extrabold text-zinc-900 tracking-tight uppercase">
+                  {step.title}
+                </h3>
+                <p className="text-sm sm:text-base text-zinc-600 leading-relaxed font-normal mt-1.5">
+                  {step.desc}
+                </p>
               </div>
-              <h3 className="text-lg font-bold text-zinc-900">
-                Autonomous Tracking & Guaranteed Closure
-              </h3>
-              <ul className="space-y-3 text-xs sm:text-sm text-zinc-600">
-                <li className="flex items-start gap-2.5">
-                  <Check
-                    size={16}
-                    className="text-emerald-600 font-bold shrink-0"
-                  />
-                  <span>1-click tracking right after sending any email</span>
-                </li>
-                <li className="flex items-start gap-2.5">
-                  <Check
-                    size={16}
-                    className="text-emerald-600 font-bold shrink-0"
-                  />
-                  <span>
-                    Background sentinel checks responses every 5 minutes
-                    automatically
-                  </span>
-                </li>
-                <li className="flex items-start gap-2.5">
-                  <Check
-                    size={16}
-                    className="text-emerald-600 font-bold shrink-0"
-                  />
-                  <span>
-                    Polite threaded follow-ups dispatch only to non-responders
-                  </span>
-                </li>
-                <li className="flex items-start gap-2.5">
-                  <Check
-                    size={16}
-                    className="text-emerald-600 font-bold shrink-0"
-                  />
-                  <span>
-                    Instant auto-resolve stops reminders the second a response
-                    arrives
-                  </span>
-                </li>
-              </ul>
             </div>
-
-            <div className="p-3.5 rounded-xl bg-emerald-50/60 border border-emerald-100 text-xs text-emerald-800 font-medium">
-              Result: 100% loop closure rate with zero mental overhead.
-            </div>
-          </div>
+          ))}
         </div>
       </section>
 

@@ -7,7 +7,7 @@ import base64
 import json
 from backend.config import Config
 from backend.models import GoogleAuth, SessionLocal, User
-from encryption import decrypt_token, encrypt_token
+from backend.encryption import decrypt_token, encrypt_token
 from pathlib import Path
 from typing import List, Dict, Any, Optional, Union
 from datetime import datetime, timezone
@@ -60,7 +60,6 @@ class GmailService:
                 refresh_token = decrypt_token(
                     google_auth.refresh_token
                 )
-            
 
             self.creds = Credentials(
                 token=access_token,
@@ -71,14 +70,11 @@ class GmailService:
                 scopes=self.SCOPES,
             )
 
-            print("Granted scopes:", self.creds.scopes)
-
             # refresh_token
             if self.creds and self.creds.expired and self.creds.refresh_token:
                 print("Refreshing Google token...")
 
                 self.creds.refresh(Request())
-                print("Granted scopes:", self.creds.scopes)
                 print("Refresh token exists:", bool(self.creds.refresh_token))
 
                 google_auth.access_token = encrypt_token(
@@ -286,7 +282,7 @@ class GmailService:
 
             # Use the unified (general - body,subject,snippet) search approach if search_term is provided
             if search_term:
-                query_parts.append(f"(subject:{search_term} OR {search_term})")
+                query_parts.append(f"(subject:{search_term} OR to:{search_term} OR {search_term} )")
 
             query = " ".join(query_parts)
 
@@ -301,6 +297,7 @@ class GmailService:
 
             original_messages = []
 
+            # to remove replies from search results
             for message in messages:
                 message_id = message.get("id")
 

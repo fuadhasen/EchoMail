@@ -5,11 +5,9 @@ import {
   BellRing,
   CheckCircle2,
   Clock,
-  Cpu,
   Radio,
   RefreshCw,
   ShieldCheck,
-  Sparkles,
 } from "lucide-react";
 import { useState } from "react";
 
@@ -147,16 +145,6 @@ const AutomaticDetectionCard = ({
               </span>
             </div>
 
-            <div className="flex items-center justify-between py-1 border-b border-slate-200/50">
-              <span className="text-slate-500 flex items-center gap-1.5">
-                <Cpu size={12} className="text-slate-400" />
-                Webhook Latency
-              </span>
-              <span className="font-mono text-[11px] font-semibold text-slate-800">
-                32 ms
-              </span>
-            </div>
-
             <div className="flex items-center justify-between py-1">
               <span className="text-slate-500 flex items-center gap-1.5">
                 <ShieldCheck size={12} className="text-emerald-600" />
@@ -206,13 +194,6 @@ const AutomaticDetectionCard = ({
           </div>
         </div>
       )}
-
-      <div className="flex items-center justify-between text-[11px] font-sans text-slate-500 border-t border-slate-100 pt-3">
-        <span className="flex items-center gap-1.5 truncate">
-          <Sparkles size={12} className="text-[#3525cd] shrink-0" />
-          <span className="truncate">Google Workspace OAuth Active</span>
-        </span>
-      </div>
     </div>
   );
 };

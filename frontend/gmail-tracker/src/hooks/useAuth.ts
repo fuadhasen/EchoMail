@@ -5,6 +5,7 @@ import axios from "axios";
 export type Status = "loading" | "authenticated" | "unauthenticated";
 
 interface User {
+  id: number;
   name: string;
   email: string;
   avatar: string;

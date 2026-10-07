@@ -7,34 +7,38 @@ import os
 from email.utils import parsedate_to_datetime
 from urllib.parse import urlencode
 from fastapi import FastAPI, Query, Depends, HTTPException, Body, WebSocket
-from websocket import websocket_endpoint
-from websocket import manager, WebSocketDisconnect
+from backend.websocket import websocket_endpoint
+from backend.websocket import manager, WebSocketDisconnect
 from fastapi.responses import RedirectResponse
 from typing import List, Optional
 from datetime import datetime, timedelta
 from sqlalchemy.orm import Session
 from pydantic import BaseModel, EmailStr, Field
 from contextlib import asynccontextmanager
-from config import Config
-from oauth import create_access_token, get_current_user, get_current_websocket_user
+from backend.config import Config
+from backend.oauth import create_access_token, get_current_user, get_current_websocket_user
 from fastapi.responses import JSONResponse
 from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
 
 from sqlalchemy import func
 
-from gmail_services import GmailService
-from models import get_db, create_tables, User
-from db_services import EmailTrackerService
-from scheduler import start_scheduler, stop_scheduler, check_email_responses
+from backend.gmail_services import GmailService
+from backend.models import get_db, create_tables, User
+from backend.db_services import EmailTrackerService
+from backend.scheduler import start_scheduler, stop_scheduler, check_email_responses
 from pathlib import Path
 from fastapi.middleware.cors import CORSMiddleware
-from dependencies import get_email_service
+from backend.dependencies import get_email_service
 from datetime import datetime, timedelta
-from models import GoogleAuth, SessionLocal, TrackedEmail
+from backend.models import GoogleAuth, SessionLocal, TrackedEmail
+from backend.encryption import encrypt_token
 
-from encryption import encrypt_token
 
+class AgentChatRequest(BaseModel):
+    session_id: str
+    message: str
+    user_id: int
 
 class SettingsUpdate(BaseModel):
     notify_on_response: bool
@@ -116,7 +120,7 @@ scopes = [
 async def lifespan(app: FastAPI):
     # Startup: create tables and start the scheduler
     create_tables()
-    start_scheduler()
+    # start_scheduler()
     print(
         "Application started - Background scheduler is running to check emails every 10 minutes"
     )
@@ -131,9 +135,6 @@ async def lifespan(app: FastAPI):
 app = FastAPI(lifespan=lifespan)
 
 
-# Temporarily for single user support!
-# TOKEN_PATH=Path("token.json")
-
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:5173", Config.FRONTEND_URL ],
@@ -141,6 +142,83 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"]
 )
+
+@app.post("/agent/chat")
+async def agent_chat(request: AgentChatRequest):
+
+
+    async with httpx.AsyncClient(timeout=None) as client:
+        adk_response = await client.post(
+            "http://127.0.0.1:8001/run",
+            json={
+                "appName": "echomail_agent",
+                "userId": str(request.user_id),
+                "sessionId": request.session_id,
+                "newMessage": {
+                    "role": "user",
+                    "parts": [
+                        {
+                            "text": request.message
+                        }
+                    ]
+                },
+                "streaming": False,
+            },
+        )
+
+    adk_response.raise_for_status()
+    events = adk_response.json()
+
+    tool_name = None
+    tool_data = []
+    final_text = None
+
+    for event in reversed(events):
+        parts = event.get("content", {}).get("parts", [])
+
+        for part in parts:
+             # Agent requested a tool
+            function_call = part.get("functionCall")
+
+            if function_call:
+                tool_name = function_call.get("name")
+
+            # Tool returned data
+            function_response = part.get("functionResponse")
+
+            if function_response:
+                response = function_response.get("response", {})
+                result = response.get("result")
+
+                if result is not None:
+                    tool_data = result
+
+            # Agent's final response
+            text = part.get("text")
+
+            if text:
+                final_text = text
+    
+    if tool_name == "search_my_sent_email":
+        return {
+            "type": "sent_email_search",
+            "content": final_text or "",
+            "data": tool_data,
+        }
+
+    if tool_name == "get_tracked_emails":
+        return {
+            "type": "tracked_emails",
+            "content": final_text or "",
+            "data": tool_data,
+        }
+
+    return {
+        "type": "text",
+        "content": final_text or "No response from agent.",
+        "data": [],
+    }
+
 
 @app.websocket("/ws")
 async def websocket_route(websocket: WebSocket):
@@ -172,15 +250,6 @@ async def websocket_route(websocket: WebSocket):
 @app.get("/")
 async def root():
     return {"message": "Welcome to Echomail"}
-
-@app.post("/test_websocket")
-async def test_websocket():
-    await manager.broadcast({
-        "type": "test",
-        "message": "Hello from EchoMail backend!"
-    })
-
-    return {"success": True}
 
 # google login endpoint
 @app.get("/auth/google")
@@ -307,12 +376,12 @@ async def check_status(
     return {
         "authenticated": True,
         "user": {
+            "id": current_user.id,
             "email": current_user.email,
             "name": current_user.name,
             "picture": current_user.picture,
         }
     }
-
 
 @app.post('/logout')
 async def logout():
@@ -324,7 +393,7 @@ async def logout():
         key="access_token",
         path="/",
         secure=Config.COOKIE_SECURE,
-        samesite="none",
+        samesite=Config.SAMESITE,
     )
     return response
 

@@ -1,5 +1,5 @@
 from cryptography.fernet import Fernet
-from config import Config
+from backend.config import Config
 
 cipher = Fernet(Config.TOKEN_ENCRYPTION_KEY)
 

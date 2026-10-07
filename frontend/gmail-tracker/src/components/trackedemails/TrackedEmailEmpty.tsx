@@ -34,7 +34,7 @@ const TrackedEmailEmpty = ({ type, onResetFilter }: TrackedEmailProps) => {
     );
   }
   return (
-    <div className="mbg-white border border-slate-200/80 rounded-2xl p-12 text-center shadow-2xs my-6 flex flex-col items-center justify-center min-h-85">
+    <div className="bg-white border border-slate-200/80 rounded-2xl p-12 text-center shadow-2xs my-6 flex flex-col items-center justify-center min-h-85">
       <div className="w-14 h-14 bg-slate-50 border border-slate-200/60 rounded-2xl flex items-center justify-center text-[#3525cd] mb-4">
         <Mail size={26} className="stroke-1.8" />
       </div>

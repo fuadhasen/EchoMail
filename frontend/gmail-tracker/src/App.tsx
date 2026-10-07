@@ -9,6 +9,7 @@ import LoginWithHandler from "./pages/login";
 import Settings from "./pages/Settings";
 import TrackedEmails from "./pages/TrackedEmail";
 import TrackNew from "./pages/TrackNew";
+import Agent from "./pages/Agent";
 
 const App = () => {
   return (
@@ -32,6 +33,7 @@ const App = () => {
         <Route path="track_new" element={<TrackNew />} />
         <Route path="settings" element={<Settings />} />
         <Route path="automation" element={<Automation />} />
+        <Route path="agent" element={<Agent />} />
 
         {/* Fallback route: redirect back to Dashboared / Home */}
         <Route path="*" element={<Navigate to="/app" replace />} />

@@ -12,10 +12,10 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 import notifiers
 from requests import Session
 
-from gmail_services import GmailService
-from models import SessionLocal
-from db_services import EmailTrackerService
-from websocket import manager
+from backend.gmail_services import GmailService
+from backend.models import SessionLocal
+from backend.db_services import EmailTrackerService
+from backend.websocket import manager
 
 # Configure logging
 logging.basicConfig(
@@ -269,7 +269,7 @@ def start_scheduler():
         # Check emails every 10 minutes
         scheduler.add_job(
             check_email_responses,
-            trigger=IntervalTrigger(minutes=5),  # Changed from 2 to 10 minutes
+            trigger=IntervalTrigger(minutes=1),  # Changed from 2 to 10 minutes
             id="check_email_responses",
             name="Check for email responses every 10 minutes",
             replace_existing=True,

@@ -6,8 +6,8 @@ from datetime import datetime, timezone, timedelta
 from jose import JWTError, jwt
 from fastapi import Request, HTTPException, status, Depends, WebSocket
 from sqlalchemy.orm import Session
-from config import Config
-from models import get_db, User
+from backend.config import Config
+from backend.models import get_db, User
 
 
 SECRET_KEY = Config.SECRET_KEY

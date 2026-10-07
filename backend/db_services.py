@@ -6,8 +6,8 @@ from fastapi import HTTPException
 from sqlalchemy import func, or_
 
 
-from gmail_services import GmailService
-from models import TrackedEmail, TrackedEmailRecipient, Recipient, Reminder, SessionLocal, User
+from backend.gmail_services import GmailService
+from backend.models import TrackedEmail, TrackedEmailRecipient, Recipient, Reminder, SessionLocal, User
 
 COOLDOWN = timedelta(hours=24)
 
@@ -414,6 +414,43 @@ class EmailTrackerService:
         db.commit()
         db.refresh(reminder)
         return reminder
+
+    @staticmethod
+    def send_ai_follow_up(
+        db: Session,
+        tracked_email_id: int,
+        user_id: int,
+        draft_body: str,
+        gmail_service: GmailService,
+    ) -> list[Reminder]:
+        """
+        Send an AI-generated follow-up to required recipients
+        who have not responded only.
+        """
+        recipients_info = EmailTrackerService.get_recipients_for_email(
+            db=db,
+            tracked_email_id=tracked_email_id,
+            user_id=user_id,
+        )
+
+        pending_recipients = recipients_info["pending_recipients"]
+        reminders = []
+
+        for recipient in pending_recipients:
+            reminder = EmailTrackerService.add_reminder(
+                db=db,
+                tracked_email_id=tracked_email_id,
+                user_id=user_id,
+                recipient_email=recipient["email"],
+                content=draft_body,
+                gmail_service=gmail_service,
+            )
+
+            if reminder:
+                reminders.append(reminder)
+
+        return reminders
+
 
     @staticmethod
     def get_recipients_for_email(db: Session, tracked_email_id: int, user_id: int) -> Dict[str, Any]:

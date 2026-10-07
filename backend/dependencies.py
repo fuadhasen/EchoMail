@@ -1,7 +1,7 @@
 from fastapi import HTTPException, Depends
-from gmail_services import GmailService
-from models import User
-from oauth import get_current_user
+from backend.gmail_services import GmailService
+from backend.models import User
+from backend.oauth import get_current_user
 
 def get_email_service(current_user: User = Depends(get_current_user)):
     # dependency injection

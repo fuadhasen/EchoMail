@@ -10,6 +10,7 @@ import {
   Plus,
   Settings,
   X,
+  Bot,
 } from "lucide-react";
 import { useState } from "react";
 import { Link, NavLink } from "react-router";
@@ -26,6 +27,7 @@ const SideBar = () => {
     { name: "Tracked Emails", icon: Mail, path: "/app/tracked" },
     { name: "Track New", icon: Plus, path: "/app/track_new" },
     { name: "Automation", icon: Bell, path: "/app/automation" },
+    { name: "Agent", icon: Bot, path: "/app/agent" },
   ];
 
   const settingsItem = {
