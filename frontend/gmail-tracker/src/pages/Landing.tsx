@@ -11,7 +11,6 @@ import {
   Radio,
   Search,
   ShieldCheck,
-  XCircle,
   Zap,
 } from "lucide-react";
 import { useState } from "react";
@@ -94,7 +93,7 @@ const Landing = () => {
   return (
     <div className="min-h-screen bg-[#fafafb] text-slate-900 font-sans relative overflow-x-hidden  selection:bg-indigo-100 selection:text-indigo-900">
       {/* subtle micro-grid pattern */}
-      <div className="absolute inset-0 opacity-[0.03] pointer-events-none bg-[linear-gradient(to_right,#000_1px,transparent_1px),linear-gradient(to_bottom,#000_1px,transparent_1px)] bg-[size:28px_28px]" />
+      <div className="absolute inset-0 opacity-[0.03] pointer-events-none bg-[linear-gradient(to_right,#000_1px,transparent_1px),linear-gradient(to_bottom,#000_1px,transparent_1px)] bg-size[28px_28px]" />
 
       {/* soft atmospheric ambient light */}
       <div className="absolute top-[3%] left-[18%] w-150 h-150 bg-indigo-500/2.5 rounded-full blur-[150px] pointer-events-none" />
